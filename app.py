@@ -12,6 +12,14 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 
+REGION_LANGUAGE_MAP = {
+    "us5725": "en-US",
+    "br53": "pt-BR",
+    "de1088": "de-DE",
+    "jp514": "ja-JP",
+    "za147": "af-ZA"
+}
+
 def is_vpn_running():
     result = subprocess.run(["pgrep", "openvpn"], stdout=subprocess.PIPE)
     return result.returncode == 0
@@ -63,7 +71,8 @@ def vpn_status():
 def index():
     vpn_running = is_vpn_running()
     ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
-    return render_template("index.html", vpn_running=vpn_running, ip_info=ip_info)
+    language = REGION_LANGUAGE_MAP.get(ip_info.get("region"), "en-US") if vpn_running else "en-US"
+    return render_template("index.html", vpn_running=vpn_running, ip_info=ip_info, language=language)
 
 @app.route("/visit-page", methods=["POST"])
 def visit_page():

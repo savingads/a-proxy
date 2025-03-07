@@ -103,8 +103,10 @@ def change_region():
 if __name__ == "__main__":
     # Automatically start the VPN service with a default region
     default_region = "de1088"  # Change this to your desired default region
+    """
     if not is_vpn_running():
         logging.debug(f"Starting VPN with default region: {default_region}")
         vpn_proc = multiprocessing.Process(target=vpn_process, args=(default_region,))
         vpn_proc.start()
+    """
     app.run(host="0.0.0.0", port=5000)

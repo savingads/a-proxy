@@ -132,3 +132,10 @@ data/
 nordvpn/
 nord-token.txt
 auth.txt
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp/
+.pnp.js

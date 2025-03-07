@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.122.0">
-    <title>Dashboard Template · Bootstrap v5.3</title>
+    <title>PersonaWeb Dashboard</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/dashboard/">
 
@@ -395,6 +395,38 @@
                                 </a>
                             </li>
                         </ul>
+                        <hr class="my-3">
+                        <!-- Browser Details Section -->
+                        <h6
+                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                            <span>Browser Details</span>
+                        </h6>
+                        <ul class="nav flex-column mb-auto">
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                    <svg class="bi">
+                                        <use xlink:href="#gear-wide-connected" />
+                                    </svg>
+                                    <span><strong>Language:</strong> {{ language }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                    <svg class="bi">
+                                        <use xlink:href="#geo-alt" />
+                                    </svg>
+                                    <span><strong>Geolocation:</strong> <span id="geolocation">Fetching...</span></span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                    <svg class="bi">
+                                        <use xlink:href="#people" />
+                                    </svg>
+                                    <span><strong>User Agent:</strong> {{ request.headers.get('User-Agent') }}</span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -402,7 +434,7 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Dashboard</h1>
+                    <h1 class="h2">Settings</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
@@ -441,12 +473,11 @@
                         <div class="tab-pane fade show active" id="demographic" role="tabpanel"
                             aria-labelledby="demographic-tab">
                             <div class="container mt-5">
-                                <h1 class="mb-4">VPN Status</h1>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <p><strong>VPN Running:</strong> {{ vpn_running }}</p>
                                         {% if vpn_running %}
-                                        <h2>IP Information</h2>
+                                        <h4>IP Information</h4>
                                         <ul class="list-group mb-4">
                                             <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
                                             <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
@@ -459,7 +490,6 @@
                                             <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}
                                             </li>
                                         </ul>
-                                        <h2>Change VPN Region</h2>
                                         <form id="change-region-form" action="{{ url_for('change_region') }}"
                                             method="post" class="mb-4">
                                             <div class="form-group">
@@ -554,36 +584,50 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script></script>
-    document.getElementById('change-region-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    var form = event.target;
-    var formData = new FormData(form);
-    fetch(form.action, {
-    method: 'POST',
-    body: formData
-    }).then(function (response) {
-    return response.json();
-    }).then(function (data) {
-    if (data.status === 'changing') {
-    pollVpnStatus();
-    }
-    });
-    });
+    <script>
+        document.getElementById('change-region-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var form = event.target;
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                if (data.status === 'changing') {
+                    pollVpnStatus();
+                }
+            });
+        });
 
-    function pollVpnStatus() {
-    fetch('/vpn-status')
-    .then(function (response) {
-    return response.json();
-    })
-    .then(function (data) {
-    if (data.vpn_running && data.ip_info.region !== '{{ ip_info.region }}') {
-    location.reload();
-    } else {
-    setTimeout(pollVpnStatus, 5000);
-    }
-    });
-    }
+        function pollVpnStatus() {
+            fetch('/vpn-status')
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.vpn_running && data.ip_info.region !== '{{ ip_info.region }}') {
+                        location.reload();
+                    } else {
+                        setTimeout(pollVpnStatus, 5000);
+                    }
+                });
+        }
+
+        if (navigator.geolocation) {
+            console.log("Geolocation is supported.");
+            navigator.geolocation.getCurrentPosition(function (position) {
+                console.log("Geolocation success:", position);
+                document.getElementById('geolocation').textContent = position.coords.latitude + ', ' + position.coords.longitude;
+            }, function (error) {
+                console.error("Geolocation error:", error);
+                document.getElementById('geolocation').textContent = 'Unavailable';
+            });
+        } else {
+            console.log("Geolocation is not supported.");
+            document.getElementById('geolocation').textContent = 'Not supported';
+        }
     </script>
 </body>
 

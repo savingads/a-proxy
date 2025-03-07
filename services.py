@@ -1,14 +1,22 @@
 import subprocess
 import logging
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
 def start_vpn(region):
-    config_file = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
-    command = f"sudo openvpn --config {config_file} --auth-user-pass auth.txt"
-    logging.debug(f"Starting VPN with command: {command}")
-    result = subprocess.run(command, shell=True)
-    logging.debug(f"VPN start result: {result}")
+    vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
+    if not os.path.exists(vpn_config_path):
+        logging.error(f"VPN configuration file not found: {vpn_config_path}")
+        return
+    logging.debug(f"Starting VPN with configuration: {vpn_config_path}")
+    subprocess.run(["sudo", "openvpn", "--config", vpn_config_path])
+
+def start_vpn_service():
+    logging.debug("Starting VPN service without connecting to a region")
+    # Add logic to start the VPN service without connecting to a region
+    # This could be a command to start the VPN service in a general way
+    subprocess.run(["sudo", "systemctl", "start", "openvpn"])
 
 if __name__ == "__main__":
     start_vpn("de1088")

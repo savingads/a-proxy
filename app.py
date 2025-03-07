@@ -3,7 +3,7 @@ import subprocess
 import requests
 import logging
 import os
-from services import start_vpn
+from services import start_vpn, start_vpn_service
 import multiprocessing
 from requests.exceptions import ConnectionError
 import time
@@ -81,15 +81,18 @@ def visit_page():
     os.system(f"python3 /home/chris/a-proxy/visit_page.py {language}")
     return "Visited Google and took a screenshot."
 
-def vpn_process(region):
+def vpn_process(region=None):
     if is_vpn_running():
         logging.debug("Stopping current VPN connection")
         subprocess.run(["sudo", "pkill", "openvpn"])
-    vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
-    if not os.path.exists(vpn_config_path):
-        logging.error(f"VPN configuration file not found: {vpn_config_path}")
-        return
-    start_vpn(region)
+    if region:
+        vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
+        if not os.path.exists(vpn_config_path):
+            logging.error(f"VPN configuration file not found: {vpn_config_path}")
+            return
+        start_vpn(region)  # Ensure this function is correctly called
+    else:
+        start_vpn_service()  # Start the VPN service without connecting to a region
 
 @app.route("/change-region", methods=["POST"])
 def change_region():
@@ -98,15 +101,21 @@ def change_region():
     vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))
     vpn_proc.start()
     logging.debug("VPN region change process started")
-    return redirect(url_for("index"))
+    return jsonify({"status": "changing"})
+
+@app.route("/start_vpn", methods=["POST"])
+def start_vpn_route():
+    region = request.form['region']
+    # Logic to start the VPN with the selected region
+    vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))
+    vpn_proc.start()
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
-    # Automatically start the VPN service with a default region
-    default_region = "de1088"  # Change this to your desired default region
-    """
+    # Automatically start the VPN service without connecting to a region
     if not is_vpn_running():
-        logging.debug(f"Starting VPN with default region: {default_region}")
-        vpn_proc = multiprocessing.Process(target=vpn_process, args=(default_region,))
+        logging.debug("Starting VPN service without connecting to a region")
+        vpn_proc = multiprocessing.Process(target=vpn_process)
         vpn_proc.start()
-    """
+
     app.run(host="0.0.0.0", port=5000)

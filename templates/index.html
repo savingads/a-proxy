@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.122.0">
-    <title>PersonaWeb Dashboard</title>
+    <title>CurrentWeb Dashboard</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/dashboard/">
 
@@ -248,8 +248,13 @@
     </svg>
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">PersonaWeb</a>
-
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">CurrentWeb</a>
+        <form action="{{ url_for('visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3">
+            <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
+            <input type="hidden" name="language" value="{{ language }}">
+            <button type="submit" class="btn btn-primary me-2">Preview</button>
+            <button type="submit" formaction="{{ url_for('archive_page') }}" class="btn btn-secondary">Archive</button>
+        </form>
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
                 <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
@@ -260,7 +265,7 @@
                     </svg>
                 </button>
             </li>
-            <li class "nav-item text-nowrap">
+            <li class="nav-item text-nowrap">
                 <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
                     aria-label="Toggle navigation">
@@ -270,7 +275,6 @@
                 </button>
             </li>
         </ul>
-
         <div id="navbarSearch" class="navbar-search w-100 collapse">
             <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
         </div>
@@ -399,7 +403,7 @@
                         <!-- Browser Details Section -->
                         <h6
                             class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                            <span>Browser Details</span>
+                            <span>This Browser</span>
                         </h6>
                         <ul class="nav flex-column mb-auto">
                             <li class="nav-item">
@@ -513,8 +517,15 @@
                                                     {% endif %}
                                                 </select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Change Region</button>
+                                            <button type="submit" class="btn btn-primary">Change VPN Region</button>
                                         </form>
+                                        <h4>Target Browser Geolocation</h4>
+                                        <div class="form-group">
+                                            <label for="target-region">Geolocation:</label>
+                                            <input type="text" id="target-region" class="form-control"
+                                                value="{{ ip_info.loc }}" readonly>
+                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                        </div>
                                         {% else %}
                                         <h2>Start VPN</h2>
                                         <form action="{{ url_for('start_vpn_route') }}" method="post" class="mb-4">
@@ -550,14 +561,6 @@
                                         </script>
                                     </div>
                                 </div>
-                                {% if vpn_running %}
-                                <h2>Google Page</h2>
-                                <p><strong>Language:</strong> {{ language }}</p>
-                                <form action="{{ url_for('visit_page') }}" method="post" class="mb-4">
-                                    <input type="hidden" name="language" value="{{ language }}">
-                                    <button type="submit" class="btn btn-primary">Visit Google</button>
-                                </form>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="tab-pane fade" id="psychographic" role="tabpanel"
@@ -596,9 +599,17 @@
                 return response.json();
             }).then(function (data) {
                 if (data.status === 'changing') {
+                    document.getElementById('region').value = data.region;
                     pollVpnStatus();
                 }
+            }).catch(function (error) {
+                console.error("Error changing region:", error);
             });
+        });
+
+        document.getElementById('set-geolocation').addEventListener('click', function () {
+            var targetRegion = document.getElementById('target-region').value;
+            document.getElementById('geolocation').textContent = targetRegion;
         });
 
         function pollVpnStatus() {
@@ -612,6 +623,8 @@
                     } else {
                         setTimeout(pollVpnStatus, 5000);
                     }
+                }).catch(function (error) {
+                    console.error("Error polling VPN status:", error);
                 });
         }
 

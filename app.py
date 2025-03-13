@@ -81,16 +81,28 @@ def visit_page():
     os.system(f"python3 /home/chris/a-proxy/visit_page.py {language}")
     return "Visited Google and took a screenshot."
 
+@app.route("/archive_page", methods=["POST"])
+def archive_page():
+    #language = request.form.get("language", "en-US")
+    #os.system(f"python3 /home/chris/a-proxy/archive_page.py {language}")
+    return "Archived Page."
+
 def vpn_process(region=None):
     if is_vpn_running():
         logging.debug("Stopping current VPN connection")
         subprocess.run(["sudo", "pkill", "openvpn"])
+        time.sleep(5)  # Wait for the VPN process to stop
     if region:
         vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
         if not os.path.exists(vpn_config_path):
             logging.error(f"VPN configuration file not found: {vpn_config_path}")
             return
-        start_vpn(region)  # Ensure this function is correctly called
+        auth_file_path = "nordvpn/auth.txt"
+        if not os.path.exists(auth_file_path):
+            logging.error(f"VPN authentication file not found: {auth_file_path}")
+            return
+        logging.debug(f"Starting VPN with configuration: {vpn_config_path} and auth file: {auth_file_path}")
+        subprocess.run(["sudo", "openvpn", "--config", vpn_config_path, "--auth-user-pass", auth_file_path])
     else:
         start_vpn_service()  # Start the VPN service without connecting to a region
 
@@ -101,7 +113,7 @@ def change_region():
     vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))
     vpn_proc.start()
     logging.debug("VPN region change process started")
-    return jsonify({"status": "changing"})
+    return jsonify({"status": "changing", "region": region})
 
 @app.route("/start_vpn", methods=["POST"])
 def start_vpn_route():

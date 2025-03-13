@@ -9,8 +9,12 @@ def start_vpn(region):
     if not os.path.exists(vpn_config_path):
         logging.error(f"VPN configuration file not found: {vpn_config_path}")
         return
-    logging.debug(f"Starting VPN with configuration: {vpn_config_path}")
-    subprocess.run(["sudo", "openvpn", "--config", vpn_config_path])
+    auth_file_path = "nordvpn/auth.txt"
+    if not os.path.exists(auth_file_path):
+        logging.error(f"VPN authentication file not found: {auth_file_path}")
+        return
+    logging.debug(f"Starting VPN with configuration: {vpn_config_path} and auth file: {auth_file_path}")
+    subprocess.run(["sudo", "openvpn", "--config", vpn_config_path, "--auth-user-pass", auth_file_path])
 
 def start_vpn_service():
     logging.debug("Starting VPN service without connecting to a region")

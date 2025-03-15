@@ -140,6 +140,16 @@ def change_region():
     logging.debug("VPN region change process started")
     return jsonify({"status": "changing", "region": region})
 
+@app.route("/get-region-geolocation/<region_code>")
+def get_region_geolocation(region_code):
+    region_code = region_code.upper()
+    if region_code in REGION_LANGUAGE_MAP:
+        return jsonify({
+            "geolocation": REGION_LANGUAGE_MAP[region_code]["geolocation"],
+            "name": REGION_LANGUAGE_MAP[region_code]["name"]
+        })
+    return jsonify({"error": "Region not found"}), 404
+
 @app.route("/start_vpn", methods=["POST"])
 def start_vpn_route():
     if 'region' not in request.form:
@@ -152,10 +162,10 @@ def start_vpn_route():
 
 if __name__ == "__main__":
     # Automatically start the VPN service without connecting to a region
-    if not is_vpn_running():
-       logging.debug("Starting VPN service without connecting to a region")
-       vpn_proc = multiprocessing.Process(target=vpn_process)
-       vpn_proc.start()
+    #if not is_vpn_running():
+       # logging.debug("Starting VPN service without connecting to a region")
+       # vpn_proc = multiprocessing.Process(target=vpn_process)
+       # vpn_proc.start()
 
     
     

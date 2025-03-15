@@ -417,10 +417,8 @@
                                 <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
                                     <span><strong>Language:</strong> {{ language }}</span>
                                 </li>
-                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2">
-                                    <svg class="bi">
-                                        <use xlink:href="#geo-alt" />
-                                    </svg>
+                                <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
+
                                     <span><strong>Geolocation:</strong> <span id="geolocation">Fetching...</span></span>
                                 </li>
                                 <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
@@ -525,7 +523,7 @@
                                             </div>
                                             <button type="submit" class="btn btn-primary">Change VPN Region</button>
                                         </form>
-                                        <h4>Target Browser Geolocation</h4>
+                                        <h4>Target Browser</h4>
                                         <div class="form-group">
                                             <label for="target-region">Geolocation:</label>
                                             <input type="text" id="target-region" class="form-control"

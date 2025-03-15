@@ -142,6 +142,8 @@ def change_region():
 
 @app.route("/start_vpn", methods=["POST"])
 def start_vpn_route():
+    if 'region' not in request.form:
+        return jsonify({"error": "No region provided"}), 400
     region = request.form['region']
     # Logic to start the VPN with the selected region
     vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))

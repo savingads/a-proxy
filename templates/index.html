@@ -641,20 +641,21 @@
                 });
             }
 
+            let pollAttempts = 0;
             function pollVpnStatus() {
                 fetch('/vpn-status')
-                    .then(function (response) {
-                        return response.json();
-                    })
-                    .then(function (data) {
+                    .then(response => response.json())
+                    .then(data => {
                         if (data.vpn_running && data.ip_info.region !== '{{ ip_info.region }}') {
                             location.reload();
-                        } else {
+                        } else if (pollAttempts < 3) {
+                            pollAttempts++;
                             setTimeout(pollVpnStatus, 5000);
+                        } else {
+                            location.reload();
                         }
-                    }).catch(function (error) {
-                        console.error("Error polling VPN status:", error);
-                    });
+                    })
+                    .catch(error => console.error("Error polling VPN status:", error));
             }
 
             {% if vpn_running %}

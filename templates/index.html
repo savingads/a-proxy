@@ -408,7 +408,26 @@
                             </ul>
 
                             <hr class="my-3">
-
+                            <!-- Browser Details Section -->
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>This Browser</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                                    <span><strong>Language:</strong> {{ language }}</span>
+                                </li>
+                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2">
+                                    <svg class="bi">
+                                        <use xlink:href="#geo-alt" />
+                                    </svg>
+                                    <span><strong>Geolocation:</strong> <span id="geolocation">Fetching...</span></span>
+                                </li>
+                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                                    <span><strong>User Agent:</strong> {{ request.headers.get('User-Agent') }}</span>
+                                </li>
+                            </ul>
+                            <hr class="my-3">
                             <ul class="nav flex-column mb-auto">
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
@@ -418,49 +437,8 @@
                                         Settings
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <svg class="bi">
-                                            <use xlink:href="#door-closed" />
-                                        </svg>
-                                        Sign out
-                                    </a>
-                                </li>
                             </ul>
                             <hr class="my-3">
-                            <!-- Browser Details Section -->
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>This Browser</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <svg class="bi">
-                                            <use xlink:href="#gear-wide-connected" />
-                                        </svg>
-                                        <span><strong>Language:</strong> {{ language }}</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <svg class="bi">
-                                            <use xlink:href="#geo-alt" />
-                                        </svg>
-                                        <span><strong>Geolocation:</strong> <span
-                                                id="geolocation">Fetching...</span></span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <svg class="bi">
-                                            <use xlink:href="#people" />
-                                        </svg>
-                                        <span><strong>User Agent:</strong> {{ request.headers.get('User-Agent')
-                                            }}</span>
-                                    </a>
-                                </li>
-                            </ul>
                         </div>
                     </div>
                 </div>

@@ -126,8 +126,8 @@ def start_vpn_route():
 if __name__ == "__main__":
     # Automatically start the VPN service without connecting to a region
     if not is_vpn_running():
-        logging.debug("Starting VPN service without connecting to a region")
-        vpn_proc = multiprocessing.Process(target=vpn_process)
-        vpn_proc.start()
+       logging.debug("Starting VPN service without connecting to a region")
+       vpn_proc = multiprocessing.Process(target=vpn_process)
+       vpn_proc.start()
 
     app.run(host="0.0.0.0", port=5000)

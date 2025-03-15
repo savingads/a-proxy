@@ -1,3 +1,8 @@
+'''
+Based on https://github.com/anjackson/sliver
+A tool for collection archival slivers of the web and web archives
+'''
+
 import os
 import time
 import yaml

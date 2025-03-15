@@ -13,11 +13,36 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 REGION_LANGUAGE_MAP = {
-    "US": "en-US",
-    "BR": "pt-BR",
-    "DE": "de-DE",
-    "JP": "ja-JP",
-    "ZA": "af-ZA"
+    "US": {
+        "name": "United States",
+        "language": "en-US",
+        "geolocation": "37.0902,-95.7129",
+        "server": "us123.nordvpn.com.udp"
+    },
+    "BR": {
+        "name": "Brazil",
+        "language": "pt-BR",
+        "geolocation": "-14.2350,-51.9253",
+        "server": "br123.nordvpn.com.udp"
+    },
+    "DE": {
+        "name": "Germany",
+        "language": "de-DE",
+        "geolocation": "51.1657,10.4515",
+        "server": "de123.nordvpn.com.udp"
+    },
+    "JP": {
+        "name": "Japan",
+        "language": "ja-JP",
+        "geolocation": "36.2048,138.2529",
+        "server": "jp123.nordvpn.com.udp"
+    },
+    "ZA": {
+        "name": "South Africa",
+        "language": "af-ZA",
+        "geolocation": "-30.5595,22.9375",
+        "server": "za123.nordvpn.com.udp"
+    }
 }
 
 def is_vpn_running():

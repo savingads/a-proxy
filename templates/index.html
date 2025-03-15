@@ -415,14 +415,16 @@
                             </h6>
                             <ul class="nav flex-column mb-auto">
                                 <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>Language:</strong> {{ language }}</span>
+                                    <span><strong>Language:</strong> <span
+                                            id="browser-language">Fetching...</span></span>
                                 </li>
                                 <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
-
-                                    <span><strong>Geolocation:</strong> <span id="geolocation">Fetching...</span></span>
+                                    <span><strong>Geolocation:</strong> <span
+                                            id="browser-geolocation">Fetching...</span></span>
                                 </li>
                                 <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>User Agent:</strong> {{ request.headers.get('User-Agent') }}</span>
+                                    <span><strong>User Agent:</strong> <span
+                                            id="browser-user-agent">Fetching...</span></span>
                                 </li>
                             </ul>
                             <hr class="my-3">
@@ -444,7 +446,7 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h3>Target Browser</h3>
+                    <h3>Target</h3>
                     <div class="container border p-3 mb-3">
                         <div class="row">
                             <div class="col">
@@ -526,8 +528,13 @@
                                         <h4>Target Browser</h4>
                                         <div class="form-group">
                                             <label for="target-region">Geolocation:</label>
+                                            {% if vpn_running %}
                                             <input type="text" id="target-region" class="form-control"
                                                 value="{{ ip_info.loc }}" readonly>
+                                            {% else %}
+                                            <input type="text" id="target-region" class="form-control"
+                                                placeholder="0.000, 0.000">
+                                            {% endif %}
                                             <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
                                         </div>
                                         {% else %}
@@ -645,6 +652,9 @@
                     });
             }
 
+            {% if vpn_running %}
+            document.getElementById('geolocation').textContent = "{{ ip_info.loc }}";
+            {% else %}
             if (navigator.geolocation) {
                 console.log("Geolocation is supported.");
                 navigator.geolocation.getCurrentPosition(function (position) {
@@ -657,6 +667,25 @@
             } else {
                 console.log("Geolocation is not supported.");
                 document.getElementById('geolocation').textContent = 'Not supported';
+            }
+            {% endif %}
+
+            // Set language
+            document.getElementById('browser-language').textContent = navigator.language || 'Unavailable';
+
+            // Set user agent
+            document.getElementById('browser-user-agent').textContent = navigator.userAgent || 'Unavailable';
+
+            // Set geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    document.getElementById('browser-geolocation').textContent =
+                        position.coords.latitude + ', ' + position.coords.longitude;
+                }, function () {
+                    document.getElementById('browser-geolocation').textContent = 'Unavailable';
+                });
+            } else {
+                document.getElementById('browser-geolocation').textContent = 'Not supported';
             }
         });
     </script>

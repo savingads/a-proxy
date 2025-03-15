@@ -524,6 +524,10 @@
                                                 </select>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Change VPN Region</button>
+                                            <div id="vpn-spinner" class="spinner-border text-primary" role="status"
+                                                style="display: none;">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
                                         </form>
                                         <h4>Target Browser</h4>
                                         <div class="form-group">
@@ -612,6 +616,7 @@
                     event.preventDefault();
                     var form = event.target;
                     var formData = new FormData(form);
+                    document.getElementById('vpn-spinner').style.display = 'inline-block';
                     fetch(form.action, {
                         method: 'POST',
                         body: formData

@@ -446,7 +446,7 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h3>Target</h3>
+                    <h3>Persona</h3>
                     <div class="container border p-3 mb-3">
                         <div class="row">
                             <div class="col">
@@ -549,13 +549,24 @@
                                         </form>
                                         {% endif %}
 
-                                        <h4>Target Browser</h4>
+                                        <h4>Target Browser Settings</h4>
                                         <div class="form-group">
                                             <label for="target-region">Geolocation:</label>
                                             <input type="text" id="target-region" class="form-control"
                                                 value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
                                                 placeholder="0.000, 0.000">
                                             <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <label for="target-language">Language:</label>
+                                            <select id="target-language" class="form-control">
+                                                <option value="en-US">English (US)</option>
+                                                <option value="pt-BR">Portuguese (Brazil)</option>
+                                                <option value="de-DE">German</option>
+                                                <option value="ja-JP">Japanese</option>
+                                                <option value="af-ZA">Afrikaans (South Africa)</option>
+                                            </select>
+                                            <button id="set-language" class="btn btn-secondary mt-2">Set</button>
                                         </div>
 
                                     </div>
@@ -675,7 +686,7 @@
             }
             {% endif %}
 
-            // Add event listener to region dropdown to fetch geolocation when a region is selected
+            // Add event listener to region dropdown to fetch geolocation and language when a region is selected
             var regionSelect = document.getElementById('region');
             if (regionSelect) {
                 regionSelect.addEventListener('change', function () {
@@ -688,9 +699,79 @@
                                 if (data.geolocation) {
                                     document.getElementById('target-region').value = data.geolocation;
                                     document.getElementById('geolocation').textContent = data.geolocation;
+
+                                    // Update language dropdown based on region
+                                    var targetLanguage = document.getElementById('target-language');
+                                    var selectedLanguage;
+
+                                    switch (regionCode) {
+                                        case 'US':
+                                            selectedLanguage = 'en-US';
+                                            break;
+                                        case 'BR':
+                                            selectedLanguage = 'pt-BR';
+                                            break;
+                                        case 'DE':
+                                            selectedLanguage = 'de-DE';
+                                            break;
+                                        case 'JP':
+                                            selectedLanguage = 'ja-JP';
+                                            break;
+                                        case 'ZA':
+                                            selectedLanguage = 'af-ZA';
+                                            break;
+                                        default:
+                                            selectedLanguage = 'en-US';
+                                    }
+
+                                    // Set the language dropdown value
+                                    targetLanguage.value = selectedLanguage;
+
+                                    // Update language in the Persona section
+                                    var personaLanguageElement = document.querySelector('.container.border .row .col:nth-child(2) strong + span');
+                                    if (personaLanguageElement) {
+                                        personaLanguageElement.textContent = selectedLanguage;
+                                    } else {
+                                        // If the span doesn't exist, update the text content next to the Language label
+                                        var languageCol = document.querySelector('.container.border .row .col:nth-child(2)');
+                                        if (languageCol) {
+                                            languageCol.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
+                                        }
+                                    }
+
+                                    // Update the hidden language input field in the form
+                                    var languageInput = document.querySelector('form input[name="language"]');
+                                    if (languageInput) {
+                                        languageInput.value = selectedLanguage;
+                                    }
                                 }
                             })
                             .catch(error => console.error("Error fetching geolocation:", error));
+                    }
+                });
+            }
+
+            // Add event listener to set language button
+            var setLanguageButton = document.getElementById('set-language');
+            if (setLanguageButton) {
+                setLanguageButton.addEventListener('click', function () {
+                    var selectedLanguage = document.getElementById('target-language').value;
+                    // Update language in the Persona section
+                    var personaLanguageElement = document.querySelector('.container.border .row .col:nth-child(2) strong + span');
+                    if (personaLanguageElement) {
+                        personaLanguageElement.textContent = selectedLanguage;
+                    } else {
+                        // If the span doesn't exist, update the text content next to the Language label
+                        var languageCol = document.querySelector('.container.border .row .col:nth-child(2)');
+                        if (languageCol) {
+                            languageCol.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
+                        }
+                    }
+
+                    // Update the hidden language input field in the form
+                    var languageInput = document.querySelector('form input[name="language"]');
+                    if (languageInput) {
+                        languageInput.value = selectedLanguage;
                     }
                 });
             }

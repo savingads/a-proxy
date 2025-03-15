@@ -469,21 +469,17 @@
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h3>Target Browser</h3>
-                    Geolocation
-                    Language
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                    <div class="container border p-3 mb-3">
+                        <div class="row">
+                            <div class="col">
+                                <strong>Geolocation:</strong> <span id="geolocation">Fetching...</span>
+                            </div>
+                            <div class="col">
+                                <strong>Language:</strong> {{ language }}
+                            </div>
                         </div>
-                        <button type="button"
-                            class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1">
-                            <svg class="bi">
-                                <use xlink:href="#calendar3" />
-                            </svg>
-                            This week
-                        </button>
                     </div>
+
                 </div>
 
                 <div class="tab-content">
@@ -574,7 +570,7 @@
                                                     <option value="za147">Africa (South Africa)</option>
                                                 </select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Start VPN</button>
+
                                         </form>
                                         {% endif %}
                                     </div>
@@ -607,6 +603,10 @@
                         <div class="tab-pane fade" id="contextual" role="tabpanel" aria-labelledby="contextual-tab">
                             <!-- Contextual content goes here -->
                         </div>
+                        <!-- Add a chart container with the correct ID -->
+                        <div class="tab-pane fade" id="chart-container" role="tabpanel" aria-labelledby="chart-tab">
+                            <canvas id="myChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -622,59 +622,67 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        document.getElementById('change-region-form').addEventListener('submit', function (event) {
-            event.preventDefault();
-            var form = event.target;
-            var formData = new FormData(form);
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            }).then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                if (data.status === 'changing') {
-                    document.getElementById('region').value = data.region;
-                    pollVpnStatus();
-                }
-            }).catch(function (error) {
-                console.error("Error changing region:", error);
-            });
-        });
-
-        document.getElementById('set-geolocation').addEventListener('click', function () {
-            var targetRegion = document.getElementById('target-region').value;
-            document.getElementById('geolocation').textContent = targetRegion;
-        });
-
-        function pollVpnStatus() {
-            fetch('/vpn-status')
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data.vpn_running && data.ip_info.region !== '{{ ip_info.region }}') {
-                        location.reload();
-                    } else {
-                        setTimeout(pollVpnStatus, 5000);
-                    }
-                }).catch(function (error) {
-                    console.error("Error polling VPN status:", error);
+        document.addEventListener('DOMContentLoaded', function () {
+            var changeRegionForm = document.getElementById('change-region-form');
+            if (changeRegionForm) {
+                changeRegionForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var form = event.target;
+                    var formData = new FormData(form);
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    }).then(function (response) {
+                        return response.json();
+                    }).then(function (data) {
+                        if (data.status === 'changing') {
+                            document.getElementById('region').value = data.region;
+                            pollVpnStatus();
+                        }
+                    }).catch(function (error) {
+                        console.error("Error changing region:", error);
+                    });
                 });
-        }
+            }
 
-        if (navigator.geolocation) {
-            console.log("Geolocation is supported.");
-            navigator.geolocation.getCurrentPosition(function (position) {
-                console.log("Geolocation success:", position);
-                document.getElementById('geolocation').textContent = position.coords.latitude + ', ' + position.coords.longitude;
-            }, function (error) {
-                console.error("Geolocation error:", error);
-                document.getElementById('geolocation').textContent = 'Unavailable';
-            });
-        } else {
-            console.log("Geolocation is not supported.");
-            document.getElementById('geolocation').textContent = 'Not supported';
-        }
+            var setGeolocationButton = document.getElementById('set-geolocation');
+            if (setGeolocationButton) {
+                setGeolocationButton.addEventListener('click', function () {
+                    var targetRegion = document.getElementById('target-region').value;
+                    document.getElementById('geolocation').textContent = targetRegion;
+                });
+            }
+
+            function pollVpnStatus() {
+                fetch('/vpn-status')
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data.vpn_running && data.ip_info.region !== '{{ ip_info.region }}') {
+                            location.reload();
+                        } else {
+                            setTimeout(pollVpnStatus, 5000);
+                        }
+                    }).catch(function (error) {
+                        console.error("Error polling VPN status:", error);
+                    });
+            }
+
+            if (navigator.geolocation) {
+                console.log("Geolocation is supported.");
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    console.log("Geolocation success:", position);
+                    document.getElementById('geolocation').textContent = position.coords.latitude + ', ' + position.coords.longitude;
+                }, function (error) {
+                    console.error("Geolocation error:", error);
+                    document.getElementById('geolocation').textContent = 'Unavailable';
+                });
+            } else {
+                console.log("Geolocation is not supported.");
+                document.getElementById('geolocation').textContent = 'Not supported';
+            }
+        });
     </script>
 </body>
 

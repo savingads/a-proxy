@@ -130,4 +130,6 @@ if __name__ == "__main__":
        vpn_proc = multiprocessing.Process(target=vpn_process)
        vpn_proc.start()
 
-    app.run(host="0.0.0.0", port=5000)
+    
+    
+    app.run(debug=True, use_reloader=True)

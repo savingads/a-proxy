@@ -275,9 +275,12 @@
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">CurrentWeb</a>
-        <form action="{{ url_for('visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3">
+        <form action="{{ url_for('visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
+            id="preview-form">
             <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
             <input type="hidden" name="language" value="{{ language }}">
+            <input type="hidden" name="geolocation" id="form-geolocation"
+                value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
             <button type="submit" formaction="{{ url_for('archive_page') }}" class="btn btn-secondary">Archive</button>
         </form>
@@ -555,7 +558,7 @@
                                             <input type="text" id="target-region" class="form-control"
                                                 value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
                                                 placeholder="0.000, 0.000">
-                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Update</button>
+                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
                                         </div>
                                         <div class="form-group mt-3">
                                             <label for="target-language">Language:</label>
@@ -566,7 +569,7 @@
                                                 <option value="ja-JP">Japanese</option>
                                                 <option value="af-ZA">Afrikaans (South Africa)</option>
                                             </select>
-                                            <button id="set-language" class="btn btn-secondary mt-2">Update</button>
+                                            <button id="set-language" class="btn btn-secondary mt-2">Set</button>
                                         </div>
 
                                     </div>
@@ -646,7 +649,14 @@
             if (setGeolocationButton) {
                 setGeolocationButton.addEventListener('click', function () {
                     var targetRegion = document.getElementById('target-region').value;
+                    // Update geolocation in the Persona section
                     document.getElementById('geolocation').textContent = targetRegion;
+
+                    // Update the hidden geolocation field in the form
+                    var geolocationInput = document.getElementById('form-geolocation');
+                    if (geolocationInput) {
+                        geolocationInput.value = targetRegion;
+                    }
                 });
             }
 

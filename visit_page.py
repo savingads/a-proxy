@@ -34,7 +34,7 @@ def main():
     logging.debug("Screenshot saved as screenshot.png")
 
     # Wait before closing
-    time.sleep(10)
+    time.sleep(30)
 
     # Close the WebDriver
     driver.quit()

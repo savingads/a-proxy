@@ -55,13 +55,21 @@
     <div class="container">
         <h1>Geolocation and Language Test</h1>
 
+        <div class="info-box" style="border-left: 4px solid #28a745;">
+            <h4>Target Settings (Passed to Selenium)</h4>
+            <p><span class="label">Target Language:</span> <span>{{ target_language }}</span></p>
+            <p><span class="label">Target Geolocation:</span> <span>{{ target_geolocation }}</span></p>
+        </div>
+
         <div class="info-box">
+            <h4>Actual Browser Settings</h4>
             <p><span class="label">Browser Language:</span> <span id="browser-language">Detecting...</span></p>
             <p><span class="label">Navigator Language:</span> <span id="navigator-language">Detecting...</span></p>
             <p><span class="label">Accept-Language Header:</span> <span id="accept-language">Detecting...</span></p>
         </div>
 
         <div class="info-box">
+            <h4>Actual Browser Geolocation</h4>
             <p><span class="label">Geolocation (JavaScript API):</span> <span id="js-geolocation">Detecting...</span>
             </p>
             <p><span class="label">Geolocation Status:</span> <span id="geolocation-status">Waiting...</span></p>
@@ -93,6 +101,36 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        // Add target geolocation marker if available
+        {% if target_geolocation and target_geolocation != "Not specified" %}
+        try {
+            const targetCoords = "{{ target_geolocation }}".split(',');
+            if (targetCoords.length === 2) {
+                const targetLat = parseFloat(targetCoords[0].trim());
+                const targetLng = parseFloat(targetCoords[1].trim());
+
+                if (!isNaN(targetLat) && !isNaN(targetLng)) {
+                    // Create a green marker for target location
+                    const targetIcon = L.divIcon({
+                        html: '<div style="background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                        className: 'target-marker',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+
+                    L.marker([targetLat, targetLng], { icon: targetIcon }).addTo(map)
+                        .bindPopup('<b>Target Location</b><br>Set in dashboard')
+                        .openPopup();
+
+                    // If no browser geolocation yet, center on target
+                    map.setView([targetLat, targetLng], 10);
+                }
+            }
+        } catch (e) {
+            console.error("Error adding target marker:", e);
+        }
+        {% endif %}
+
         // Get geolocation using JavaScript API
         if (navigator.geolocation) {
             document.getElementById('geolocation-status').textContent = 'Requesting position...';
@@ -107,9 +145,35 @@
 
                     // Update map with the location
                     map.setView([lat, lng], 10);
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('Your location according to browser API')
+
+                    // Create a blue marker for actual browser location
+                    const browserIcon = L.divIcon({
+                        html: '<div style="background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                        className: 'browser-marker',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+
+                    L.marker([lat, lng], { icon: browserIcon }).addTo(map)
+                        .bindPopup('<b>Actual Browser Location</b><br>Detected via JavaScript API')
                         .openPopup();
+
+                    // Add a legend to the map
+                    const legend = L.control({ position: 'bottomright' });
+                    legend.onAdd = function (map) {
+                        const div = L.DomUtil.create('div', 'info legend');
+                        div.style.backgroundColor = 'white';
+                        div.style.padding = '10px';
+                        div.style.borderRadius = '5px';
+                        div.style.border = '1px solid #ccc';
+
+                        div.innerHTML = `
+                            <div style="margin-bottom: 5px;"><div style="display: inline-block; background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; margin-right: 5px;"></div> Target Location</div>
+                            <div><div style="display: inline-block; background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; margin-right: 5px;"></div> Actual Browser Location</div>
+                        `;
+                        return div;
+                    };
+                    legend.addTo(map);
                 },
                 // Error callback
                 function (error) {

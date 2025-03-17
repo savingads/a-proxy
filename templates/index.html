@@ -673,6 +673,7 @@
                     var testLanguageInput = document.getElementById('test-language-input');
                     if (testLanguageInput) {
                         testLanguageInput.value = selectedLanguage;
+                        console.log("Set language to:", selectedLanguage);
                     }
                 });
             }
@@ -680,39 +681,83 @@
             // Update test browser form when geolocation is set
             var setGeolocationButton = document.getElementById('set-geolocation');
             if (setGeolocationButton) {
-                var originalClickHandler = setGeolocationButton.onclick;
                 setGeolocationButton.addEventListener('click', function () {
                     var targetRegion = document.getElementById('target-region').value;
+                    // Update geolocation in the Persona section
+                    document.getElementById('geolocation').textContent = targetRegion;
+
+                    // Update the hidden geolocation field in the form
+                    var geolocationInput = document.getElementById('form-geolocation');
+                    if (geolocationInput) {
+                        geolocationInput.value = targetRegion;
+                    }
+
                     // Update the test browser form geolocation input
                     var testGeolocationInput = document.getElementById('test-geolocation-input');
                     if (testGeolocationInput) {
                         testGeolocationInput.value = targetRegion;
+                        console.log("Set geolocation to:", targetRegion);
                     }
                 });
             }
 
-            // Initialize test browser form with current values
-            document.addEventListener('DOMContentLoaded', function () {
-                // Set initial language value
+            // Add a "Test Now" button that will submit the form data via fetch
+            var testNowButton = document.createElement('button');
+            testNowButton.type = 'button';
+            testNowButton.className = 'btn btn-success mt-3 ml-2';
+            testNowButton.textContent = 'Apply Settings & Test';
+            testNowButton.style.marginLeft = '10px';
+            testNowButton.addEventListener('click', function () {
+                // Get current values
                 var currentLanguage = document.getElementById('target-language').value;
-                var testLanguageInput = document.getElementById('test-language-input');
-                if (testLanguageInput && currentLanguage) {
-                    testLanguageInput.value = currentLanguage;
-                }
-
-                // Set initial geolocation value
                 var currentGeolocation = document.getElementById('target-region').value;
-                var testGeolocationInput = document.getElementById('test-geolocation-input');
-                if (testGeolocationInput && currentGeolocation) {
-                    testGeolocationInput.value = currentGeolocation;
-                } else if (testGeolocationInput) {
-                    // If no geolocation is set, use the current geolocation from the persona section
-                    var personaGeolocation = document.getElementById('geolocation').textContent;
-                    if (personaGeolocation && personaGeolocation !== 'Fetching...' && personaGeolocation !== 'Unavailable' && personaGeolocation !== 'Not supported') {
-                        testGeolocationInput.value = personaGeolocation;
-                    }
-                }
+
+                console.log("Sending test request with language:", currentLanguage, "and geolocation:", currentGeolocation);
+
+                // Create form data
+                var formData = new FormData();
+                formData.append('language', currentLanguage);
+                formData.append('geolocation', currentGeolocation);
+
+                // Send the request to the server using fetch
+                fetch('{{ url_for("test_geolocation") }}', {
+                    method: 'POST',
+                    body: formData
+                }).then(function (response) {
+                    return response.text();
+                }).then(function (data) {
+                    console.log("Test response:", data);
+                }).catch(function (error) {
+                    console.error("Error testing geolocation:", error);
+                });
             });
+
+            // Add the button next to the Test in Browser button
+            var testBrowserForm = document.getElementById('test-browser-form');
+            testBrowserForm.querySelector('button').insertAdjacentElement('afterend', testNowButton);
+
+            // Initialize test browser form with current values
+            // Set initial language value
+            var currentLanguage = document.getElementById('target-language').value;
+            var testLanguageInput = document.getElementById('test-language-input');
+            if (testLanguageInput && currentLanguage) {
+                testLanguageInput.value = currentLanguage;
+            }
+
+            // Set initial geolocation value
+            var currentGeolocation = document.getElementById('target-region').value;
+            var testGeolocationInput = document.getElementById('test-geolocation-input');
+            if (testGeolocationInput && currentGeolocation) {
+                testGeolocationInput.value = currentGeolocation;
+                console.log("Setting test geolocation input to:", currentGeolocation);
+            } else if (testGeolocationInput) {
+                // If no geolocation is set, use the current geolocation from the persona section
+                var personaGeolocation = document.getElementById('geolocation').textContent;
+                if (personaGeolocation && personaGeolocation !== 'Fetching...' && personaGeolocation !== 'Unavailable' && personaGeolocation !== 'Not supported') {
+                    testGeolocationInput.value = personaGeolocation;
+                    console.log("Setting test geolocation input from persona:", personaGeolocation);
+                }
+            }
 
             // Set language
             document.getElementById('browser-language').textContent = navigator.language || 'Unavailable';

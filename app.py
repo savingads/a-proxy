@@ -129,7 +129,12 @@ def archive_page():
 @app.route("/geolocation-test")
 def geolocation_test():
     """Render the geolocation test page"""
-    return render_template("geolocation_test.html")
+    # Get query parameters if they exist (these would be passed when accessing directly)
+    target_language = request.args.get("language", "Not specified")
+    target_geolocation = request.args.get("geolocation", "Not specified")
+    return render_template("geolocation_test.html", 
+                          target_language=target_language,
+                          target_geolocation=target_geolocation)
 
 @app.route("/get-headers")
 def get_headers():
@@ -143,8 +148,12 @@ def test_geolocation():
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation", None)
     
-    # Build the command to open the geolocation test page
-    command = f"python3 /home/chris/a-proxy/visit_page.py 'http://localhost:5000/geolocation-test' --language '{language}'"
+    # Build the command to open the geolocation test page with query parameters
+    test_url = f"http://localhost:5000/geolocation-test?language={language}"
+    if geolocation:
+        test_url += f"&geolocation={geolocation}"
+    
+    command = f"python3 /home/chris/a-proxy/visit_page.py '{test_url}' --language '{language}'"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
     

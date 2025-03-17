@@ -701,7 +701,7 @@
                 });
             }
 
-            // Add a "Test Now" button that will submit the form data via fetch
+            // Add a "Test Now" button that will update the form and submit it
             var testNowButton = document.createElement('button');
             testNowButton.type = 'button';
             testNowButton.className = 'btn btn-success mt-3 ml-2';
@@ -712,24 +712,14 @@
                 var currentLanguage = document.getElementById('target-language').value;
                 var currentGeolocation = document.getElementById('target-region').value;
 
-                console.log("Sending test request with language:", currentLanguage, "and geolocation:", currentGeolocation);
+                console.log("Applying and testing with language:", currentLanguage, "and geolocation:", currentGeolocation);
 
-                // Create form data
-                var formData = new FormData();
-                formData.append('language', currentLanguage);
-                formData.append('geolocation', currentGeolocation);
+                // Update the form fields
+                document.getElementById('test-language-input').value = currentLanguage;
+                document.getElementById('test-geolocation-input').value = currentGeolocation;
 
-                // Send the request to the server using fetch
-                fetch('{{ url_for("test_geolocation") }}', {
-                    method: 'POST',
-                    body: formData
-                }).then(function (response) {
-                    return response.text();
-                }).then(function (data) {
-                    console.log("Test response:", data);
-                }).catch(function (error) {
-                    console.error("Error testing geolocation:", error);
-                });
+                // Submit the form (this will trigger the server-side route that opens a new browser)
+                document.getElementById('test-browser-form').submit();
             });
 
             // Add the button next to the Test in Browser button

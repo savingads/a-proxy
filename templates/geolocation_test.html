@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation and Language Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>Geolocation and Language Test</h1>
+
+        <div class="info-box">
+            <p><span class="label">Browser Language:</span> <span id="browser-language">Detecting...</span></p>
+            <p><span class="label">Navigator Language:</span> <span id="navigator-language">Detecting...</span></p>
+            <p><span class="label">Accept-Language Header:</span> <span id="accept-language">Detecting...</span></p>
+        </div>
+
+        <div class="info-box">
+            <p><span class="label">Geolocation (JavaScript API):</span> <span id="js-geolocation">Detecting...</span>
+            </p>
+            <p><span class="label">Geolocation Status:</span> <span id="geolocation-status">Waiting...</span></p>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+    <script>
+        // Display language information
+        document.getElementById('browser-language').textContent = navigator.language || 'Not available';
+        document.getElementById('navigator-language').textContent = navigator.languages ? navigator.languages.join(', ') : 'Not available';
+
+        // Function to get Accept-Language header
+        fetch('/get-headers')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('accept-language').textContent = data['accept-language'] || 'Not available';
+            })
+            .catch(error => {
+                console.error('Error fetching headers:', error);
+                document.getElementById('accept-language').textContent = 'Error fetching';
+            });
+
+        // Initialize map with default view
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Get geolocation using JavaScript API
+        if (navigator.geolocation) {
+            document.getElementById('geolocation-status').textContent = 'Requesting position...';
+
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('js-geolocation').textContent = `${lat}, ${lng}`;
+                    document.getElementById('geolocation-status').textContent = 'Position successfully obtained';
+
+                    // Update map with the location
+                    map.setView([lat, lng], 10);
+                    L.marker([lat, lng]).addTo(map)
+                        .bindPopup('Your location according to browser API')
+                        .openPopup();
+                },
+                // Error callback
+                function (error) {
+                    let errorMessage;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'User denied the request for geolocation';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'The request to get user location timed out';
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            errorMessage = 'An unknown error occurred';
+                            break;
+                    }
+                    document.getElementById('js-geolocation').textContent = 'Failed to get location';
+                    document.getElementById('geolocation-status').textContent = errorMessage;
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            document.getElementById('js-geolocation').textContent = 'Geolocation is not supported by this browser';
+            document.getElementById('geolocation-status').textContent = 'API not available';
+        }
+    </script>
+</body>
+
+</html>

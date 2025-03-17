@@ -126,6 +126,33 @@ def archive_page():
     #os.system(f"python3 /home/chris/a-proxy/archive_page.py {language}")
     return "Archived Page."
 
+@app.route("/geolocation-test")
+def geolocation_test():
+    """Render the geolocation test page"""
+    return render_template("geolocation_test.html")
+
+@app.route("/get-headers")
+def get_headers():
+    """Return the request headers as JSON"""
+    headers = dict(request.headers)
+    return jsonify({"accept-language": headers.get("Accept-Language", "Not available")})
+
+@app.route("/test-geolocation", methods=["POST"])
+def test_geolocation():
+    """Open a browser with the specified geolocation and language settings"""
+    language = request.form.get("language", "en-US")
+    geolocation = request.form.get("geolocation", None)
+    
+    # Build the command to open the geolocation test page
+    command = f"python3 /home/chris/a-proxy/visit_page.py 'http://localhost:5000/geolocation-test' --language '{language}'"
+    if geolocation:
+        command += f" --geolocation '{geolocation}'"
+    
+    logging.debug(f"Executing command: {command}")
+    os.system(command)
+    
+    return f"Testing geolocation with language {language} and coordinates {geolocation or 'not specified'}. Screenshot saved."
+
 def vpn_process(region=None):
     if is_vpn_running():
         logging.debug("Stopping current VPN connection")
@@ -180,7 +207,5 @@ if __name__ == "__main__":
        # logging.debug("Starting VPN service without connecting to a region")
        # vpn_proc = multiprocessing.Process(target=vpn_process)
        # vpn_proc.start()
-
-    
     
     app.run(debug=True, use_reloader=True)

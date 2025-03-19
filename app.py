@@ -3,6 +3,7 @@ import subprocess
 import requests
 import logging
 import os
+import json
 from services import start_vpn, start_vpn_service
 import multiprocessing
 from requests.exceptions import ConnectionError
@@ -255,6 +256,240 @@ def save_persona():
         # Use a response object to avoid session issues
         response = redirect(url_for('index'))
         response.set_cookie('flash_message', f"Error saving persona: {str(e)}")
+        return response
+
+@app.route("/save_psychographic_data", methods=["POST"])
+def save_psychographic_data():
+    """Save psychographic data for a persona"""
+    try:
+        # Get form data
+        persona_id = request.form.get("persona_id")
+        
+        # If no persona_id is provided, create a new persona
+        if not persona_id:
+            # Create a new persona with a default name
+            persona_data = {
+                "name": "New Persona",
+                "demographic": {
+                    "geolocation": request.form.get("geolocation", ""),
+                    "language": request.form.get("language", "en-US"),
+                    "country": request.form.get("country", ""),
+                    "city": request.form.get("city", ""),
+                    "region": request.form.get("region", "")
+                },
+                "psychographic": {
+                    "interests": request.form.get("interests", "").split(",") if request.form.get("interests") else [],
+                    "personal_values": request.form.get("personal_values", "").split(",") if request.form.get("personal_values") else [],
+                    "attitudes": request.form.get("attitudes", "").split(",") if request.form.get("attitudes") else [],
+                    "lifestyle": request.form.get("lifestyle", ""),
+                    "personality": request.form.get("personality", ""),
+                    "opinions": request.form.get("opinions", "").split(",") if request.form.get("opinions") else []
+                }
+            }
+            
+            # Save to database
+            persona_id = database.save_persona(persona_data)
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"New persona created with psychographic data!")
+            return response
+        else:
+            # Get the existing persona
+            persona = database.get_persona(persona_id)
+            
+            # Update with psychographic data
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                """
+                UPDATE psychographic_data 
+                SET interests = ?, personal_values = ?, attitudes = ?, lifestyle = ?, personality = ?, opinions = ?
+                WHERE persona_id = ?
+                """,
+                (
+                    json.dumps(request.form.get("interests", "").split(",") if request.form.get("interests") else []),
+                    json.dumps(request.form.get("personal_values", "").split(",") if request.form.get("personal_values") else []),
+                    json.dumps(request.form.get("attitudes", "").split(",") if request.form.get("attitudes") else []),
+                    request.form.get("lifestyle", ""),
+                    request.form.get("personality", ""),
+                    json.dumps(request.form.get("opinions", "").split(",") if request.form.get("opinions") else []),
+                    persona_id
+                )
+            )
+            
+            conn.commit()
+            conn.close()
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"Psychographic data updated for persona {persona_id}!")
+            return response
+    
+    except Exception as e:
+        logging.error(f"Error saving psychographic data: {e}")
+        # Use a response object to avoid session issues
+        response = redirect(url_for('index'))
+        response.set_cookie('flash_message', f"Error saving psychographic data: {str(e)}")
+        return response
+
+@app.route("/save_behavioral_data", methods=["POST"])
+def save_behavioral_data():
+    """Save behavioral data for a persona"""
+    try:
+        # Get form data
+        persona_id = request.form.get("persona_id")
+        
+        # If no persona_id is provided, create a new persona
+        if not persona_id:
+            # Create a new persona with a default name
+            persona_data = {
+                "name": "New Persona",
+                "demographic": {
+                    "geolocation": request.form.get("geolocation", ""),
+                    "language": request.form.get("language", "en-US"),
+                    "country": request.form.get("country", ""),
+                    "city": request.form.get("city", ""),
+                    "region": request.form.get("region", "")
+                },
+                "behavioral": {
+                    "browsing_habits": request.form.get("browsing_habits", "").split(",") if request.form.get("browsing_habits") else [],
+                    "purchase_history": request.form.get("purchase_history", "").split(",") if request.form.get("purchase_history") else [],
+                    "brand_interactions": request.form.get("brand_interactions", "").split(",") if request.form.get("brand_interactions") else [],
+                    "device_usage": json.loads(request.form.get("device_usage", "{}")) if request.form.get("device_usage") else {},
+                    "social_media_activity": json.loads(request.form.get("social_media_activity", "{}")) if request.form.get("social_media_activity") else {},
+                    "content_consumption": json.loads(request.form.get("content_consumption", "{}")) if request.form.get("content_consumption") else {}
+                }
+            }
+            
+            # Save to database
+            persona_id = database.save_persona(persona_data)
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"New persona created with behavioral data!")
+            return response
+        else:
+            # Get the existing persona
+            persona = database.get_persona(persona_id)
+            
+            # Update with behavioral data
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                """
+                UPDATE behavioral_data 
+                SET browsing_habits = ?, purchase_history = ?, brand_interactions = ?, 
+                    device_usage = ?, social_media_activity = ?, content_consumption = ?
+                WHERE persona_id = ?
+                """,
+                (
+                    json.dumps(request.form.get("browsing_habits", "").split(",") if request.form.get("browsing_habits") else []),
+                    json.dumps(request.form.get("purchase_history", "").split(",") if request.form.get("purchase_history") else []),
+                    json.dumps(request.form.get("brand_interactions", "").split(",") if request.form.get("brand_interactions") else []),
+                    request.form.get("device_usage", "{}"),
+                    request.form.get("social_media_activity", "{}"),
+                    request.form.get("content_consumption", "{}"),
+                    persona_id
+                )
+            )
+            
+            conn.commit()
+            conn.close()
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"Behavioral data updated for persona {persona_id}!")
+            return response
+    
+    except Exception as e:
+        logging.error(f"Error saving behavioral data: {e}")
+        # Use a response object to avoid session issues
+        response = redirect(url_for('index'))
+        response.set_cookie('flash_message', f"Error saving behavioral data: {str(e)}")
+        return response
+
+@app.route("/save_contextual_data", methods=["POST"])
+def save_contextual_data():
+    """Save contextual data for a persona"""
+    try:
+        # Get form data
+        persona_id = request.form.get("persona_id")
+        
+        # If no persona_id is provided, create a new persona
+        if not persona_id:
+            # Create a new persona with a default name
+            persona_data = {
+                "name": "New Persona",
+                "demographic": {
+                    "geolocation": request.form.get("geolocation", ""),
+                    "language": request.form.get("language", "en-US"),
+                    "country": request.form.get("country", ""),
+                    "city": request.form.get("city", ""),
+                    "region": request.form.get("region", "")
+                },
+                "contextual": {
+                    "time_of_day": request.form.get("time_of_day", ""),
+                    "day_of_week": request.form.get("day_of_week", ""),
+                    "season": request.form.get("season", ""),
+                    "weather": request.form.get("weather", ""),
+                    "device_type": request.form.get("device_type", ""),
+                    "browser_type": request.form.get("browser_type", ""),
+                    "screen_size": request.form.get("screen_size", ""),
+                    "connection_type": request.form.get("connection_type", "")
+                }
+            }
+            
+            # Save to database
+            persona_id = database.save_persona(persona_data)
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"New persona created with contextual data!")
+            return response
+        else:
+            # Get the existing persona
+            persona = database.get_persona(persona_id)
+            
+            # Update with contextual data
+            conn = database.get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                """
+                UPDATE contextual_data 
+                SET time_of_day = ?, day_of_week = ?, season = ?, weather = ?, 
+                    device_type = ?, browser_type = ?, screen_size = ?, connection_type = ?
+                WHERE persona_id = ?
+                """,
+                (
+                    request.form.get("time_of_day", ""),
+                    request.form.get("day_of_week", ""),
+                    request.form.get("season", ""),
+                    request.form.get("weather", ""),
+                    request.form.get("device_type", ""),
+                    request.form.get("browser_type", ""),
+                    request.form.get("screen_size", ""),
+                    request.form.get("connection_type", ""),
+                    persona_id
+                )
+            )
+            
+            conn.commit()
+            conn.close()
+            
+            # Use a response object to avoid session issues
+            response = redirect(url_for('index'))
+            response.set_cookie('flash_message', f"Contextual data updated for persona {persona_id}!")
+            return response
+    
+    except Exception as e:
+        logging.error(f"Error saving contextual data: {e}")
+        # Use a response object to avoid session issues
+        response = redirect(url_for('index'))
+        response.set_cookie('flash_message', f"Error saving contextual data: {str(e)}")
         return response
 
 @app.route("/personas", methods=["GET"])

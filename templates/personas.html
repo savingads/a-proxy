@@ -119,7 +119,9 @@
     <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">CurrentWeb</a>
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home') }}">
+            <i class="bi bi-house-door me-2"></i>A-Proxy
+        </a>
         <form action="{{ url_for('visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
             id="preview-form">
             <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>

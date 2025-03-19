@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, Response
+from flask import Flask, jsonify, render_template, request, redirect, url_for, Response, flash
 import subprocess
 import requests
 import logging
@@ -7,8 +7,15 @@ from services import start_vpn, start_vpn_service
 import multiprocessing
 from requests.exceptions import ConnectionError
 import time
+import database
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
+
+# Configure session to avoid the 'partitioned' keyword issue
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -209,6 +216,49 @@ def start_vpn_route():
     vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))
     vpn_proc.start()
     return redirect(url_for('index'))
+
+@app.route("/save-persona", methods=["POST"])
+def save_persona():
+    """Save persona data to the database"""
+    try:
+        # Get form data
+        name = request.form.get("persona_name", "Unnamed Persona")
+        
+        # Log form data for debugging
+        logging.debug(f"Form data: {dict(request.form)}")
+        
+        # Create persona data structure
+        persona_data = {
+            "name": name,
+            "demographic": {
+                "geolocation": request.form.get("geolocation", ""),
+                "language": request.form.get("language", "en-US"),
+                "country": request.form.get("country", ""),
+                "city": request.form.get("city", ""),
+                "region": request.form.get("region", "")
+            }
+        }
+        
+        # Save to database
+        persona_id = database.save_persona(persona_data)
+        
+        # Use a response object to avoid session issues
+        response = redirect(url_for('index'))
+        response.set_cookie('flash_message', f"Persona '{name}' saved successfully!")
+        return response
+    
+    except Exception as e:
+        logging.error(f"Error saving persona: {e}")
+        # Use a response object to avoid session issues
+        response = redirect(url_for('index'))
+        response.set_cookie('flash_message', f"Error saving persona: {str(e)}")
+        return response
+
+@app.route("/personas", methods=["GET"])
+def list_personas():
+    """List all saved personas"""
+    personas = database.get_all_personas()
+    return render_template("personas.html", personas=personas)
 
 if __name__ == "__main__":
     # Automatically start the VPN service without connecting to a region

@@ -155,8 +155,11 @@ def test_geolocation():
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation", None)
     
+    # Get the port from the request
+    port = request.host.split(':')[-1] if ':' in request.host else '5000'
+    
     # Build the command to open the geolocation test page with query parameters
-    test_url = f"http://localhost:5000/geolocation-test?language={language}"
+    test_url = f"http://localhost:{port}/geolocation-test?language={language}"
     if geolocation:
         test_url += f"&geolocation={geolocation}"
     
@@ -267,4 +270,9 @@ if __name__ == "__main__":
        # vpn_proc = multiprocessing.Process(target=vpn_process)
        # vpn_proc.start()
     
-    app.run(debug=True, use_reloader=True)
+    import argparse
+    parser = argparse.ArgumentParser(description='Run the Flask application')
+    parser.add_argument('--port', type=int, default=5001, help='Port to run the application on')
+    args = parser.parse_args()
+    
+    app.run(debug=True, use_reloader=True, port=args.port)

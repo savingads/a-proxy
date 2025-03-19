@@ -338,7 +338,7 @@
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" id="behavior-tab" data-bs-toggle="tab" href="#behavior" role="tab"
-                                aria-controls="behavior" aria-selected="false">Behavior</a>
+                                aria-controls="behavior" aria-selected="false">Behavioral</a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" id="contextual-tab" data-bs-toggle="tab" href="#contextual" role="tab"
@@ -442,7 +442,8 @@
                                                     value="en-US">
                                                 <input type="hidden" name="geolocation" id="test-geolocation-input"
                                                     value="">
-                                                <button type="submit" class="btn btn-primary">Test in Browser</button>
+                                                <button type="submit" class="btn btn-success">Apply Settings &
+                                                    Test</button>
                                             </form>
                                         </div>
 
@@ -714,30 +715,21 @@
                 });
             }
 
-            // Add a "Test Now" button that will update the form and submit it
-            var testNowButton = document.createElement('button');
-            testNowButton.type = 'button';
-            testNowButton.className = 'btn btn-success mt-3 ml-2';
-            testNowButton.textContent = 'Apply Settings & Test';
-            testNowButton.style.marginLeft = '10px';
-            testNowButton.addEventListener('click', function () {
-                // Get current values
-                var currentLanguage = document.getElementById('target-language').value;
-                var currentGeolocation = document.getElementById('target-region').value;
-
-                console.log("Applying and testing with language:", currentLanguage, "and geolocation:", currentGeolocation);
-
-                // Update the form fields
-                document.getElementById('test-language-input').value = currentLanguage;
-                document.getElementById('test-geolocation-input').value = currentGeolocation;
-
-                // Submit the form (this will trigger the server-side route that opens a new browser)
-                document.getElementById('test-browser-form').submit();
-            });
-
-            // Add the button next to the Test in Browser button
+            // Update form fields before submitting
             var testBrowserForm = document.getElementById('test-browser-form');
-            testBrowserForm.querySelector('button').insertAdjacentElement('afterend', testNowButton);
+            if (testBrowserForm) {
+                testBrowserForm.addEventListener('submit', function (event) {
+                    // Get current values
+                    var currentLanguage = document.getElementById('target-language').value;
+                    var currentGeolocation = document.getElementById('target-region').value;
+
+                    console.log("Applying and testing with language:", currentLanguage, "and geolocation:", currentGeolocation);
+
+                    // Update the form fields
+                    document.getElementById('test-language-input').value = currentLanguage;
+                    document.getElementById('test-geolocation-input').value = currentGeolocation;
+                });
+            }
 
             // Initialize test browser form with current values
             // Set initial language value

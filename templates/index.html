@@ -226,7 +226,8 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('list_personas') }}">
                                         <i class="bi bi-people"></i>
                                         Personas
                                     </a>
@@ -324,6 +325,7 @@
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h3>Persona</h3>
+                    <div id="flash-message-container"></div>
                     <div class="container border p-3 mb-3">
                         <div class="row">
                             <div class="col">
@@ -333,8 +335,27 @@
                                 <strong>Language:</strong> {{ language }}
                             </div>
                         </div>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <form action="{{ url_for('save_persona') }}" method="post" id="save-persona-form">
+                                    <input type="hidden" name="geolocation" id="save-geolocation"
+                                        value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+                                    <input type="hidden" name="language" id="save-language" value="{{ language }}">
+                                    <input type="hidden" name="country" id="save-country"
+                                        value="{% if vpn_running %}{{ ip_info.country }}{% endif %}">
+                                    <input type="hidden" name="city" id="save-city"
+                                        value="{% if vpn_running %}{{ ip_info.city }}{% endif %}">
+                                    <input type="hidden" name="region" id="save-region"
+                                        value="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="persona_name"
+                                            placeholder="Persona Name" required>
+                                        <button type="submit" class="btn btn-success">Save Persona</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
 
                 <div class="tab-content">
@@ -542,6 +563,12 @@
                     if (geolocationInput) {
                         geolocationInput.value = targetRegion;
                     }
+
+                    // Update the save persona form geolocation field
+                    var saveGeolocationInput = document.getElementById('save-geolocation');
+                    if (saveGeolocationInput) {
+                        saveGeolocationInput.value = targetRegion;
+                    }
                 });
             }
 
@@ -553,6 +580,12 @@
                         if (data.vpn_running && data.ip_info) {
                             document.getElementById('vpn-spinner').style.display = 'none';
                             document.getElementById('geolocation').textContent = data.ip_info.loc || 'Unavailable';
+
+                            // Update save persona form fields
+                            document.getElementById('save-geolocation').value = data.ip_info.loc || '';
+                            document.getElementById('save-country').value = data.ip_info.country || '';
+                            document.getElementById('save-city').value = data.ip_info.city || '';
+                            document.getElementById('save-region').value = data.ip_info.region || '';
                         }
                         if (pollAttempts < 5) {
                             pollAttempts++;
@@ -639,6 +672,12 @@
                                     if (languageInput) {
                                         languageInput.value = selectedLanguage;
                                     }
+
+                                    // Update the save persona form language field
+                                    var saveLanguageInput = document.getElementById('save-language');
+                                    if (saveLanguageInput) {
+                                        saveLanguageInput.value = selectedLanguage;
+                                    }
                                 }
                             })
                             .catch(error => console.error("Error fetching geolocation:", error));
@@ -667,6 +706,12 @@
                     var languageInput = document.querySelector('form input[name="language"]');
                     if (languageInput) {
                         languageInput.value = selectedLanguage;
+                    }
+
+                    // Update the save persona form language field
+                    var saveLanguageInput = document.getElementById('save-language');
+                    if (saveLanguageInput) {
+                        saveLanguageInput.value = selectedLanguage;
                     }
 
                     // Update the test browser form language input
@@ -766,9 +811,27 @@
             } else {
                 document.getElementById('browser-geolocation').textContent = 'Not supported';
             }
+
+            // Handle flash messages from cookies
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const flashMessage = getCookie('flash_message');
+            if (flashMessage) {
+                const flashContainer = document.getElementById('flash-message-container');
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = decodeURIComponent(flashMessage) +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                flashContainer.appendChild(alertDiv);
+
+                // Clear the cookie
+                document.cookie = 'flash_message=; Max-Age=0; path=/;';
+            }
         });
     </script>
     <i class="bi bi-moon-stars-fill my-1" style="font-size: 16px;"></i>
-</body>
-
-</html>

@@ -101,6 +101,16 @@ def vpn_status():
     })
 
 @app.route("/")
+@app.route("/home")
+def home():
+    vpn_running = is_vpn_running()
+    ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+    country = ip_info.get("country", "")
+    language = REGION_LANGUAGE_MAP.get(country, "en-US") if vpn_running else "en-US"
+    return render_template("home.html", vpn_running=vpn_running, ip_info=ip_info, language=language)
+
+@app.route("/dashboard")
+@app.route("/index")
 def index():
     vpn_running = is_vpn_running()
     ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
@@ -490,6 +500,25 @@ def save_contextual_data():
         # Use a response object to avoid session issues
         response = redirect(url_for('index'))
         response.set_cookie('flash_message', f"Error saving contextual data: {str(e)}")
+        return response
+
+@app.route("/delete-persona/<int:persona_id>", methods=["POST"])
+def delete_persona(persona_id):
+    """Delete a persona from the database"""
+    try:
+        # Delete the persona
+        database.delete_persona(persona_id)
+        
+        # Use a response object to avoid session issues
+        response = redirect(url_for('list_personas'))
+        response.set_cookie('flash_message', f"Persona {persona_id} deleted successfully!")
+        return response
+    
+    except Exception as e:
+        logging.error(f"Error deleting persona: {e}")
+        # Use a response object to avoid session issues
+        response = redirect(url_for('list_personas'))
+        response.set_cookie('flash_message', f"Error deleting persona: {str(e)}")
         return response
 
 @app.route("/personas", methods=["GET"])

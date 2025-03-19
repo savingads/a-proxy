@@ -238,6 +238,22 @@ def get_all_personas():
     
     return personas
 
+def delete_persona(persona_id):
+    """Delete a persona and all its associated data from the database"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Delete the persona (CASCADE will handle related records)
+        cursor.execute("DELETE FROM personas WHERE id = ?", (persona_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+
 def get_persona(persona_id):
     """Retrieve a specific persona with all its data"""
     conn = get_db_connection()

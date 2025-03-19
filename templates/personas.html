@@ -185,7 +185,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
                                         <i class="bi bi-globe"></i>
-                                        Browse Web
+                                        Browse As
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -278,7 +278,8 @@
                                 <td>{{ persona.city }}</td>
                                 <td>{{ persona.created_at }}</td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="#persona-{{ persona.id }}" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal">View</a>
                                     <a href="#" class="btn btn-sm btn-outline-secondary">Use</a>
                                 </td>
                             </tr>
@@ -295,6 +296,234 @@
             </main>
         </div>
     </div>
+
+    <!-- Modal for each persona -->
+    {% if personas %}
+    {% for persona in personas %}
+    <div class="modal fade" id="persona-{{ persona.id }}" tabindex="-1"
+        aria-labelledby="personaModalLabel-{{ persona.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="personaModalLabel-{{ persona.id }}">{{ persona.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="personaTab-{{ persona.id }}" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="demographic-tab-{{ persona.id }}" data-bs-toggle="tab"
+                                data-bs-target="#demographic-{{ persona.id }}" type="button" role="tab"
+                                aria-controls="demographic-{{ persona.id }}" aria-selected="true">Demographic</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="psychographic-tab-{{ persona.id }}" data-bs-toggle="tab"
+                                data-bs-target="#psychographic-{{ persona.id }}" type="button" role="tab"
+                                aria-controls="psychographic-{{ persona.id }}"
+                                aria-selected="false">Psychographic</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="behavioral-tab-{{ persona.id }}" data-bs-toggle="tab"
+                                data-bs-target="#behavioral-{{ persona.id }}" type="button" role="tab"
+                                aria-controls="behavioral-{{ persona.id }}" aria-selected="false">Behavioral</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="contextual-tab-{{ persona.id }}" data-bs-toggle="tab"
+                                data-bs-target="#contextual-{{ persona.id }}" type="button" role="tab"
+                                aria-controls="contextual-{{ persona.id }}" aria-selected="false">Contextual</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-3" id="personaTabContent-{{ persona.id }}">
+                        <!-- Demographic Tab -->
+                        <div class="tab-pane fade show active" id="demographic-{{ persona.id }}" role="tabpanel"
+                            aria-labelledby="demographic-tab-{{ persona.id }}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-group">
+                                        <li class="list-group-item"><strong>Name:</strong> {{ persona.name }}</li>
+                                        <li class="list-group-item"><strong>Geolocation:</strong> {{ persona.geolocation
+                                            }}</li>
+                                        <li class="list-group-item"><strong>Language:</strong> {{ persona.language }}
+                                        </li>
+                                        <li class="list-group-item"><strong>Country:</strong> {{ persona.country }}</li>
+                                        <li class="list-group-item"><strong>City:</strong> {{ persona.city }}</li>
+                                        <li class="list-group-item"><strong>Region:</strong> {{ persona.region }}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="persona-map-{{ persona.id }}" style="width: 100%; height: 250px;"></div>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            // Initialize map when modal is shown
+                                            document.querySelector('[data-bs-target="#persona-{{ persona.id }}"]').addEventListener('click', function () {
+                                                setTimeout(function () {
+                                                    if (!window['map{{ persona.id }}']) {
+                                                        try {
+                                                            const coords = "{{ persona.geolocation }}".split(',');
+                                                            if (coords.length === 2) {
+                                                                const lat = parseFloat(coords[0]);
+                                                                const lng = parseFloat(coords[1]);
+                                                                window['map{{ persona.id }}'] = L.map('persona-map-{{ persona.id }}').setView([lat, lng], 10);
+                                                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                                                }).addTo(window['map{{ persona.id }}']);
+                                                                L.marker([lat, lng]).addTo(window['map{{ persona.id }}'])
+                                                                    .bindPopup('<b>{{ persona.name }}</b><br>{{ persona.city }}, {{ persona.country }}')
+                                                                    .openPopup();
+                                                            }
+                                                        } catch (e) {
+                                                            console.error('Error initializing map:', e);
+                                                        }
+                                                    }
+                                                }, 500); // Small delay to ensure modal is fully shown
+                                            });
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Psychographic Tab -->
+                        <div class="tab-pane fade" id="psychographic-{{ persona.id }}" role="tabpanel"
+                            aria-labelledby="psychographic-tab-{{ persona.id }}">
+                            {% if persona.psychographic %}
+                            <ul class="list-group">
+                                {% if persona.psychographic.interests %}
+                                <li class="list-group-item"><strong>Interests:</strong> {{
+                                    persona.psychographic.interests|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.psychographic.personal_values %}
+                                <li class="list-group-item"><strong>Personal Values:</strong> {{
+                                    persona.psychographic.personal_values|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.psychographic.attitudes %}
+                                <li class="list-group-item"><strong>Attitudes:</strong> {{
+                                    persona.psychographic.attitudes|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.psychographic.lifestyle %}
+                                <li class="list-group-item"><strong>Lifestyle:</strong> {{
+                                    persona.psychographic.lifestyle }}</li>
+                                {% endif %}
+                                {% if persona.psychographic.personality %}
+                                <li class="list-group-item"><strong>Personality:</strong> {{
+                                    persona.psychographic.personality }}</li>
+                                {% endif %}
+                                {% if persona.psychographic.opinions %}
+                                <li class="list-group-item"><strong>Opinions:</strong> {{
+                                    persona.psychographic.opinions|join(', ') }}</li>
+                                {% endif %}
+                            </ul>
+                            {% else %}
+                            <p class="text-muted">No psychographic data available for this persona.</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Behavioral Tab -->
+                        <div class="tab-pane fade" id="behavioral-{{ persona.id }}" role="tabpanel"
+                            aria-labelledby="behavioral-tab-{{ persona.id }}">
+                            {% if persona.behavioral %}
+                            <ul class="list-group">
+                                {% if persona.behavioral.browsing_habits %}
+                                <li class="list-group-item"><strong>Browsing Habits:</strong> {{
+                                    persona.behavioral.browsing_habits|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.behavioral.purchase_history %}
+                                <li class="list-group-item"><strong>Purchase History:</strong> {{
+                                    persona.behavioral.purchase_history|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.behavioral.brand_interactions %}
+                                <li class="list-group-item"><strong>Brand Interactions:</strong> {{
+                                    persona.behavioral.brand_interactions|join(', ') }}</li>
+                                {% endif %}
+                                {% if persona.behavioral.device_usage %}
+                                <li class="list-group-item">
+                                    <strong>Device Usage:</strong>
+                                    <ul>
+                                        {% for device, usage in persona.behavioral.device_usage.items() %}
+                                        <li>{{ device }}: {{ usage }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                                {% if persona.behavioral.social_media_activity %}
+                                <li class="list-group-item">
+                                    <strong>Social Media Activity:</strong>
+                                    <ul>
+                                        {% for platform, frequency in persona.behavioral.social_media_activity.items()
+                                        %}
+                                        <li>{{ platform }}: {{ frequency }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                                {% if persona.behavioral.content_consumption %}
+                                <li class="list-group-item">
+                                    <strong>Content Consumption:</strong>
+                                    <ul>
+                                        {% for content, amount in persona.behavioral.content_consumption.items() %}
+                                        <li>{{ content }}: {{ amount }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                            </ul>
+                            {% else %}
+                            <p class="text-muted">No behavioral data available for this persona.</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contextual Tab -->
+                        <div class="tab-pane fade" id="contextual-{{ persona.id }}" role="tabpanel"
+                            aria-labelledby="contextual-tab-{{ persona.id }}">
+                            {% if persona.contextual %}
+                            <ul class="list-group">
+                                {% if persona.contextual.time_of_day %}
+                                <li class="list-group-item"><strong>Time of Day:</strong> {{
+                                    persona.contextual.time_of_day }}</li>
+                                {% endif %}
+                                {% if persona.contextual.day_of_week %}
+                                <li class="list-group-item"><strong>Day of Week:</strong> {{
+                                    persona.contextual.day_of_week }}</li>
+                                {% endif %}
+                                {% if persona.contextual.season %}
+                                <li class="list-group-item"><strong>Season:</strong> {{ persona.contextual.season }}
+                                </li>
+                                {% endif %}
+                                {% if persona.contextual.weather %}
+                                <li class="list-group-item"><strong>Weather:</strong> {{ persona.contextual.weather }}
+                                </li>
+                                {% endif %}
+                                {% if persona.contextual.device_type %}
+                                <li class="list-group-item"><strong>Device Type:</strong> {{
+                                    persona.contextual.device_type }}</li>
+                                {% endif %}
+                                {% if persona.contextual.browser_type %}
+                                <li class="list-group-item"><strong>Browser Type:</strong> {{
+                                    persona.contextual.browser_type }}</li>
+                                {% endif %}
+                                {% if persona.contextual.screen_size %}
+                                <li class="list-group-item"><strong>Screen Size:</strong> {{
+                                    persona.contextual.screen_size }}</li>
+                                {% endif %}
+                                {% if persona.contextual.connection_type %}
+                                <li class="list-group-item"><strong>Connection Type:</strong> {{
+                                    persona.contextual.connection_type }}</li>
+                                {% endif %}
+                            </ul>
+                            {% else %}
+                            <p class="text-muted">No contextual data available for this persona.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="#" class="btn btn-primary">Use This Persona</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

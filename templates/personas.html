@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en" data-bs-theme="dark">
 
 <head>
-    <script src="{{ url_for('static', filename='js/color-modes.js') }}"></script>
+    <!-- Dark theme is set as default -->
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -116,39 +116,7 @@
 </head>
 
 <body>
-    <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
-        <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button"
-            aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
-            <i class="bi bi-circle-half my-1 theme-icon-active" style="font-size: 1em;"></i>
-            <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
-            <li>
-                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"
-                    aria-pressed="false">
-                    <i class="bi bi-sun-fill me-2 opacity-50" style="font-size: 1em;"></i>
-                    Light
-                    <i class="bi bi-check2 ms-auto d-none" style="font-size: 1em;"></i>
-                </button>
-            </li>
-            <li>
-                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
-                    aria-pressed="false">
-                    <i class="bi bi-moon-stars-fill me-2 opacity-50" style="font-size: 1em;"></i>
-                    Dark
-                    <i class="bi bi-check2 ms-auto d-none" style="font-size: 1em;"></i>
-                </button>
-            </li>
-            <li>
-                <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"
-                    aria-pressed="true">
-                    <i class="bi bi-circle-half me-2 opacity-50" style="font-size: 1em;"></i>
-                    Auto
-                    <i class="bi bi-check2 ms-auto d-none" style="font-size: 1em;"></i>
-                </button>
-            </li>
-        </ul>
-    </div>
+    <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">CurrentWeb</a>

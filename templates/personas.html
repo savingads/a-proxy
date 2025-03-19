@@ -163,8 +163,14 @@
                         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home') }}">
                                         <i class="bi bi-house-fill"></i>
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                                        <i class="bi bi-speedometer2"></i>
                                         Dashboard
                                     </a>
                                 </li>
@@ -281,6 +287,11 @@
                                     <a href="#persona-{{ persona.id }}" class="btn btn-sm btn-outline-primary"
                                         data-bs-toggle="modal">View</a>
                                     <a href="#" class="btn btn-sm btn-outline-secondary">Use</a>
+                                    <form action="{{ url_for('delete_persona', persona_id=persona.id) }}" method="post"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this persona?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}

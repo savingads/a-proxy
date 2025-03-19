@@ -188,7 +188,7 @@
                             <ul class="nav flex-column">
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
-                                        href="#">
+                                        href="{{ url_for('index') }}">
                                         <i class="bi bi-house-fill"></i>
                                         Dashboard
                                     </a>
@@ -200,13 +200,32 @@
                                         Personas
                                     </a>
                                 </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Web Browsing</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-file-earmark"></i>
-                                        Target Websites
+                                        <i class="bi bi-globe"></i>
+                                        Browse As
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-archive"></i>
+                                        Archived Pages
+                                    </a>
+                                </li>
+                            </ul>
 
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Analysis</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
                                         <i class="bi bi-graph-up"></i>
@@ -217,40 +236,6 @@
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
                                         <i class="bi bi-puzzle"></i>
                                         Integrations
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Saved Archives</span>
-                                <a class="link-secondary" href="#" aria-label="Add a new report">
-                                    <i class="bi bi-plus-circle"></i>
-                                </a>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        By Date
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        By Website
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        By Region
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        By Persona
                                     </a>
                                 </li>
                             </ul>
@@ -469,13 +454,196 @@
                         </div>
                         <div class="tab-pane fade" id="psychographic" role="tabpanel"
                             aria-labelledby="psychographic-tab">
-                            <!-- Psychographic content goes here -->
+                            <div class="container mt-4">
+                                <h4>Psychographic Data</h4>
+                                <form action="{{ url_for('save_psychographic_data') }}" method="post"
+                                    id="psychographic-form">
+                                    <input type="hidden" name="persona_id" id="psychographic-persona-id" value="">
+
+                                    <div class="mb-3">
+                                        <label for="interests" class="form-label">Interests (comma separated)</label>
+                                        <input type="text" class="form-control" id="interests" name="interests"
+                                            placeholder="technology, travel, cooking">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="personal_values" class="form-label">Personal Values (comma
+                                            separated)</label>
+                                        <input type="text" class="form-control" id="personal_values"
+                                            name="personal_values" placeholder="family, honesty, freedom">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="attitudes" class="form-label">Attitudes (comma separated)</label>
+                                        <input type="text" class="form-control" id="attitudes" name="attitudes"
+                                            placeholder="optimistic, skeptical, open-minded">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="lifestyle" class="form-label">Lifestyle</label>
+                                        <input type="text" class="form-control" id="lifestyle" name="lifestyle"
+                                            placeholder="urban professional, outdoor enthusiast">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="personality" class="form-label">Personality</label>
+                                        <input type="text" class="form-control" id="personality" name="personality"
+                                            placeholder="introverted, analytical, creative">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="opinions" class="form-label">Opinions (comma separated)</label>
+                                        <input type="text" class="form-control" id="opinions" name="opinions"
+                                            placeholder="privacy-focused, environmentally conscious">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Save Psychographic Data</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="behavior" role="tabpanel" aria-labelledby="behavior-tab">
-                            <!-- Behavior content goes here -->
+                            <div class="container mt-4">
+                                <h4>Behavioral Data</h4>
+                                <form action="{{ url_for('save_behavioral_data') }}" method="post" id="behavioral-form">
+                                    <input type="hidden" name="persona_id" id="behavioral-persona-id" value="">
+
+                                    <div class="mb-3">
+                                        <label for="browsing_habits" class="form-label">Browsing Habits (comma
+                                            separated)</label>
+                                        <input type="text" class="form-control" id="browsing_habits"
+                                            name="browsing_habits" placeholder="social media, news sites, shopping">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="purchase_history" class="form-label">Purchase History (comma
+                                            separated)</label>
+                                        <input type="text" class="form-control" id="purchase_history"
+                                            name="purchase_history" placeholder="electronics, books, clothing">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="brand_interactions" class="form-label">Brand Interactions (comma
+                                            separated)</label>
+                                        <input type="text" class="form-control" id="brand_interactions"
+                                            name="brand_interactions" placeholder="Apple, Nike, Amazon">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="device_usage" class="form-label">Device Usage (JSON format)</label>
+                                        <textarea class="form-control" id="device_usage" name="device_usage" rows="3"
+                                            placeholder='{"mobile": "4 hours", "desktop": "6 hours", "tablet": "1 hour"}'></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="social_media_activity" class="form-label">Social Media Activity
+                                            (JSON format)</label>
+                                        <textarea class="form-control" id="social_media_activity"
+                                            name="social_media_activity" rows="3"
+                                            placeholder='{"facebook": "daily", "twitter": "weekly", "instagram": "hourly"}'></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="content_consumption" class="form-label">Content Consumption (JSON
+                                            format)</label>
+                                        <textarea class="form-control" id="content_consumption"
+                                            name="content_consumption" rows="3"
+                                            placeholder='{"videos": "2 hours/day", "articles": "5/day", "podcasts": "3/week"}'></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="contextual" role="tabpanel" aria-labelledby="contextual-tab">
-                            <!-- Contextual content goes here -->
+                            <div class="container mt-4">
+                                <h4>Contextual Data</h4>
+                                <form action="{{ url_for('save_contextual_data') }}" method="post" id="contextual-form">
+                                    <input type="hidden" name="persona_id" id="contextual-persona-id" value="">
+
+                                    <div class="mb-3">
+                                        <label for="time_of_day" class="form-label">Time of Day</label>
+                                        <select class="form-control" id="time_of_day" name="time_of_day">
+                                            <option value="">Select time of day</option>
+                                            <option value="morning">Morning</option>
+                                            <option value="afternoon">Afternoon</option>
+                                            <option value="evening">Evening</option>
+                                            <option value="night">Night</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="day_of_week" class="form-label">Day of Week</label>
+                                        <select class="form-control" id="day_of_week" name="day_of_week">
+                                            <option value="">Select day of week</option>
+                                            <option value="monday">Monday</option>
+                                            <option value="tuesday">Tuesday</option>
+                                            <option value="wednesday">Wednesday</option>
+                                            <option value="thursday">Thursday</option>
+                                            <option value="friday">Friday</option>
+                                            <option value="saturday">Saturday</option>
+                                            <option value="sunday">Sunday</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="season" class="form-label">Season</label>
+                                        <select class="form-control" id="season" name="season">
+                                            <option value="">Select season</option>
+                                            <option value="spring">Spring</option>
+                                            <option value="summer">Summer</option>
+                                            <option value="fall">Fall</option>
+                                            <option value="winter">Winter</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="weather" class="form-label">Weather</label>
+                                        <input type="text" class="form-control" id="weather" name="weather"
+                                            placeholder="sunny, rainy, snowy">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="device_type" class="form-label">Device Type</label>
+                                        <select class="form-control" id="device_type" name="device_type">
+                                            <option value="">Select device type</option>
+                                            <option value="desktop">Desktop</option>
+                                            <option value="laptop">Laptop</option>
+                                            <option value="tablet">Tablet</option>
+                                            <option value="mobile">Mobile</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="browser_type" class="form-label">Browser Type</label>
+                                        <select class="form-control" id="browser_type" name="browser_type">
+                                            <option value="">Select browser type</option>
+                                            <option value="chrome">Chrome</option>
+                                            <option value="firefox">Firefox</option>
+                                            <option value="safari">Safari</option>
+                                            <option value="edge">Edge</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="screen_size" class="form-label">Screen Size</label>
+                                        <input type="text" class="form-control" id="screen_size" name="screen_size"
+                                            placeholder="1920x1080, 375x812">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="connection_type" class="form-label">Connection Type</label>
+                                        <select class="form-control" id="connection_type" name="connection_type">
+                                            <option value="">Select connection type</option>
+                                            <option value="wifi">WiFi</option>
+                                            <option value="ethernet">Ethernet</option>
+                                            <option value="4g">4G</option>
+                                            <option value="5g">5G</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Save Contextual Data</button>
+                                </form>
+                            </div>
                         </div>
                         <!-- Add a chart container with the correct ID -->
                         <div class="tab-pane fade" id="chart-container" role="tabpanel" aria-labelledby="chart-tab">
@@ -791,6 +959,87 @@
 
                 // Clear the cookie
                 document.cookie = 'flash_message=; Max-Age=0; path=/;';
+            }
+
+            // Add event listeners for tab changes to update form fields with current geolocation and language
+            document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function (tabLink) {
+                tabLink.addEventListener('shown.bs.tab', function (event) {
+                    const targetTab = event.target.getAttribute('aria-controls');
+                    const currentGeolocation = document.getElementById('geolocation').textContent;
+                    const currentLanguage = document.querySelector('.container.border .row .col:nth-child(2)').textContent.replace('Language:', '').trim();
+                    const currentCountry = "{% if vpn_running %}{{ ip_info.country }}{% endif %}";
+                    const currentCity = "{% if vpn_running %}{{ ip_info.city }}{% endif %}";
+                    const currentRegion = "{% if vpn_running %}{{ ip_info.region }}{% endif %}";
+
+                    // Add hidden fields to the forms for demographic data
+                    if (targetTab === 'psychographic') {
+                        // Add hidden fields to psychographic form
+                        const form = document.getElementById('psychographic-form');
+                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
+                    } else if (targetTab === 'behavior') {
+                        // Add hidden fields to behavioral form
+                        const form = document.getElementById('behavioral-form');
+                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
+                    } else if (targetTab === 'contextual') {
+                        // Add hidden fields to contextual form
+                        const form = document.getElementById('contextual-form');
+                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
+                    }
+                });
+            });
+
+            // Function to add hidden fields to a form
+            function addHiddenFields(form, geolocation, language, country, city, region) {
+                // Check if fields already exist
+                if (!form.querySelector('input[name="geolocation"]')) {
+                    const geoField = document.createElement('input');
+                    geoField.type = 'hidden';
+                    geoField.name = 'geolocation';
+                    geoField.value = geolocation;
+                    form.appendChild(geoField);
+                } else {
+                    form.querySelector('input[name="geolocation"]').value = geolocation;
+                }
+
+                if (!form.querySelector('input[name="language"]')) {
+                    const langField = document.createElement('input');
+                    langField.type = 'hidden';
+                    langField.name = 'language';
+                    langField.value = language;
+                    form.appendChild(langField);
+                } else {
+                    form.querySelector('input[name="language"]').value = language;
+                }
+
+                if (!form.querySelector('input[name="country"]')) {
+                    const countryField = document.createElement('input');
+                    countryField.type = 'hidden';
+                    countryField.name = 'country';
+                    countryField.value = country;
+                    form.appendChild(countryField);
+                } else {
+                    form.querySelector('input[name="country"]').value = country;
+                }
+
+                if (!form.querySelector('input[name="city"]')) {
+                    const cityField = document.createElement('input');
+                    cityField.type = 'hidden';
+                    cityField.name = 'city';
+                    cityField.value = city;
+                    form.appendChild(cityField);
+                } else {
+                    form.querySelector('input[name="city"]').value = city;
+                }
+
+                if (!form.querySelector('input[name="region"]')) {
+                    const regionField = document.createElement('input');
+                    regionField.type = 'hidden';
+                    regionField.name = 'region';
+                    regionField.value = region;
+                    form.appendChild(regionField);
+                } else {
+                    form.querySelector('input[name="region"]').value = region;
+                }
             }
         });
     </script>

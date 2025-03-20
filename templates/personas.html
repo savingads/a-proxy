@@ -266,7 +266,8 @@
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
-                                <th>Geolocation</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
                                 <th>Language</th>
                                 <th>Country</th>
                                 <th>City</th>
@@ -280,7 +281,8 @@
                             <tr>
                                 <td>{{ persona.id }}</td>
                                 <td>{{ persona.name }}</td>
-                                <td>{{ persona.geolocation }}</td>
+                                <td>{{ persona.latitude }}</td>
+                                <td>{{ persona.longitude }}</td>
                                 <td>{{ persona.language }}</td>
                                 <td>{{ persona.country }}</td>
                                 <td>{{ persona.city }}</td>
@@ -299,7 +301,7 @@
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="8" class="text-center">No personas saved yet. <a
+                                <td colspan="9" class="text-center">No personas saved yet. <a
                                         href="{{ url_for('index') }}">Create one now</a>.</td>
                             </tr>
                             {% endif %}
@@ -353,8 +355,8 @@
                                 <div class="col-md-6">
                                     <ul class="list-group">
                                         <li class="list-group-item"><strong>Name:</strong> {{ persona.name }}</li>
-                                        <li class="list-group-item"><strong>Geolocation:</strong> {{ persona.geolocation
-                                            }}</li>
+                                        <li class="list-group-item"><strong>Latitude:</strong> {{ persona.latitude }}</li>
+                                        <li class="list-group-item"><strong>Longitude:</strong> {{ persona.longitude }}</li>
                                         <li class="list-group-item"><strong>Language:</strong> {{ persona.language }}
                                         </li>
                                         <li class="list-group-item"><strong>Country:</strong> {{ persona.country }}</li>
@@ -371,18 +373,15 @@
                                                 setTimeout(function () {
                                                     if (!window['map{{ persona.id }}']) {
                                                         try {
-                                                            const coords = "{{ persona.geolocation }}".split(',');
-                                                            if (coords.length === 2) {
-                                                                const lat = parseFloat(coords[0]);
-                                                                const lng = parseFloat(coords[1]);
-                                                                window['map{{ persona.id }}'] = L.map('persona-map-{{ persona.id }}').setView([lat, lng], 10);
-                                                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                                                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                                }).addTo(window['map{{ persona.id }}']);
-                                                                L.marker([lat, lng]).addTo(window['map{{ persona.id }}'])
-                                                                    .bindPopup('<b>{{ persona.name }}</b><br>{{ persona.city }}, {{ persona.country }}')
-                                                                    .openPopup();
-                                                            }
+                                                            const lat = parseFloat("{{ persona.latitude }}");
+                                                            const lng = parseFloat("{{ persona.longitude }}");
+                                                            window['map{{ persona.id }}'] = L.map('persona-map-{{ persona.id }}').setView([lat, lng], 10);
+                                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                                            }).addTo(window['map{{ persona.id }}']);
+                                                            L.marker([lat, lng]).addTo(window['map{{ persona.id }}'])
+                                                                .bindPopup('<b>{{ persona.name }}</b><br>{{ persona.city }}, {{ persona.country }}')
+                                                                .openPopup();
                                                         } catch (e) {
                                                             console.error('Error initializing map:', e);
                                                         }

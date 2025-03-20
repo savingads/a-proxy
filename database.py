@@ -29,12 +29,13 @@ def init_db():
     )
     ''')
     
-    # Create demographic data table
+    # Update demographic_data table to include latitude and longitude
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS demographic_data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         persona_id INTEGER NOT NULL,
-        geolocation TEXT,
+        latitude REAL,
+        longitude REAL,
         language TEXT,
         country TEXT,
         city TEXT,
@@ -131,12 +132,13 @@ def save_persona(persona_data):
         cursor.execute(
             """
             INSERT INTO demographic_data 
-            (persona_id, geolocation, language, country, city, region, age, gender, education, income, occupation)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (persona_id, latitude, longitude, language, country, city, region, age, gender, education, income, occupation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 persona_id,
-                demographic.get('geolocation'),
+                demographic.get('latitude'),
+                demographic.get('longitude'),
                 demographic.get('language'),
                 demographic.get('country'),
                 demographic.get('city'),
@@ -227,7 +229,7 @@ def get_all_personas():
     
     cursor.execute("""
     SELECT p.id, p.name, p.created_at, p.updated_at,
-           d.geolocation, d.language, d.country, d.city, d.region
+           d.latitude, d.longitude, d.language, d.country, d.city, d.region
     FROM personas p
     LEFT JOIN demographic_data d ON p.id = d.persona_id
     ORDER BY p.updated_at DESC

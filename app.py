@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, Response, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, Response, flash, session
+from forms import PersonaForm
 import subprocess
 import requests
 import logging
@@ -91,6 +92,63 @@ def wait_for_vpn_and_get_ip_info():
         time.sleep(wait_time)
     return {"error": "Failed to get IP info after retries"}
 
+class FormObject:
+    """A simple object to populate form fields from dictionary data."""
+    def __init__(self, data=None):
+        if data:
+            for key, value in data.items():
+                setattr(self, key, value)
+
+def prepare_form_object(persona):
+    """Create a form object from persona data for use with WTForms' obj parameter."""
+    form_obj = FormObject()
+    
+    # Set basic fields
+    form_obj.persona_id = persona.get('id', '')
+    form_obj.persona_name = persona.get('name', '')
+    
+    # Set demographic data
+    demographic = persona.get('demographic', {})
+    form_obj.geolocation = demographic.get('geolocation', '')
+    form_obj.language = demographic.get('language', 'en-US')
+    form_obj.country = demographic.get('country', '')
+    form_obj.city = demographic.get('city', '')
+    form_obj.region = demographic.get('region', '')
+    
+    # Set psychographic data
+    if 'psychographic' in persona:
+        psycho = persona['psychographic']
+        form_obj.interests = ', '.join(psycho.get('interests', []))
+        form_obj.personal_values = ', '.join(psycho.get('personal_values', []))
+        form_obj.attitudes = ', '.join(psycho.get('attitudes', []))
+        form_obj.lifestyle = psycho.get('lifestyle', '')
+        form_obj.personality = psycho.get('personality', '')
+        form_obj.opinions = ', '.join(psycho.get('opinions', []))
+    
+    # Set behavioral data
+    if 'behavioral' in persona:
+        behav = persona['behavioral']
+        form_obj.browsing_habits = ', '.join(behav.get('browsing_habits', []))
+        form_obj.purchase_history = ', '.join(behav.get('purchase_history', []))
+        form_obj.brand_interactions = ', '.join(behav.get('brand_interactions', []))
+        form_obj.device_usage = json.dumps(behav.get('device_usage', {}), indent=2)
+        form_obj.social_media_activity = json.dumps(behav.get('social_media_activity', {}), indent=2)
+        form_obj.content_consumption = json.dumps(behav.get('content_consumption', {}), indent=2)
+    
+    # Set contextual data
+    if 'contextual' in persona:
+        context = persona['contextual']
+        form_obj.time_of_day = context.get('time_of_day', '')
+        form_obj.day_of_week = context.get('day_of_week', '')
+        form_obj.season = context.get('season', '')
+        form_obj.weather = context.get('weather', '')
+        form_obj.device_type = context.get('device_type', '')
+        form_obj.browser_type = context.get('browser_type', '')
+        form_obj.screen_size = context.get('screen_size', '')
+        form_obj.connection_type = context.get('connection_type', '')
+    
+    return form_obj
+
 @app.route("/vpn-status")
 def vpn_status():
     vpn_running = is_vpn_running()
@@ -112,11 +170,73 @@ def home():
 @app.route("/dashboard")
 @app.route("/index")
 def index():
+    # Get persona_id from URL parameter (if provided by use_persona route)
+    persona_id = request.args.get('persona_id')
+    form = None
+    
+    if persona_id:
+        try:
+            # Get persona data from database
+            persona = database.get_persona(persona_id)
+            
+            # Create a form object to populate form fields
+            form_obj = prepare_form_object(persona)
+            
+            # Create form with obj parameter to populate fields
+            form = PersonaForm(obj=form_obj)
+            
+            # Prepare page data
+            vpn_running = is_vpn_running()
+            ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+            
+            # Use language and geolocation from persona if available
+            language = form_obj.language
+            geolocation = form_obj.geolocation
+            
+            # Set fields at top of page
+            flash(f"Using persona: {persona['name']}", "success")
+            
+            return render_template("index.html", 
+                              form=form,
+                              vpn_running=vpn_running, 
+                              ip_info=ip_info, 
+                              language=language,
+                              persona_name=persona['name'],
+                              geolocation=geolocation,
+                              country=form_obj.country,
+                              city=form_obj.city,
+                              region=form_obj.region)
+        except Exception as e:
+            logging.error(f"Error using persona: {e}")
+            flash(f"Error loading persona: {str(e)}", "danger")
+            
+    # If no persona_id or error occurred, initialize empty form
+    if form is None:
+        form = PersonaForm()
+    
+    # Get default values
     vpn_running = is_vpn_running()
     ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
     country = ip_info.get("country", "")
-    language = REGION_LANGUAGE_MAP.get(country, "en-US") if vpn_running else "en-US"
-    return render_template("index.html", vpn_running=vpn_running, ip_info=ip_info, language=language)
+    language = request.args.get('language') or REGION_LANGUAGE_MAP.get(country, "en-US") if vpn_running else "en-US"
+    
+    # Handle other URL parameters for backward compatibility    
+    persona_name = request.args.get("persona_name")
+    geolocation = request.args.get("geolocation") or (ip_info.get("loc") if vpn_running else None)
+    country = request.args.get("country") or ip_info.get("country", "")
+    city = request.args.get("city") or ip_info.get("city", "")
+    region = request.args.get("region") or ip_info.get("region", "")
+    
+    return render_template("index.html", 
+                          form=form,
+                          vpn_running=vpn_running, 
+                          ip_info=ip_info, 
+                          language=language,
+                          persona_name=persona_name,
+                          geolocation=geolocation,
+                          country=country,
+                          city=city,
+                          region=region)
 
 @app.route("/visit-page", methods=["POST"])
 def visit_page():
@@ -231,6 +351,12 @@ def start_vpn_route():
     vpn_proc.start()
     return redirect(url_for('index'))
 
+@app.route("/use-persona/<int:persona_id>", methods=["GET"])
+def use_persona(persona_id):
+    """Retrieve persona data and redirect to index page with persona_id parameter"""
+    # Simply redirect to index with persona_id as a parameter
+    return redirect(url_for('index', persona_id=persona_id))
+
 @app.route("/save-persona", methods=["POST"])
 def save_persona():
     """Save persona data to the database"""
@@ -257,16 +383,13 @@ def save_persona():
         persona_id = database.save_persona(persona_data)
         
         # Use a response object to avoid session issues
-        response = redirect(url_for('index'))
-        response.set_cookie('flash_message', f"Persona '{name}' saved successfully!")
-        return response
+        flash(f"Persona '{name}' saved successfully!", "success")
+        return redirect(url_for('index'))
     
     except Exception as e:
         logging.error(f"Error saving persona: {e}")
-        # Use a response object to avoid session issues
-        response = redirect(url_for('index'))
-        response.set_cookie('flash_message', f"Error saving persona: {str(e)}")
-        return response
+        flash(f"Error saving persona: {str(e)}", "danger")
+        return redirect(url_for('index'))
 
 @app.route("/save_psychographic_data", methods=["POST"])
 def save_psychographic_data():
@@ -300,10 +423,8 @@ def save_psychographic_data():
             # Save to database
             persona_id = database.save_persona(persona_data)
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"New persona created with psychographic data!")
-            return response
+            flash(f"New persona created with psychographic data!", "success")
+            return redirect(url_for('index'))
         else:
             # Get the existing persona
             persona = database.get_persona(persona_id)
@@ -332,17 +453,13 @@ def save_psychographic_data():
             conn.commit()
             conn.close()
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"Psychographic data updated for persona {persona_id}!")
-            return response
+            flash(f"Psychographic data updated for persona {persona_id}!", "success")
+            return redirect(url_for('index'))
     
     except Exception as e:
         logging.error(f"Error saving psychographic data: {e}")
-        # Use a response object to avoid session issues
-        response = redirect(url_for('index'))
-        response.set_cookie('flash_message', f"Error saving psychographic data: {str(e)}")
-        return response
+        flash(f"Error saving psychographic data: {str(e)}", "danger")
+        return redirect(url_for('index'))
 
 @app.route("/save_behavioral_data", methods=["POST"])
 def save_behavioral_data():
@@ -376,10 +493,8 @@ def save_behavioral_data():
             # Save to database
             persona_id = database.save_persona(persona_data)
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"New persona created with behavioral data!")
-            return response
+            flash(f"New persona created with behavioral data!", "success")
+            return redirect(url_for('index'))
         else:
             # Get the existing persona
             persona = database.get_persona(persona_id)
@@ -409,17 +524,13 @@ def save_behavioral_data():
             conn.commit()
             conn.close()
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"Behavioral data updated for persona {persona_id}!")
-            return response
+            flash(f"Behavioral data updated for persona {persona_id}!", "success")
+            return redirect(url_for('index'))
     
     except Exception as e:
         logging.error(f"Error saving behavioral data: {e}")
-        # Use a response object to avoid session issues
-        response = redirect(url_for('index'))
-        response.set_cookie('flash_message', f"Error saving behavioral data: {str(e)}")
-        return response
+        flash(f"Error saving behavioral data: {str(e)}", "danger")
+        return redirect(url_for('index'))
 
 @app.route("/save_contextual_data", methods=["POST"])
 def save_contextual_data():
@@ -455,10 +566,8 @@ def save_contextual_data():
             # Save to database
             persona_id = database.save_persona(persona_data)
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"New persona created with contextual data!")
-            return response
+            flash(f"New persona created with contextual data!", "success")
+            return redirect(url_for('index'))
         else:
             # Get the existing persona
             persona = database.get_persona(persona_id)
@@ -490,17 +599,13 @@ def save_contextual_data():
             conn.commit()
             conn.close()
             
-            # Use a response object to avoid session issues
-            response = redirect(url_for('index'))
-            response.set_cookie('flash_message', f"Contextual data updated for persona {persona_id}!")
-            return response
+            flash(f"Contextual data updated for persona {persona_id}!", "success")
+            return redirect(url_for('index'))
     
     except Exception as e:
         logging.error(f"Error saving contextual data: {e}")
-        # Use a response object to avoid session issues
-        response = redirect(url_for('index'))
-        response.set_cookie('flash_message', f"Error saving contextual data: {str(e)}")
-        return response
+        flash(f"Error saving contextual data: {str(e)}", "danger")
+        return redirect(url_for('index'))
 
 @app.route("/delete-persona/<int:persona_id>", methods=["POST"])
 def delete_persona(persona_id):
@@ -509,17 +614,13 @@ def delete_persona(persona_id):
         # Delete the persona
         database.delete_persona(persona_id)
         
-        # Use a response object to avoid session issues
-        response = redirect(url_for('list_personas'))
-        response.set_cookie('flash_message', f"Persona {persona_id} deleted successfully!")
-        return response
+        flash(f"Persona {persona_id} deleted successfully!", "success")
+        return redirect(url_for('list_personas'))
     
     except Exception as e:
         logging.error(f"Error deleting persona: {e}")
-        # Use a response object to avoid session issues
-        response = redirect(url_for('list_personas'))
-        response.set_cookie('flash_message', f"Error deleting persona: {str(e)}")
-        return response
+        flash(f"Error deleting persona: {str(e)}", "danger")
+        return redirect(url_for('list_personas'))
 
 @app.route("/personas", methods=["GET"])
 def list_personas():

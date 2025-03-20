@@ -23,11 +23,17 @@ A-Proxy is a tool that allows you to test websites with different geolocation an
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/savingads/personas
+git clone https://github.com/savingads/a-proxy
 cd a-proxy
 ```
 
 ### Install Python Dependencies
+
+It is recommended to use a virtual environment to avoid conflicts with system-wide Python packages. To create and activate a virtual environment, run:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
@@ -47,19 +53,17 @@ The application uses Chrome/Chromium for web testing. Install it with:
 
 ```bash
 # For Ubuntu/Debian
-sudo apt update
-sudo apt install -y google-chrome-stable
-
-# Alternatively, install Chromium
-# sudo apt install -y chromium-browser
+sudo apt install -y chromium-browser
 ```
 
 After installation, verify that Chrome is installed at `/usr/bin/google-chrome`. If it's installed at a different location, update the `binary_location` in `selenium_proxy.py`.
 
 ### Install Selenium WebDriver Dependencies
 
+Install the required Python dependencies (including Selenium and WebDriver Manager) using:
+
 ```bash
-pip install selenium webdriver-manager
+pip install -r requirements.txt
 ```
 
 ## VPN Configuration
@@ -76,6 +80,20 @@ This project includes configuration files for NordVPN. However, **you need to pr
 mkdir -p nordvpn
 echo "your_nordvpn_username" > nordvpn/auth.txt
 echo "your_nordvpn_password" >> nordvpn/auth.txt
+```
+
+4. Download the OpenVPN configuration files for NordVPN:
+   - Visit the [NordVPN server tools page](https://nordvpn.com/ovpn/) and download the `.ovpn` files for the servers you want to use.
+   - Choose between UDP or TCP configurations based on your preference:
+     - **UDP**: Faster but less reliable
+     - **TCP**: Slower but more reliable
+   - Place the downloaded `.ovpn` files in the `nordvpn/ovpn_udp/` or `nordvpn/ovpn_tcp/` directories, depending on the protocol.
+
+```bash
+mkdir -p nordvpn/ovpn_udp nordvpn/ovpn_tcp
+# Example: Move downloaded files to the appropriate directory
+mv ~/Downloads/*.udp.ovpn nordvpn/ovpn_udp/
+mv ~/Downloads/*.tcp.ovpn nordvpn/ovpn_tcp/
 ```
 
 ### Using Your Own VPN Provider

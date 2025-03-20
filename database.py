@@ -223,10 +223,11 @@ def save_persona(persona_data):
         conn.close()
 
 def get_all_personas():
-    """Retrieve all personas from the database"""
+    """Retrieve all personas from the database with all their associated data"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    # First get all personas basic info
     cursor.execute("""
     SELECT p.id, p.name, p.created_at, p.updated_at,
            d.latitude, d.longitude, d.language, d.country, d.city, d.region
@@ -236,8 +237,39 @@ def get_all_personas():
     """)
     
     personas = [dict(row) for row in cursor.fetchall()]
-    conn.close()
     
+    # Now for each persona, get their associated data
+    for persona in personas:
+        persona_id = persona['id']
+        
+        # Get psychographic data
+        cursor.execute("SELECT * FROM psychographic_data WHERE persona_id = ?", (persona_id,))
+        psychographic = cursor.fetchone()
+        if psychographic:
+            persona['psychographic'] = dict(psychographic)
+            # Parse JSON fields
+            for field in ['interests', 'personal_values', 'attitudes', 'opinions']:
+                if persona['psychographic'][field]:
+                    persona['psychographic'][field] = json.loads(persona['psychographic'][field])
+        
+        # Get behavioral data
+        cursor.execute("SELECT * FROM behavioral_data WHERE persona_id = ?", (persona_id,))
+        behavioral = cursor.fetchone()
+        if behavioral:
+            persona['behavioral'] = dict(behavioral)
+            # Parse JSON fields
+            for field in ['browsing_habits', 'purchase_history', 'brand_interactions', 
+                         'device_usage', 'social_media_activity', 'content_consumption']:
+                if persona['behavioral'][field]:
+                    persona['behavioral'][field] = json.loads(persona['behavioral'][field])
+        
+        # Get contextual data
+        cursor.execute("SELECT * FROM contextual_data WHERE persona_id = ?", (persona_id,))
+        contextual = cursor.fetchone()
+        if contextual:
+            persona['contextual'] = dict(contextual)
+    
+    conn.close()
     return personas
 
 def delete_persona(persona_id):

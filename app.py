@@ -294,14 +294,20 @@ def test_geolocation():
     if geolocation:
         test_url += f"&geolocation={geolocation}"
     
-    command = f"python3 /home/chris/a-proxy/visit_page.py '{test_url}' --language '{language}'"
+    # Use current directory path rather than hardcoded path
+    import os
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    visit_page_path = os.path.join(current_dir, 'visit_page.py')
+    
+    command = f"python3 {visit_page_path} '{test_url}' --language '{language}'"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
     
     logging.debug(f"Executing command: {command}")
     os.system(command)
     
-    return f"Testing geolocation with language {language} and coordinates {geolocation or 'not specified'}. Screenshot saved."
+    flash("Testing geolocation settings in a new browser window. Check that a Chrome/Chromium window has opened.", "info")
+    return redirect(url_for('index'))
 
 def vpn_process(region=None):
     if is_vpn_running():

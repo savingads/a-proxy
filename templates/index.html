@@ -791,6 +791,13 @@
                     if (saveGeolocationInput) {
                         saveGeolocationInput.value = targetRegion;
                     }
+
+                    // Update the test browser form geolocation input
+                    var testGeolocationInput = document.getElementById('test-geolocation-input');
+                    if (testGeolocationInput) {
+                        testGeolocationInput.value = targetRegion;
+                        console.log("Set geolocation to:", targetRegion);
+                    }
                 });
             }
 
@@ -910,15 +917,9 @@
                                     targetLanguage.value = selectedLanguage;
 
                                     // Update language in the Persona section
-                                    var personaLanguageElement = document.querySelector('.container.border .row .col:nth-child(2) strong + span');
+                                    var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
                                     if (personaLanguageElement) {
-                                        personaLanguageElement.textContent = selectedLanguage;
-                                    } else {
-                                        // If the span doesn't exist, update the text content next to the Language label
-                                        var languageCol = document.querySelector('.container.border .row .col:nth-child(2)');
-                                        if (languageCol) {
-                                            languageCol.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
-                                        }
+                                        personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
                                     }
 
                                     // Update the hidden language input field in the form
@@ -945,15 +946,9 @@
                 setLanguageButton.addEventListener('click', function () {
                     var selectedLanguage = document.getElementById('target-language').value;
                     // Update language in the Persona section
-                    var personaLanguageElement = document.querySelector('.container.border .row .col:nth-child(2) strong + span');
+                    var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
                     if (personaLanguageElement) {
-                        personaLanguageElement.textContent = selectedLanguage;
-                    } else {
-                        // If the span doesn't exist, update the text content next to the Language label
-                        var languageCol = document.querySelector('.container.border .row .col:nth-child(2)');
-                        if (languageCol) {
-                            languageCol.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
-                        }
+                        personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
                     }
 
                     // Update the hidden language input field in the form
@@ -1002,6 +997,70 @@
                     if (testGeolocationInput) {
                         testGeolocationInput.value = targetRegion;
                         console.log("Set geolocation to:", targetRegion);
+                    }
+                });
+            }
+
+            // Update our duplicate setGeolocationButton handler to avoid conflicts
+            var setGeolocationButton = document.getElementById('set-geolocation');
+            if (setGeolocationButton) {
+                // Clear previous event listeners by cloning and replacing
+                var newSetGeoButton = setGeolocationButton.cloneNode(true);
+                setGeolocationButton.parentNode.replaceChild(newSetGeoButton, setGeolocationButton);
+                
+                newSetGeoButton.addEventListener('click', function () {
+                    var targetRegion = document.getElementById('target-region').value;
+                    // Update geolocation in the Persona section
+                    document.getElementById('geolocation').textContent = targetRegion;
+
+                    // Update the hidden geolocation field in the form
+                    var geolocationInput = document.getElementById('form-geolocation');
+                    if (geolocationInput) {
+                        geolocationInput.value = targetRegion;
+                    }
+
+                    // Update the save persona form geolocation field
+                    var saveGeolocationInput = document.getElementById('save-geolocation');
+                    if (saveGeolocationInput) {
+                        saveGeolocationInput.value = targetRegion;
+                    }
+                    
+                    // Update the test browser form geolocation input
+                    var testGeolocationInput = document.getElementById('test-geolocation-input');
+                    if (testGeolocationInput) {
+                        testGeolocationInput.value = targetRegion;
+                        console.log("Set geolocation to:", targetRegion);
+                    }
+                    
+                    // Update map with the new coordinates
+                    const coordinates = targetRegion.split(',');
+                    if (coordinates.length === 2) {
+                        const lat = parseFloat(coordinates[0].trim());
+                        const lng = parseFloat(coordinates[1].trim());
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            // Update latitude and longitude input fields
+                            const latitudeInput = document.getElementById('latitude');
+                            const longitudeInput = document.getElementById('longitude');
+                            if (latitudeInput && longitudeInput) {
+                                latitudeInput.value = lat;
+                                longitudeInput.value = lng;
+                            }
+                            
+                            // Clear existing markers and add a new one
+                            if (window.markersLayer) {
+                                window.markersLayer.clearLayers();
+                            }
+                            
+                            // Add marker and center map
+                            L.marker([lat, lng])
+                                .addTo(window.markersLayer)
+                                .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                                .openPopup();
+                            
+                            // Center the map on the new location with appropriate zoom
+                            window.map.setView([lat, lng], 5);
+                        }
                     }
                 });
             }
@@ -1089,7 +1148,7 @@
                 tabLink.addEventListener('shown.bs.tab', function (event) {
                     const targetTab = event.target.getAttribute('aria-controls');
                     const currentGeolocation = document.getElementById('geolocation').textContent;
-                    const currentLanguage = document.querySelector('.container.border .row .col:nth-child(2)').textContent.replace('Language:', '').trim();
+                    const currentLanguage = document.querySelector('.custom-card .row .col:nth-child(2)').textContent.replace('Language:', '').trim();
                     const currentCountry = "{% if vpn_running %}{{ ip_info.country }}{% endif %}";
                     const currentCity = "{% if vpn_running %}{{ ip_info.city }}{% endif %}";
                     const currentRegion = "{% if vpn_running %}{{ ip_info.region }}{% endif %}";

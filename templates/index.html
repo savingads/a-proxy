@@ -101,12 +101,13 @@
             display: block !important;
         }
 
+        /* Replace high-contrast white borders with subtle card styling */
         .show-grid [class^="col"] {
             position: relative;
             padding-top: 10px;
             padding-bottom: 10px;
-            border: 1px solid #ddd;
-            background-color: rgba(86, 61, 124, 0.15);
+            background-color: var(--bs-dark-bg-subtle);
+            border: none;
         }
 
         .sidebar {
@@ -124,11 +125,54 @@
             /* Adjust this value based on the width of your sidebar */
         }
 
-        < !--.sidebar {
-            display: none;
+        /* Anthropic-style card styling */
+        .custom-card {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            padding: 15px;
         }
 
-        -->
+        .custom-list-group .list-group-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2px;
+            border-radius: 4px;
+        }
+
+        #map {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            border-bottom: 2px solid var(--bs-primary);
+            background-color: transparent;
+            color: var(--bs-primary);
+        }
+
+        .tab-content {
+            padding-top: 20px;
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Subtle divider */
+        .subtle-divider {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 1rem 0;
+        }
     </style>
 
 
@@ -175,10 +219,10 @@
         </div>
     </header>
 
-    <div class="container-fluid show-grid">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-3 col-lg-2 p-0 bg-body-tertiary sidebar">
-                <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+                <div class="sidebar border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
                     <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
                         aria-labelledby="sidebarMenuLabel">
                         <div class="offcanvas-header">
@@ -284,37 +328,38 @@
             </div>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div
-                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 subtle-divider">
                     <h3>Persona</h3>
                     <div id="flash-message-container"></div>
-                    <div class="container border p-3 mb-3">
-                        <div class="row">
-                            <div class="col">
-                                <strong>Geolocation:</strong> <span id="geolocation">Fetching...</span>
-                            </div>
-                            <div class="col">
-                                <strong>Language:</strong> {{ language }}
-                            </div>
+                </div>
+                
+                <div class="custom-card mb-4">
+                    <div class="row">
+                        <div class="col">
+                            <strong>Geolocation:</strong> <span id="geolocation">Fetching...</span>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col">
-                                <form action="{{ url_for('save_persona') }}" method="post" id="save-persona-form">
-                                    <input type="hidden" name="geolocation" id="save-geolocation"
-                                        value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
-                                    <input type="hidden" name="language" id="save-language" value="{{ language }}">
-                                    <input type="hidden" name="country" id="save-country"
-                                        value="{% if vpn_running %}{{ ip_info.country }}{% endif %}">
-                                    <input type="hidden" name="city" id="save-city"
-                                        value="{% if vpn_running %}{{ ip_info.city }}{% endif %}">
-                                    <input type="hidden" name="region" id="save-region"
-                                        value="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" name="persona_name"
-                                            placeholder="Persona Name" required>
-                                        <button type="submit" class="btn btn-success">Save Persona</button>
-                                    </div>
-                                </form>
-                            </div>
+                        <div class="col">
+                            <strong>Language:</strong> {{ language }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <form action="{{ url_for('save_persona') }}" method="post" id="save-persona-form">
+                                <input type="hidden" name="geolocation" id="save-geolocation"
+                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+                                <input type="hidden" name="language" id="save-language" value="{{ language }}">
+                                <input type="hidden" name="country" id="save-country"
+                                    value="{% if vpn_running %}{{ ip_info.country }}{% endif %}">
+                                <input type="hidden" name="city" id="save-city"
+                                    value="{% if vpn_running %}{{ ip_info.city }}{% endif %}">
+                                <input type="hidden" name="region" id="save-region"
+                                    value="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="persona_name"
+                                        placeholder="Persona Name" required>
+                                    <button type="submit" class="btn btn-success">Save Persona</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -341,108 +386,125 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="demographic" role="tabpanel"
                             aria-labelledby="demographic-tab">
-                            <div class="container mt-5">
+                            <div class="container mt-4">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <p><strong>VPN Running:</strong> {{ vpn_running }}</p>
                                         {% if vpn_running %}
-                                        <h4>IP Information</h4>
-                                        <ul class="list-group mb-4">
-                                            <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
-                                            <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
-                                            <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region }}
-                                            </li>
-                                            <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country }}
-                                            </li>
-                                            <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc }}
-                                            </li>
-                                            <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}
-                                            </li>
-                                        </ul>
-                                        <form id="change-region-form" action="{{ url_for('change_region') }}"
-                                            method="post" class="mb-4">
-                                            <div class="form-group">
-                                                <label for="region">Region:</label>
-                                                <select id="region" name="region" class="form-control">
-                                                    <option value="" disabled selected>Select a region</option>
-                                                    {% if ip_info.region != "North America (US)" %}
-                                                    <option value="us5725" data-code="US">North America (US)</option>
-                                                    {% endif %}
-                                                    {% if ip_info.region != "South America (Brazil)" %}
-                                                    <option value="br53" data-code="BR">South America (Brazil)</option>
-                                                    {% endif %}
-                                                    {% if ip_info.region != "Europe (Germany)" %}
-                                                    <option value="de1088" data-code="DE">Europe (Germany)</option>
-                                                    {% endif %}
-                                                    {% if ip_info.region != "Asia (Japan)" %}
-                                                    <option value="jp514" data-code="JP">Asia (Japan)</option>
-                                                    {% endif %}
-                                                    {% if ip_info.region != "Africa (South Africa)" %}
-                                                    <option value="za147" data-code="ZA">Africa (South Africa)</option>
-                                                    {% endif %}
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Change VPN Region</button>
-                                            <div id="vpn-spinner" class="spinner-border text-primary" role="status"
-                                                style="display: none;">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
-                                        </form>
-                                        {% else %}
-                                        <form action="{{ url_for('start_vpn_route') }}" method="post" class="mb-4">
-                                            <button type="submit" class="btn btn-primary">Start VPN</button>
-
-
-                                            <div class="form-group">
-                                                <label for="region">Region:</label>
-                                                <select id="region" name="region" class="form-control">
-                                                    <option value="" disabled selected>Select a region</option>
-                                                    <option value="us5725" data-code="US">North America (US)</option>
-                                                    <option value="br53" data-code="BR">South America (Brazil)</option>
-                                                    <option value="de1088" data-code="DE">Europe (Germany)</option>
-                                                    <option value="jp514" data-code="JP">Asia (Japan)</option>
-                                                    <option value="za147" data-code="ZA">Africa (South Africa)</option>
-                                                </select>
-                                            </div>
-
-                                        </form>
-                                        {% endif %}
-
-                                        <h4>Target Browser Settings</h4>
-                                        <div class="form-group">
-                                            <label for="target-region">Geolocation:</label>
-                                            <input type="text" id="target-region" class="form-control"
-                                                value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
-                                                placeholder="0.000, 0.000">
-                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                        <div class="custom-card">
+                                            <h4>IP Information</h4>
+                                            <ul class="list-group custom-list-group mb-4">
+                                                <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
+                                                <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
+                                                <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}
+                                                </li>
+                                            </ul>
                                         </div>
-                                        <div class="form-group mt-3">
-                                            <label for="target-language">Language:</label>
-                                            <select id="target-language" class="form-control">
-                                                <option value="en-US">English (US)</option>
-                                                <option value="pt-BR">Portuguese (Brazil)</option>
-                                                <option value="de-DE">German</option>
-                                                <option value="ja-JP">Japanese</option>
-                                                <option value="af-ZA">Afrikaans (South Africa)</option>
-                                            </select>
-                                            <button id="set-language" class="btn btn-secondary mt-2">Set</button>
-                                        </div>
-
-                                        <div class="form-group mt-3">
-                                            <form action="{{ url_for('test_geolocation') }}" method="post"
-                                                id="test-browser-form">
-                                                <input type="hidden" name="language" id="test-language-input"
-                                                    value="en-US">
-                                                <input type="hidden" name="geolocation" id="test-geolocation-input"
-                                                    value="">
-                                                <button type="submit" class="btn btn-success">Apply Settings &
-                                                    Test</button>
+                                        <div class="custom-card">
+                                            <form id="change-region-form" action="{{ url_for('change_region') }}"
+                                                method="post" class="mb-2">
+                                                <div class="form-group">
+                                                    <label for="region">Region:</label>
+                                                    <select id="region" name="region" class="form-select">
+                                                        <option value="" disabled selected>Select a region</option>
+                                                        {% if ip_info.region != "North America (US)" %}
+                                                        <option value="us5725" data-code="US">North America (US)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "South America (Brazil)" %}
+                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Europe (Germany)" %}
+                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Asia (Japan)" %}
+                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Africa (South Africa)" %}
+                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary mt-2">Change VPN Region</button>
+                                                <div id="vpn-spinner" class="spinner-border text-primary" role="status"
+                                                    style="display: none;">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
                                             </form>
                                         </div>
+                                        {% else %}
+                                        <div class="custom-card">
+                                            <form action="{{ url_for('start_vpn_route') }}" method="post" class="mb-2">
+                                                <button type="submit" class="btn btn-primary">Start VPN</button>
+                                                <div class="form-group mt-2">
+                                                    <label for="region">Region:</label>
+                                                    <select id="region" name="region" class="form-select">
+                                                        <option value="" disabled selected>Select a region</option>
+                                                        <option value="us5725" data-code="US">North America (US)</option>
+                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
+                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
+                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
+                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {% endif %}
 
+                                        <div class="custom-card">
+                                            <h4>Target Browser Settings</h4>
+                                            <div class="form-group">
+                                                <label for="target-region">Geolocation:</label>
+                                                <input type="text" id="target-region" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
+                                                    placeholder="0.000, 0.000">
+                                                <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                            </div>
+                                            <div class="form-group mt-3">
+                                                <label for="target-language">Language:</label>
+                                                <select id="target-language" class="form-select">
+                                                    <option value="en-US">English (US)</option>
+                                                    <option value="pt-BR">Portuguese (Brazil)</option>
+                                                    <option value="de-DE">German</option>
+                                                    <option value="ja-JP">Japanese</option>
+                                                    <option value="af-ZA">Afrikaans (South Africa)</option>
+                                                </select>
+                                                <button id="set-language" class="btn btn-secondary mt-2">Set</button>
+                                            </div>
+
+                                            <div class="form-group mt-3">
+                                                <form action="{{ url_for('test_geolocation') }}" method="post"
+                                                    id="test-browser-form">
+                                                    <input type="hidden" name="language" id="test-language-input"
+                                                        value="en-US">
+                                                    <input type="hidden" name="geolocation" id="test-geolocation-input"
+                                                        value="">
+                                                    <button type="submit" class="btn btn-success">Apply Settings &
+                                                        Test</button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="custom-card">
+                                            <div class="form-group">
+                                                <label for="latitude">Latitude:</label>
+                                                <input type="text" id="latitude" name="latitude" class="form-control" 
+                                                    placeholder="Enter Latitude" required>
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <label for="longitude">Longitude:</label>
+                                                <input type="text" id="longitude" name="longitude" class="form-control" 
+                                                    placeholder="Enter Longitude" required>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div id="map" style="width: 100%; height: 400px; border: 2px solid black;">
+                                        <div id="map" style="width: 100%; height: 400px;">
                                         </div>
                                         <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
                                         <script>
@@ -463,199 +525,207 @@
                         <div class="tab-pane fade" id="psychographic" role="tabpanel"
                             aria-labelledby="psychographic-tab">
                             <div class="container mt-4">
-                                <h4>Psychographic Data</h4>
-                                <form action="{{ url_for('save_psychographic_data') }}" method="post"
-                                    id="psychographic-form">
-                                    <input type="hidden" name="persona_id" id="psychographic-persona-id" value="">
+                                <div class="custom-card">
+                                    <h4>Psychographic Data</h4>
+                                    <form action="{{ url_for('save_psychographic_data') }}" method="post"
+                                        id="psychographic-form">
+                                        <input type="hidden" name="persona_id" id="psychographic-persona-id" value="">
 
-                                    <div class="mb-3">
-                                        <label for="interests" class="form-label">Interests (comma separated)</label>
-                                        <input type="text" class="form-control" id="interests" name="interests"
-                                            placeholder="technology, travel, cooking">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="interests" class="form-label">Interests (comma separated)</label>
+                                            <input type="text" class="form-control" id="interests" name="interests"
+                                                placeholder="technology, travel, cooking">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="personal_values" class="form-label">Personal Values (comma
-                                            separated)</label>
-                                        <input type="text" class="form-control" id="personal_values"
-                                            name="personal_values" placeholder="family, honesty, freedom">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="personal_values" class="form-label">Personal Values (comma
+                                                separated)</label>
+                                            <input type="text" class="form-control" id="personal_values"
+                                                name="personal_values" placeholder="family, honesty, freedom">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="attitudes" class="form-label">Attitudes (comma separated)</label>
-                                        <input type="text" class="form-control" id="attitudes" name="attitudes"
-                                            placeholder="optimistic, skeptical, open-minded">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="attitudes" class="form-label">Attitudes (comma separated)</label>
+                                            <input type="text" class="form-control" id="attitudes" name="attitudes"
+                                                placeholder="optimistic, skeptical, open-minded">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="lifestyle" class="form-label">Lifestyle</label>
-                                        <input type="text" class="form-control" id="lifestyle" name="lifestyle"
-                                            placeholder="urban professional, outdoor enthusiast">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="lifestyle" class="form-label">Lifestyle</label>
+                                            <input type="text" class="form-control" id="lifestyle" name="lifestyle"
+                                                placeholder="urban professional, outdoor enthusiast">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="personality" class="form-label">Personality</label>
-                                        <input type="text" class="form-control" id="personality" name="personality"
-                                            placeholder="introverted, analytical, creative">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="personality" class="form-label">Personality</label>
+                                            <input type="text" class="form-control" id="personality" name="personality"
+                                                placeholder="introverted, analytical, creative">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="opinions" class="form-label">Opinions (comma separated)</label>
-                                        <input type="text" class="form-control" id="opinions" name="opinions"
-                                            placeholder="privacy-focused, environmentally conscious">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="opinions" class="form-label">Opinions (comma separated)</label>
+                                            <input type="text" class="form-control" id="opinions" name="opinions"
+                                                placeholder="privacy-focused, environmentally conscious">
+                                        </div>
 
-                                    <button type="submit" class="btn btn-primary">Save Psychographic Data</button>
-                                </form>
+                                        <button type="submit" class="btn btn-primary">Save Psychographic Data</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="behavior" role="tabpanel" aria-labelledby="behavior-tab">
                             <div class="container mt-4">
-                                <h4>Behavioral Data</h4>
-                                <form action="{{ url_for('save_behavioral_data') }}" method="post" id="behavioral-form">
-                                    <input type="hidden" name="persona_id" id="behavioral-persona-id" value="">
+                                <div class="custom-card">
+                                    <h4>Behavioral Data</h4>
+                                    <form action="{{ url_for('save_behavioral_data') }}" method="post" id="behavioral-form">
+                                        <input type="hidden" name="persona_id" id="behavioral-persona-id" value="">
 
-                                    <div class="mb-3">
-                                        <label for="browsing_habits" class="form-label">Browsing Habits (comma
-                                            separated)</label>
-                                        <input type="text" class="form-control" id="browsing_habits"
-                                            name="browsing_habits" placeholder="social media, news sites, shopping">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="browsing_habits" class="form-label">Browsing Habits (comma
+                                                separated)</label>
+                                            <input type="text" class="form-control" id="browsing_habits"
+                                                name="browsing_habits" placeholder="social media, news sites, shopping">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="purchase_history" class="form-label">Purchase History (comma
-                                            separated)</label>
-                                        <input type="text" class="form-control" id="purchase_history"
-                                            name="purchase_history" placeholder="electronics, books, clothing">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="purchase_history" class="form-label">Purchase History (comma
+                                                separated)</label>
+                                            <input type="text" class="form-control" id="purchase_history"
+                                                name="purchase_history" placeholder="electronics, books, clothing">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="brand_interactions" class="form-label">Brand Interactions (comma
-                                            separated)</label>
-                                        <input type="text" class="form-control" id="brand_interactions"
-                                            name="brand_interactions" placeholder="Apple, Nike, Amazon">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="brand_interactions" class="form-label">Brand Interactions (comma
+                                                separated)</label>
+                                            <input type="text" class="form-control" id="brand_interactions"
+                                                name="brand_interactions" placeholder="Apple, Nike, Amazon">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="device_usage" class="form-label">Device Usage (JSON format)</label>
-                                        <textarea class="form-control" id="device_usage" name="device_usage" rows="3"
-                                            placeholder='{"mobile": "4 hours", "desktop": "6 hours", "tablet": "1 hour"}'></textarea>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="device_usage" class="form-label">Device Usage (JSON format)</label>
+                                            <textarea class="form-control" id="device_usage" name="device_usage" rows="3"
+                                                placeholder='{"mobile": "4 hours", "desktop": "6 hours", "tablet": "1 hour"}'></textarea>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="social_media_activity" class="form-label">Social Media Activity
-                                            (JSON format)</label>
-                                        <textarea class="form-control" id="social_media_activity"
-                                            name="social_media_activity" rows="3"
-                                            placeholder='{"facebook": "daily", "twitter": "weekly", "instagram": "hourly"}'></textarea>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="social_media_activity" class="form-label">Social Media Activity
+                                                (JSON format)</label>
+                                            <textarea class="form-control" id="social_media_activity"
+                                                name="social_media_activity" rows="3"
+                                                placeholder='{"facebook": "daily", "twitter": "weekly", "instagram": "hourly"}'></textarea>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="content_consumption" class="form-label">Content Consumption (JSON
-                                            format)</label>
-                                        <textarea class="form-control" id="content_consumption"
-                                            name="content_consumption" rows="3"
-                                            placeholder='{"videos": "2 hours/day", "articles": "5/day", "podcasts": "3/week"}'></textarea>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="content_consumption" class="form-label">Content Consumption (JSON
+                                                format)</label>
+                                            <textarea class="form-control" id="content_consumption"
+                                                name="content_consumption" rows="3"
+                                                placeholder='{"videos": "2 hours/day", "articles": "5/day", "podcasts": "3/week"}'></textarea>
+                                        </div>
 
-                                    <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
-                                </form>
+                                        <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="contextual" role="tabpanel" aria-labelledby="contextual-tab">
                             <div class="container mt-4">
-                                <h4>Contextual Data</h4>
-                                <form action="{{ url_for('save_contextual_data') }}" method="post" id="contextual-form">
-                                    <input type="hidden" name="persona_id" id="contextual-persona-id" value="">
+                                <div class="custom-card">
+                                    <h4>Contextual Data</h4>
+                                    <form action="{{ url_for('save_contextual_data') }}" method="post" id="contextual-form">
+                                        <input type="hidden" name="persona_id" id="contextual-persona-id" value="">
 
-                                    <div class="mb-3">
-                                        <label for="time_of_day" class="form-label">Time of Day</label>
-                                        <select class="form-control" id="time_of_day" name="time_of_day">
-                                            <option value="">Select time of day</option>
-                                            <option value="morning">Morning</option>
-                                            <option value="afternoon">Afternoon</option>
-                                            <option value="evening">Evening</option>
-                                            <option value="night">Night</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="time_of_day" class="form-label">Time of Day</label>
+                                            <select class="form-select" id="time_of_day" name="time_of_day">
+                                                <option value="">Select time of day</option>
+                                                <option value="morning">Morning</option>
+                                                <option value="afternoon">Afternoon</option>
+                                                <option value="evening">Evening</option>
+                                                <option value="night">Night</option>
+                                            </select>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="day_of_week" class="form-label">Day of Week</label>
-                                        <select class="form-control" id="day_of_week" name="day_of_week">
-                                            <option value="">Select day of week</option>
-                                            <option value="monday">Monday</option>
-                                            <option value="tuesday">Tuesday</option>
-                                            <option value="wednesday">Wednesday</option>
-                                            <option value="thursday">Thursday</option>
-                                            <option value="friday">Friday</option>
-                                            <option value="saturday">Saturday</option>
-                                            <option value="sunday">Sunday</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="day_of_week" class="form-label">Day of Week</label>
+                                            <select class="form-select" id="day_of_week" name="day_of_week">
+                                                <option value="">Select day of week</option>
+                                                <option value="monday">Monday</option>
+                                                <option value="tuesday">Tuesday</option>
+                                                <option value="wednesday">Wednesday</option>
+                                                <option value="thursday">Thursday</option>
+                                                <option value="friday">Friday</option>
+                                                <option value="saturday">Saturday</option>
+                                                <option value="sunday">Sunday</option>
+                                            </select>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="season" class="form-label">Season</label>
-                                        <select class="form-control" id="season" name="season">
-                                            <option value="">Select season</option>
-                                            <option value="spring">Spring</option>
-                                            <option value="summer">Summer</option>
-                                            <option value="fall">Fall</option>
-                                            <option value="winter">Winter</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="season" class="form-label">Season</label>
+                                            <select class="form-select" id="season" name="season">
+                                                <option value="">Select season</option>
+                                                <option value="spring">Spring</option>
+                                                <option value="summer">Summer</option>
+                                                <option value="fall">Fall</option>
+                                                <option value="winter">Winter</option>
+                                            </select>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="weather" class="form-label">Weather</label>
-                                        <input type="text" class="form-control" id="weather" name="weather"
-                                            placeholder="sunny, rainy, snowy">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="weather" class="form-label">Weather</label>
+                                            <input type="text" class="form-control" id="weather" name="weather"
+                                                placeholder="sunny, rainy, snowy">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="device_type" class="form-label">Device Type</label>
-                                        <select class="form-control" id="device_type" name="device_type">
-                                            <option value="">Select device type</option>
-                                            <option value="desktop">Desktop</option>
-                                            <option value="laptop">Laptop</option>
-                                            <option value="tablet">Tablet</option>
-                                            <option value="mobile">Mobile</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="device_type" class="form-label">Device Type</label>
+                                            <select class="form-select" id="device_type" name="device_type">
+                                                <option value="">Select device type</option>
+                                                <option value="desktop">Desktop</option>
+                                                <option value="laptop">Laptop</option>
+                                                <option value="tablet">Tablet</option>
+                                                <option value="mobile">Mobile</option>
+                                            </select>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="browser_type" class="form-label">Browser Type</label>
-                                        <select class="form-control" id="browser_type" name="browser_type">
-                                            <option value="">Select browser type</option>
-                                            <option value="chrome">Chrome</option>
-                                            <option value="firefox">Firefox</option>
-                                            <option value="safari">Safari</option>
-                                            <option value="edge">Edge</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="browser_type" class="form-label">Browser Type</label>
+                                            <select class="form-select" id="browser_type" name="browser_type">
+                                                <option value="">Select browser type</option>
+                                                <option value="chrome">Chrome</option>
+                                                <option value="firefox">Firefox</option>
+                                                <option value="safari">Safari</option>
+                                                <option value="edge">Edge</option>
+                                            </select>
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="screen_size" class="form-label">Screen Size</label>
-                                        <input type="text" class="form-control" id="screen_size" name="screen_size"
-                                            placeholder="1920x1080, 375x812">
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="screen_size" class="form-label">Screen Size</label>
+                                            <input type="text" class="form-control" id="screen_size" name="screen_size"
+                                                placeholder="1920x1080, 375x812">
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label for="connection_type" class="form-label">Connection Type</label>
-                                        <select class="form-control" id="connection_type" name="connection_type">
-                                            <option value="">Select connection type</option>
-                                            <option value="wifi">WiFi</option>
-                                            <option value="ethernet">Ethernet</option>
-                                            <option value="4g">4G</option>
-                                            <option value="5g">5G</option>
-                                        </select>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="connection_type" class="form-label">Connection Type</label>
+                                            <select class="form-select" id="connection_type" name="connection_type">
+                                                <option value="">Select connection type</option>
+                                                <option value="wifi">WiFi</option>
+                                                <option value="ethernet">Ethernet</option>
+                                                <option value="4g">4G</option>
+                                                <option value="5g">5G</option>
+                                            </select>
+                                        </div>
 
-                                    <button type="submit" class="btn btn-primary">Save Contextual Data</button>
-                                </form>
+                                        <button type="submit" class="btn btn-primary">Save Contextual Data</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <!-- Add a chart container with the correct ID -->
                         <div class="tab-pane fade" id="chart-container" role="tabpanel" aria-labelledby="chart-tab">
-                            <canvas id="myChart"></canvas>
+                            <div class="custom-card">
+                                <canvas id="myChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1052,41 +1122,6 @@
         });
     </script>
     <i class="bi bi-moon-stars-fill my-1" style="font-size: 16px;"></i>
-    <div class="form-group">
-        <label for="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude" class="form-control" placeholder="Enter Latitude" required>
-    </div>
-    <div class="form-group">
-        <label for="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude" class="form-control" placeholder="Enter Longitude" required>
-    </div>
-    <script>
-        // Update geolocation handling to populate latitude and longitude fields
-        var setGeolocationButton = document.getElementById('set-geolocation');
-        if (setGeolocationButton) {
-            setGeolocationButton.addEventListener('click', function () {
-                var targetLatitude = document.getElementById('latitude').value;
-                var targetLongitude = document.getElementById('longitude').value;
-
-                // Update geolocation in the Persona section
-                document.getElementById('geolocation').textContent = targetLatitude + ', ' + targetLongitude;
-
-                // Update the hidden geolocation fields in the form
-                var geolocationInput = document.getElementById('form-geolocation');
-                if (geolocationInput) {
-                    geolocationInput.value = targetLatitude + ',' + targetLongitude;
-                }
-
-                // Update the save persona form latitude and longitude fields
-                var saveLatitudeInput = document.getElementById('save-geolocation-latitude');
-                var saveLongitudeInput = document.getElementById('save-geolocation-longitude');
-                if (saveLatitudeInput && saveLongitudeInput) {
-                    saveLatitudeInput.value = targetLatitude;
-                    saveLongitudeInput.value = targetLongitude;
-                }
-            });
-        }
-    </script>
 </body>
 
 </html>

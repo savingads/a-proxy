@@ -299,14 +299,31 @@ def test_geolocation():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     visit_page_path = os.path.join(current_dir, 'visit_page.py')
     
-    command = f"python3 {visit_page_path} '{test_url}' --language '{language}'"
+    # Build command with improved options
+    command = f"python3 {visit_page_path} '{test_url}' --language '{language}' --keep-open"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
     
     logging.debug(f"Executing command: {command}")
-    os.system(command)
     
-    flash("Testing geolocation settings in a new browser window. Check that a Chrome/Chromium window has opened.", "info")
+    # Run the command in background to prevent hanging the Flask server
+    import subprocess
+    try:
+        # Use Popen to run the process in the background
+        process = subprocess.Popen(
+            command, 
+            shell=True, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE
+        )
+        
+        # Log process ID for debugging
+        logging.debug(f"Started browser process with PID: {process.pid}")
+        flash("Testing geolocation settings in a new browser window. The browser will stay open until you close it or press Ctrl+C in its terminal.", "info")
+    except Exception as e:
+        logging.error(f"Error executing browser command: {e}")
+        flash(f"Error launching test browser: {str(e)}", "danger")
+    
     return redirect(url_for('index'))
 
 def vpn_process(region=None):

@@ -508,12 +508,19 @@
                                         </div>
                                         <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
                                         <script>
-                                            var map = L.map('map').setView([51.505, -0.09], 2); // Default view (world map)
+                                            // Create a global map variable so it can be accessed from other functions
+                                            window.map = L.map('map').setView([51.505, -0.09], 2); // Default view (world map)
                                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            }).addTo(map);
+                                            }).addTo(window.map);
+                                            
+                                            // Initialize the markers layer as a global variable
+                                            window.markersLayer = L.layerGroup().addTo(window.map);
+                                            
                                             {% if vpn_running %}
-                                            L.marker([{{ ip_info.loc.split(',')[0] }}, {{ ip_info.loc.split(',')[1] }}]).addTo(map)
+                                            // Add the initial VPN location marker
+                                            L.marker([{{ ip_info.loc.split(',')[0] }}, {{ ip_info.loc.split(',')[1] }}])
+                                                .addTo(window.markersLayer)
                                                 .bindPopup('<b>{{ ip_info.city }}</b><br>{{ ip_info.region }}, {{ ip_info.country }}')
                                                 .openPopup();
                                             {% endif %}
@@ -835,6 +842,7 @@
                 regionSelect.addEventListener('change', function () {
                     var selectedOption = this.options[this.selectedIndex];
                     var regionCode = selectedOption.getAttribute('data-code');
+                    var regionName = selectedOption.textContent;
                     if (regionCode) {
                         fetch('/get-region-geolocation/' + regionCode)
                             .then(response => response.json())
@@ -842,6 +850,37 @@
                                 if (data.geolocation) {
                                     document.getElementById('target-region').value = data.geolocation;
                                     document.getElementById('geolocation').textContent = data.geolocation;
+
+                                    // Parse the geolocation coordinates
+                                    const coordinates = data.geolocation.split(',');
+                                    if (coordinates.length === 2) {
+                                        const lat = parseFloat(coordinates[0].trim());
+                                        const lng = parseFloat(coordinates[1].trim());
+                                        
+                                        // Update latitude and longitude input fields
+                                        const latitudeInput = document.getElementById('latitude');
+                                        const longitudeInput = document.getElementById('longitude');
+                                        if (latitudeInput && longitudeInput) {
+                                            latitudeInput.value = lat;
+                                            longitudeInput.value = lng;
+                                        }
+                                        
+                                        // Clear existing markers and add a new one
+                                        if (window.markersLayer) {
+                                            window.markersLayer.clearLayers();
+                                        } else {
+                                            window.markersLayer = L.layerGroup().addTo(window.map);
+                                        }
+                                        
+                                        // Create a marker with popup showing the region info
+                                        const marker = L.marker([lat, lng])
+                                            .addTo(window.markersLayer)
+                                            .bindPopup(`<b>${regionName}</b><br>Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                                            .openPopup();
+                                        
+                                        // Center the map on the new location with appropriate zoom
+                                        window.map.setView([lat, lng], 5);
+                                    }
 
                                     // Update language dropdown based on region
                                     var targetLanguage = document.getElementById('target-language');
@@ -950,6 +989,12 @@
                     var geolocationInput = document.getElementById('form-geolocation');
                     if (geolocationInput) {
                         geolocationInput.value = targetRegion;
+                    }
+
+                    // Update the save persona form geolocation field
+                    var saveGeolocationInput = document.getElementById('save-geolocation');
+                    if (saveGeolocationInput) {
+                        saveGeolocationInput.value = targetRegion;
                     }
 
                     // Update the test browser form geolocation input
@@ -1117,6 +1162,49 @@
                     form.appendChild(regionField);
                 } else {
                     form.querySelector('input[name="region"]').value = region;
+                }
+            }
+
+            // Add event listener for manual lat/lng entry to update map
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            
+            if (latitudeInput && longitudeInput) {
+                const updateMapFromCoords = function() {
+                    const lat = parseFloat(latitudeInput.value);
+                    const lng = parseFloat(longitudeInput.value);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        // Update the target-region input
+                        document.getElementById('target-region').value = `${lat}, ${lng}`;
+                        
+                        // Clear existing markers and add a new one
+                        window.markersLayer.clearLayers();
+                        
+                        // Add marker and center map
+                        L.marker([lat, lng])
+                            .addTo(window.markersLayer)
+                            .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                            .openPopup();
+                        
+                        // Center the map on the new location with appropriate zoom
+                        window.map.setView([lat, lng], 5);
+                    }
+                };
+                
+                // Add blur event listeners to update map when user finishes typing
+                latitudeInput.addEventListener('blur', updateMapFromCoords);
+                longitudeInput.addEventListener('blur', updateMapFromCoords);
+                
+                // Also add a button to manually update from the inputs
+                const coordsCard = latitudeInput.closest('.custom-card');
+                if (coordsCard) {
+                    const updateButton = document.createElement('button');
+                    updateButton.type = 'button';
+                    updateButton.className = 'btn btn-primary mt-2';
+                    updateButton.textContent = 'Update Map';
+                    updateButton.addEventListener('click', updateMapFromCoords);
+                    coordsCard.appendChild(updateButton);
                 }
             }
         });

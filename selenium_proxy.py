@@ -2,12 +2,35 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import logging
+import os
+import shutil
 
 def setup_vpn_browser(language="en-US", geolocation=None, url=None):
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument(f'--lang={language}')
-    options.binary_location = "/usr/bin/google-chrome"
+    
+    # Try to find Chrome/Chromium in common locations
+    chrome_paths = [
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/snap/bin/chromium",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"  # For macOS
+    ]
+    
+    # Find the first available Chrome binary
+    chrome_binary = None
+    for path in chrome_paths:
+        if os.path.exists(path):
+            chrome_binary = path
+            logging.debug(f"Found Chrome binary at: {chrome_binary}")
+            break
+    
+    if chrome_binary:
+        options.binary_location = chrome_binary
+    else:
+        logging.warning("Chrome binary not found in common locations, will try to use system default")
     
     # Add geolocation if provided
     if geolocation:
@@ -22,7 +45,28 @@ def setup_vpn_browser(language="en-US", geolocation=None, url=None):
         except Exception as e:
             logging.error(f"Error parsing geolocation: {e}")
     
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    try:
+        # First try with ChromeDriverManager
+        logging.debug("Attempting to initialize Chrome with ChromeDriverManager")
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    except Exception as chrome_driver_error:
+        logging.error(f"Error initializing Chrome with ChromeDriverManager: {chrome_driver_error}")
+        
+        try:
+            # Fallback: try to find chromedriver in PATH
+            logging.debug("Trying to find chromedriver in PATH")
+            chromedriver_path = shutil.which('chromedriver')
+            
+            if chromedriver_path:
+                logging.debug(f"Using chromedriver found at: {chromedriver_path}")
+                driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
+            else:
+                # Last resort: try without specifying service
+                logging.debug("Attempting to initialize Chrome without specifying service")
+                driver = webdriver.Chrome(options=options)
+        except Exception as e:
+            logging.error(f"Failed to initialize Chrome after all attempts: {e}")
+            raise
     
     # Set geolocation using JavaScript if coordinates were provided
     if geolocation:

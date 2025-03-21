@@ -282,49 +282,24 @@ def get_headers():
 
 @app.route("/test-geolocation", methods=["POST"])
 def test_geolocation():
-    """Open a browser with the specified geolocation and language settings"""
+    """Redirect to the geolocation test page with the specified settings"""
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation", None)
     
-    # Get the port from the request
-    port = request.host.split(':')[-1] if ':' in request.host else '5000'
+    # Fix geolocation format if missing comma
+    if geolocation and '-' in geolocation and ',' not in geolocation:
+        # Extract coordinates and add a comma
+        parts = geolocation.split('-', 1)
+        if len(parts) == 2:
+            geolocation = f"{parts[0]},{'-' + parts[1]}"
+            logging.debug(f"Fixed geolocation format from {request.form.get('geolocation')} to {geolocation}")
     
-    # Build the command to open the geolocation test page with query parameters
-    test_url = f"http://localhost:{port}/geolocation-test?language={language}"
-    if geolocation:
-        test_url += f"&geolocation={geolocation}"
+    # Store the language and geolocation in the session so we can access them in the test page
+    session['test_language'] = language
+    session['test_geolocation'] = geolocation
     
-    # Use current directory path rather than hardcoded path
-    import os
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    visit_page_path = os.path.join(current_dir, 'visit_page.py')
-    
-    # Build command with improved options
-    command = f"python3 {visit_page_path} '{test_url}' --language '{language}' --keep-open"
-    if geolocation:
-        command += f" --geolocation '{geolocation}'"
-    
-    logging.debug(f"Executing command: {command}")
-    
-    # Run the command in background to prevent hanging the Flask server
-    import subprocess
-    try:
-        # Use Popen to run the process in the background
-        process = subprocess.Popen(
-            command, 
-            shell=True, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE
-        )
-        
-        # Log process ID for debugging
-        logging.debug(f"Started browser process with PID: {process.pid}")
-        flash("Testing geolocation settings in a new browser window. The browser will stay open until you close it or press Ctrl+C in its terminal.", "info")
-    except Exception as e:
-        logging.error(f"Error executing browser command: {e}")
-        flash(f"Error launching test browser: {str(e)}", "danger")
-    
-    return redirect(url_for('index'))
+    # Directly redirect to the geolocation test page with parameters
+    return redirect(url_for('geolocation_test', language=language, geolocation=geolocation))
 
 def vpn_process(region=None):
     if is_vpn_running():

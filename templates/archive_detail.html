@@ -5,8 +5,8 @@
     <h1>Archive Details</h1>
     
     <div class="mb-4">
-        <a href="{{ url_for('list_archives') }}" class="btn btn-primary">Back to Archives</a>
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="{{ url_for('archives.list_archives') }}" class="btn btn-primary">Back to Archives</a>
+        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
     
     <div class="card mb-4">
@@ -96,7 +96,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('view_memento', archived_website_id=archived_website.id, memento_id=memento.id) }}" 
+                                    <a href="{{ url_for('archives.view_memento', archived_website_id=archived_website.id, memento_id=memento.id) }}" 
                                        class="btn btn-sm btn-info">
                                         View
                                     </a>

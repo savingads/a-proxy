@@ -5,7 +5,7 @@
     <h1>Archived Websites</h1>
     
     <div class="mb-4">
-        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Dashboard</a>
+        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
     </div>
     
     {% if archived_websites %}
@@ -38,7 +38,7 @@
                         <td>{{ website.archive_type }}</td>
                         <td>{{ website.created_at }}</td>
                         <td>
-                            <a href="{{ url_for('view_archive', archived_website_id=website.id) }}" 
+                            <a href="{{ url_for('archives.view_archive', archived_website_id=website.id) }}" 
                                class="btn btn-sm btn-info">
                                 View Mementos
                             </a>

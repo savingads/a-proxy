@@ -11,17 +11,11 @@
     <meta name="generator" content="Hugo 0.122.0">
     <title>CurrentWeb Dashboard</title>
 
-
-
-
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
 
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
-
-
 
     <style>
         .bd-placeholder-img {
@@ -182,21 +176,24 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
-<body>
+<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}" 
+      data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}" 
+      data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}" 
+      data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
     <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home') }}">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
             <i class="bi bi-house-door me-2"></i>A-Proxy
         </a>
-        <form action="{{ url_for('visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
+        <form action="{{ url_for('browsing.visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
             id="preview-form">
             <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
             <input type="hidden" name="language" value="{{ language }}">
             <input type="hidden" name="geolocation" id="form-geolocation"
                 value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
-            <button type="submit" formaction="{{ url_for('archive_page_route') }}" class="btn btn-secondary">Archive</button>
+            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
         </form>
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
@@ -233,21 +230,21 @@
                         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home.index') }}">
                                         <i class="bi bi-house-fill"></i>
                                         Home
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
-                                        href="{{ url_for('index') }}">
+                                        href="{{ url_for('persona.dashboard') }}">
                                         <i class="bi bi-speedometer2"></i>
                                         Dashboard
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('list_personas') }}">
+                                        href="{{ url_for('persona.list_personas') }}">
                                         <i class="bi bi-people"></i>
                                         Personas
                                     </a>
@@ -266,7 +263,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('list_archives') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('archives.list_archives') }}">
                                         <i class="bi bi-archive"></i>
                                         Archived Pages
                                     </a>
@@ -344,7 +341,7 @@
                     </div>
                     <div class="row mt-2">
                         <div class="col">
-                            <form action="{{ url_for('save_persona') }}" method="post" id="save-persona-form">
+                            <form action="{{ url_for('persona.save_persona') }}" method="post" id="save-persona-form">
                                 <input type="hidden" name="geolocation" id="save-geolocation"
                                     value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
                                 <input type="hidden" name="language" id="save-language" value="{{ language }}">
@@ -407,7 +404,7 @@
                                             </ul>
                                         </div>
                                         <div class="custom-card">
-                                            <form id="change-region-form" action="{{ url_for('change_region') }}"
+                                            <form id="change-region-form" action="{{ url_for('vpn.change_region') }}"
                                                 method="post" class="mb-2">
                                                 <div class="form-group">
                                                     <label for="region">Region:</label>
@@ -439,7 +436,7 @@
                                         </div>
                                         {% else %}
                                         <div class="custom-card">
-                                            <form action="{{ url_for('start_vpn_route') }}" method="post" class="mb-2">
+                                            <form action="{{ url_for('vpn.start_vpn_route') }}" method="post" class="mb-2">
                                                 <button type="submit" class="btn btn-primary">Start VPN</button>
                                                 <div class="form-group mt-2">
                                                     <label for="region">Region:</label>
@@ -459,12 +456,18 @@
                                         <div class="custom-card">
                                             <h4>Target Browser Settings</h4>
                                             <div class="form-group">
-                                                <label for="target-region">Geolocation:</label>
-                                                <input type="text" id="target-region" class="form-control"
-                                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
-                                                    placeholder="0.000, 0.000">
-                                                <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                                <label for="target-latitude">Latitude:</label>
+                                                <input type="text" id="target-latitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[0] }}{% endif %}"
+                                                    placeholder="0.000">
                                             </div>
+                                            <div class="form-group mt-2">
+                                                <label for="target-longitude">Longitude:</label>
+                                                <input type="text" id="target-longitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[1] }}{% endif %}"
+                                                    placeholder="0.000">
+                                            </div>
+                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set Geolocation</button>
                                             <div class="form-group mt-3">
                                                 <label for="target-language">Language:</label>
                                                 <select id="target-language" class="form-select">
@@ -478,7 +481,7 @@
                                             </div>
 
                                             <div class="form-group mt-3">
-                                                <form action="{{ url_for('test_geolocation') }}" method="post"
+                                                <form action="{{ url_for('browsing.test_geolocation') }}" method="post"
                                                     id="test-browser-form">
                                                     <input type="hidden" name="language" id="test-language-input"
                                                         value="en-US">
@@ -490,18 +493,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="custom-card">
-                                            <div class="form-group">
-                                                <label for="latitude">Latitude:</label>
-                                                <input type="text" id="latitude" name="latitude" class="form-control" 
-                                                    placeholder="Enter Latitude" required>
-                                            </div>
-                                            <div class="form-group mt-2">
-                                                <label for="longitude">Longitude:</label>
-                                                <input type="text" id="longitude" name="longitude" class="form-control" 
-                                                    placeholder="Enter Longitude" required>
-                                            </div>
-                                        </div>
+                                        <!-- Removed duplicate latitude/longitude fields -->
                                     </div>
                                     <div class="col-md-6">
                                         <div id="map" style="width: 100%; height: 400px;">
@@ -534,7 +526,7 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Psychographic Data</h4>
-                                    <form action="{{ url_for('save_psychographic_data') }}" method="post"
+                                    <form action="{{ url_for('persona.save_psychographic_data') }}" method="post"
                                         id="psychographic-form">
                                         <input type="hidden" name="persona_id" id="psychographic-persona-id" value="">
 
@@ -584,50 +576,37 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Behavioral Data</h4>
-                                    <form action="{{ url_for('save_behavioral_data') }}" method="post" id="behavioral-form">
+                                    <form action="{{ url_for('persona.save_behavioral_data') }}" method="post" id="behavioral-form">
                                         <input type="hidden" name="persona_id" id="behavioral-persona-id" value="">
 
                                         <div class="mb-3">
-                                            <label for="browsing_habits" class="form-label">Browsing Habits (comma
-                                                separated)</label>
-                                            <input type="text" class="form-control" id="browsing_habits"
-                                                name="browsing_habits" placeholder="social media, news sites, shopping">
+                                            <label for="browsing_habits" class="form-label">Browsing Habits (comma separated)</label>
+                                            <input type="text" class="form-control" id="browsing_habits" name="browsing_habits"
+                                                placeholder="social media, news, research">
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="purchase_history" class="form-label">Purchase History (comma
-                                                separated)</label>
-                                            <input type="text" class="form-control" id="purchase_history"
-                                                name="purchase_history" placeholder="electronics, books, clothing">
+                                            <label for="purchase_history" class="form-label">Purchase History (comma separated)</label>
+                                            <input type="text" class="form-control" id="purchase_history" name="purchase_history"
+                                                placeholder="electronics, clothing, books">
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="brand_interactions" class="form-label">Brand Interactions (comma
-                                                separated)</label>
-                                            <input type="text" class="form-control" id="brand_interactions"
-                                                name="brand_interactions" placeholder="Apple, Nike, Amazon">
+                                            <label for="online_activity" class="form-label">Online Activity</label>
+                                            <input type="text" class="form-control" id="online_activity" name="online_activity"
+                                                placeholder="daily social media, weekly shopping">
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="device_usage" class="form-label">Device Usage (JSON format)</label>
-                                            <textarea class="form-control" id="device_usage" name="device_usage" rows="3"
-                                                placeholder='{"mobile": "4 hours", "desktop": "6 hours", "tablet": "1 hour"}'></textarea>
+                                            <label for="content_consumption" class="form-label">Content Consumption</label>
+                                            <input type="text" class="form-control" id="content_consumption" name="content_consumption"
+                                                placeholder="video streaming, podcasts, articles">
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="social_media_activity" class="form-label">Social Media Activity
-                                                (JSON format)</label>
-                                            <textarea class="form-control" id="social_media_activity"
-                                                name="social_media_activity" rows="3"
-                                                placeholder='{"facebook": "daily", "twitter": "weekly", "instagram": "hourly"}'></textarea>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="content_consumption" class="form-label">Content Consumption (JSON
-                                                format)</label>
-                                            <textarea class="form-control" id="content_consumption"
-                                                name="content_consumption" rows="3"
-                                                placeholder='{"videos": "2 hours/day", "articles": "5/day", "podcasts": "3/week"}'></textarea>
+                                            <label for="tech_usage" class="form-label">Technology Usage</label>
+                                            <input type="text" class="form-control" id="tech_usage" name="tech_usage"
+                                                placeholder="mobile-first, desktop for work">
                                         </div>
 
                                         <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
@@ -639,13 +618,25 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Contextual Data</h4>
-                                    <form action="{{ url_for('save_contextual_data') }}" method="post" id="contextual-form">
+                                    <form action="{{ url_for('persona.save_contextual_data') }}" method="post" id="contextual-form">
                                         <input type="hidden" name="persona_id" id="contextual-persona-id" value="">
+
+                                        <div class="mb-3">
+                                            <label for="device" class="form-label">Device</label>
+                                            <select class="form-select" id="device" name="device">
+                                                <option value="" disabled selected>Select a device</option>
+                                                <option value="desktop">Desktop</option>
+                                                <option value="laptop">Laptop</option>
+                                                <option value="tablet">Tablet</option>
+                                                <option value="mobile">Mobile</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
 
                                         <div class="mb-3">
                                             <label for="time_of_day" class="form-label">Time of Day</label>
                                             <select class="form-select" id="time_of_day" name="time_of_day">
-                                                <option value="">Select time of day</option>
+                                                <option value="" disabled selected>Select time of day</option>
                                                 <option value="morning">Morning</option>
                                                 <option value="afternoon">Afternoon</option>
                                                 <option value="evening">Evening</option>
@@ -654,72 +645,38 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="day_of_week" class="form-label">Day of Week</label>
-                                            <select class="form-select" id="day_of_week" name="day_of_week">
-                                                <option value="">Select day of week</option>
-                                                <option value="monday">Monday</option>
-                                                <option value="tuesday">Tuesday</option>
-                                                <option value="wednesday">Wednesday</option>
-                                                <option value="thursday">Thursday</option>
-                                                <option value="friday">Friday</option>
-                                                <option value="saturday">Saturday</option>
-                                                <option value="sunday">Sunday</option>
+                                            <label for="location_type" class="form-label">Location Type</label>
+                                            <select class="form-select" id="location_type" name="location_type">
+                                                <option value="" disabled selected>Select location type</option>
+                                                <option value="home">Home</option>
+                                                <option value="work">Work</option>
+                                                <option value="public">Public Space</option>
+                                                <option value="commuting">Commuting</option>
+                                                <option value="other">Other</option>
                                             </select>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="season" class="form-label">Season</label>
-                                            <select class="form-select" id="season" name="season">
-                                                <option value="">Select season</option>
-                                                <option value="spring">Spring</option>
-                                                <option value="summer">Summer</option>
-                                                <option value="fall">Fall</option>
-                                                <option value="winter">Winter</option>
+                                            <label for="network_type" class="form-label">Network Type</label>
+                                            <select class="form-select" id="network_type" name="network_type">
+                                                <option value="" disabled selected>Select network type</option>
+                                                <option value="home_wifi">Home Wi-Fi</option>
+                                                <option value="work_wifi">Work Wi-Fi</option>
+                                                <option value="public_wifi">Public Wi-Fi</option>
+                                                <option value="mobile_data">Mobile Data</option>
+                                                <option value="other">Other</option>
                                             </select>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="weather" class="form-label">Weather</label>
-                                            <input type="text" class="form-control" id="weather" name="weather"
-                                                placeholder="sunny, rainy, snowy">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="device_type" class="form-label">Device Type</label>
-                                            <select class="form-select" id="device_type" name="device_type">
-                                                <option value="">Select device type</option>
-                                                <option value="desktop">Desktop</option>
-                                                <option value="laptop">Laptop</option>
-                                                <option value="tablet">Tablet</option>
-                                                <option value="mobile">Mobile</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="browser_type" class="form-label">Browser Type</label>
-                                            <select class="form-select" id="browser_type" name="browser_type">
-                                                <option value="">Select browser type</option>
+                                            <label for="browser" class="form-label">Browser</label>
+                                            <select class="form-select" id="browser" name="browser">
+                                                <option value="" disabled selected>Select browser</option>
                                                 <option value="chrome">Chrome</option>
                                                 <option value="firefox">Firefox</option>
                                                 <option value="safari">Safari</option>
                                                 <option value="edge">Edge</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="screen_size" class="form-label">Screen Size</label>
-                                            <input type="text" class="form-control" id="screen_size" name="screen_size"
-                                                placeholder="1920x1080, 375x812">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="connection_type" class="form-label">Connection Type</label>
-                                            <select class="form-select" id="connection_type" name="connection_type">
-                                                <option value="">Select connection type</option>
-                                                <option value="wifi">WiFi</option>
-                                                <option value="ethernet">Ethernet</option>
-                                                <option value="4g">4G</option>
-                                                <option value="5g">5G</option>
+                                                <option value="other">Other</option>
                                             </select>
                                         </div>
 
@@ -728,547 +685,14 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Add a chart container with the correct ID -->
-                        <div class="tab-pane fade" id="chart-container" role="tabpanel" aria-labelledby="chart-tab">
-                            <div class="custom-card">
-                                <canvas id="myChart"></canvas>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"
-        integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp"
-        crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var changeRegionForm = document.getElementById('change-region-form');
-            if (changeRegionForm) {
-                changeRegionForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    var form = event.target;
-                    var formData = new FormData(form);
-                    document.getElementById('vpn-spinner').style.display = 'inline-block';
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData
-                    }).then(function (response) {
-                        return response.json();
-                    }).then(function (data) {
-                        if (data.status === 'changing') {
-                            document.getElementById('region').value = data.region;
-                            pollVpnStatus();
-                        }
-                    }).catch(function (error) {
-                        console.error("Error changing region:", error);
-                    });
-                });
-            }
-
-            var setGeolocationButton = document.getElementById('set-geolocation');
-            if (setGeolocationButton) {
-                setGeolocationButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
-                    // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
-
-                    // Update the hidden geolocation field in the form
-                    var geolocationInput = document.getElementById('form-geolocation');
-                    if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
-                    }
-
-                    // Update the save persona form geolocation field
-                    var saveGeolocationInput = document.getElementById('save-geolocation');
-                    if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
-                    }
-
-                    // Update the test browser form geolocation input
-                    var testGeolocationInput = document.getElementById('test-geolocation-input');
-                    if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
-                    }
-                });
-            }
-
-            let pollAttempts = 0;
-            function pollVpnStatus() {
-                fetch('/vpn-status')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.vpn_running && data.ip_info) {
-                            document.getElementById('vpn-spinner').style.display = 'none';
-                            document.getElementById('geolocation').textContent = data.ip_info.loc || 'Unavailable';
-
-                            // Update save persona form fields
-                            document.getElementById('save-geolocation').value = data.ip_info.loc || '';
-                            document.getElementById('save-country').value = data.ip_info.country || '';
-                            document.getElementById('save-city').value = data.ip_info.city || '';
-                            document.getElementById('save-region').value = data.ip_info.region || '';
-                        }
-                        if (pollAttempts < 5) {
-                            pollAttempts++;
-                            setTimeout(pollVpnStatus, 3000);
-                        }
-                    })
-                    .catch(error => console.error("Error polling VPN status:", error));
-            }
-            pollVpnStatus();
-
-            {% if vpn_running %}
-            document.getElementById('geolocation').textContent = "{{ ip_info.loc }}";
-            {% else %}
-            if (navigator.geolocation) {
-                console.log("Geolocation is supported.");
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    console.log("Geolocation success:", position);
-                    document.getElementById('geolocation').textContent = position.coords.latitude + ', ' + position.coords.longitude;
-                }, function (error) {
-                    console.error("Geolocation error:", error);
-                    document.getElementById('geolocation').textContent = 'Unavailable';
-                });
-            } else {
-                console.log("Geolocation is not supported.");
-                document.getElementById('geolocation').textContent = 'Not supported';
-            }
-            {% endif %}
-
-            // Add event listener to region dropdown to fetch geolocation and language when a region is selected
-            var regionSelect = document.getElementById('region');
-            if (regionSelect) {
-                regionSelect.addEventListener('change', function () {
-                    var selectedOption = this.options[this.selectedIndex];
-                    var regionCode = selectedOption.getAttribute('data-code');
-                    var regionName = selectedOption.textContent;
-                    if (regionCode) {
-                        fetch('/get-region-geolocation/' + regionCode)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.geolocation) {
-                                    document.getElementById('target-region').value = data.geolocation;
-                                    document.getElementById('geolocation').textContent = data.geolocation;
-
-                                    // Parse the geolocation coordinates
-                                    const coordinates = data.geolocation.split(',');
-                                    if (coordinates.length === 2) {
-                                        const lat = parseFloat(coordinates[0].trim());
-                                        const lng = parseFloat(coordinates[1].trim());
-                                        
-                                        // Update latitude and longitude input fields
-                                        const latitudeInput = document.getElementById('latitude');
-                                        const longitudeInput = document.getElementById('longitude');
-                                        if (latitudeInput && longitudeInput) {
-                                            latitudeInput.value = lat;
-                                            longitudeInput.value = lng;
-                                        }
-                                        
-                                        // Clear existing markers and add a new one
-                                        if (window.markersLayer) {
-                                            window.markersLayer.clearLayers();
-                                        } else {
-                                            window.markersLayer = L.layerGroup().addTo(window.map);
-                                        }
-                                        
-                                        // Create a marker with popup showing the region info
-                                        const marker = L.marker([lat, lng])
-                                            .addTo(window.markersLayer)
-                                            .bindPopup(`<b>${regionName}</b><br>Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-                                            .openPopup();
-                                        
-                                        // Center the map on the new location with appropriate zoom
-                                        window.map.setView([lat, lng], 5);
-                                    }
-
-                                    // Update language dropdown based on region
-                                    var targetLanguage = document.getElementById('target-language');
-                                    var selectedLanguage;
-
-                                    switch (regionCode) {
-                                        case 'US':
-                                            selectedLanguage = 'en-US';
-                                            break;
-                                        case 'BR':
-                                            selectedLanguage = 'pt-BR';
-                                            break;
-                                        case 'DE':
-                                            selectedLanguage = 'de-DE';
-                                            break;
-                                        case 'JP':
-                                            selectedLanguage = 'ja-JP';
-                                            break;
-                                        case 'ZA':
-                                            selectedLanguage = 'af-ZA';
-                                            break;
-                                        default:
-                                            selectedLanguage = 'en-US';
-                                    }
-
-                                    // Set the language dropdown value
-                                    targetLanguage.value = selectedLanguage;
-
-                                    // Update language in the Persona section
-                                    var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
-                                    if (personaLanguageElement) {
-                                        personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
-                                    }
-
-                                    // Update the hidden language input field in the form
-                                    var languageInput = document.querySelector('form input[name="language"]');
-                                    if (languageInput) {
-                                        languageInput.value = selectedLanguage;
-                                    }
-
-                                    // Update the save persona form language field
-                                    var saveLanguageInput = document.getElementById('save-language');
-                                    if (saveLanguageInput) {
-                                        saveLanguageInput.value = selectedLanguage;
-                                    }
-                                }
-                            })
-                            .catch(error => console.error("Error fetching geolocation:", error));
-                    }
-                });
-            }
-
-            // Add event listener to set language button
-            var setLanguageButton = document.getElementById('set-language');
-            if (setLanguageButton) {
-                setLanguageButton.addEventListener('click', function () {
-                    var selectedLanguage = document.getElementById('target-language').value;
-                    // Update language in the Persona section
-                    var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
-                    if (personaLanguageElement) {
-                        personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
-                    }
-
-                    // Update the hidden language input field in the form
-                    var languageInput = document.querySelector('form input[name="language"]');
-                    if (languageInput) {
-                        languageInput.value = selectedLanguage;
-                    }
-
-                    // Update the save persona form language field
-                    var saveLanguageInput = document.getElementById('save-language');
-                    if (saveLanguageInput) {
-                        saveLanguageInput.value = selectedLanguage;
-                    }
-
-                    // Update the test browser form language input
-                    var testLanguageInput = document.getElementById('test-language-input');
-                    if (testLanguageInput) {
-                        testLanguageInput.value = selectedLanguage;
-                        console.log("Set language to:", selectedLanguage);
-                    }
-                });
-            }
-
-            // Update test browser form when geolocation is set
-            var setGeolocationButton = document.getElementById('set-geolocation');
-            if (setGeolocationButton) {
-                setGeolocationButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
-                    // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
-
-                    // Update the hidden geolocation field in the form
-                    var geolocationInput = document.getElementById('form-geolocation');
-                    if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
-                    }
-
-                    // Update the save persona form geolocation field
-                    var saveGeolocationInput = document.getElementById('save-geolocation');
-                    if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
-                    }
-
-                    // Update the test browser form geolocation input
-                    var testGeolocationInput = document.getElementById('test-geolocation-input');
-                    if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
-                    }
-                });
-            }
-
-            // Update our duplicate setGeolocationButton handler to avoid conflicts
-            var setGeolocationButton = document.getElementById('set-geolocation');
-            if (setGeolocationButton) {
-                // Clear previous event listeners by cloning and replacing
-                var newSetGeoButton = setGeolocationButton.cloneNode(true);
-                setGeolocationButton.parentNode.replaceChild(newSetGeoButton, setGeolocationButton);
-                
-                newSetGeoButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
-                    // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
-
-                    // Update the hidden geolocation field in the form
-                    var geolocationInput = document.getElementById('form-geolocation');
-                    if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
-                    }
-
-                    // Update the save persona form geolocation field
-                    var saveGeolocationInput = document.getElementById('save-geolocation');
-                    if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
-                    }
-                    
-                    // Update the test browser form geolocation input
-                    var testGeolocationInput = document.getElementById('test-geolocation-input');
-                    if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
-                    }
-                    
-                    // Update map with the new coordinates
-                    const coordinates = targetRegion.split(',');
-                    if (coordinates.length === 2) {
-                        const lat = parseFloat(coordinates[0].trim());
-                        const lng = parseFloat(coordinates[1].trim());
-                        
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            // Update latitude and longitude input fields
-                            const latitudeInput = document.getElementById('latitude');
-                            const longitudeInput = document.getElementById('longitude');
-                            if (latitudeInput && longitudeInput) {
-                                latitudeInput.value = lat;
-                                longitudeInput.value = lng;
-                            }
-                            
-                            // Clear existing markers and add a new one
-                            if (window.markersLayer) {
-                                window.markersLayer.clearLayers();
-                            }
-                            
-                            // Add marker and center map
-                            L.marker([lat, lng])
-                                .addTo(window.markersLayer)
-                                .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-                                .openPopup();
-                            
-                            // Center the map on the new location with appropriate zoom
-                            window.map.setView([lat, lng], 5);
-                        }
-                    }
-                });
-            }
-
-            // Update form fields before submitting
-            var testBrowserForm = document.getElementById('test-browser-form');
-            if (testBrowserForm) {
-                testBrowserForm.addEventListener('submit', function (event) {
-                    // Get current values
-                    var currentLanguage = document.getElementById('target-language').value;
-                    var currentGeolocation = document.getElementById('target-region').value;
-
-                    console.log("Applying and testing with language:", currentLanguage, "and geolocation:", currentGeolocation);
-
-                    // Update the form fields
-                    document.getElementById('test-language-input').value = currentLanguage;
-                    document.getElementById('test-geolocation-input').value = currentGeolocation;
-                });
-            }
-
-            // Initialize test browser form with current values
-            // Set initial language value
-            var currentLanguage = document.getElementById('target-language').value;
-            var testLanguageInput = document.getElementById('test-language-input');
-            if (testLanguageInput && currentLanguage) {
-                testLanguageInput.value = currentLanguage;
-            }
-
-            // Set initial geolocation value
-            var currentGeolocation = document.getElementById('target-region').value;
-            var testGeolocationInput = document.getElementById('test-geolocation-input');
-            if (testGeolocationInput && currentGeolocation) {
-                testGeolocationInput.value = currentGeolocation;
-                console.log("Setting test geolocation input to:", currentGeolocation);
-            } else if (testGeolocationInput) {
-                // If no geolocation is set, use the current geolocation from the persona section
-                var personaGeolocation = document.getElementById('geolocation').textContent;
-                if (personaGeolocation && personaGeolocation !== 'Fetching...' && personaGeolocation !== 'Unavailable' && personaGeolocation !== 'Not supported') {
-                    testGeolocationInput.value = personaGeolocation;
-                    console.log("Setting test geolocation input from persona:", personaGeolocation);
-                }
-            }
-
-            // Set language
-            document.getElementById('browser-language').textContent = navigator.language || 'Unavailable';
-
-            // Set user agent
-            document.getElementById('browser-user-agent').textContent = navigator.userAgent || 'Unavailable';
-
-            // Set geolocation
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    document.getElementById('browser-geolocation').textContent =
-                        position.coords.latitude + ', ' + position.coords.longitude;
-                }, function () {
-                    document.getElementById('browser-geolocation').textContent = 'Unavailable';
-                });
-            } else {
-                document.getElementById('browser-geolocation').textContent = 'Not supported';
-            }
-
-            // Handle flash messages from cookies
-            function getCookie(name) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${name}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-            }
-
-            const flashMessage = getCookie('flash_message');
-            if (flashMessage) {
-                const flashContainer = document.getElementById('flash-message-container');
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.role = 'alert';
-                alertDiv.innerHTML = decodeURIComponent(flashMessage) +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-                flashContainer.appendChild(alertDiv);
-
-                // Clear the cookie
-                document.cookie = 'flash_message=; Max-Age=0; path=/;';
-            }
-
-            // Add event listeners for tab changes to update form fields with current geolocation and language
-            document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function (tabLink) {
-                tabLink.addEventListener('shown.bs.tab', function (event) {
-                    const targetTab = event.target.getAttribute('aria-controls');
-                    const currentGeolocation = document.getElementById('geolocation').textContent;
-                    const currentLanguage = document.querySelector('.custom-card .row .col:nth-child(2)').textContent.replace('Language:', '').trim();
-                    const currentCountry = "{% if vpn_running %}{{ ip_info.country }}{% endif %}";
-                    const currentCity = "{% if vpn_running %}{{ ip_info.city }}{% endif %}";
-                    const currentRegion = "{% if vpn_running %}{{ ip_info.region }}{% endif %}";
-
-                    // Add hidden fields to the forms for demographic data
-                    if (targetTab === 'psychographic') {
-                        // Add hidden fields to psychographic form
-                        const form = document.getElementById('psychographic-form');
-                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
-                    } else if (targetTab === 'behavior') {
-                        // Add hidden fields to behavioral form
-                        const form = document.getElementById('behavioral-form');
-                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
-                    } else if (targetTab === 'contextual') {
-                        // Add hidden fields to contextual form
-                        const form = document.getElementById('contextual-form');
-                        addHiddenFields(form, currentGeolocation, currentLanguage, currentCountry, currentCity, currentRegion);
-                    }
-                });
-            });
-
-            // Function to add hidden fields to a form
-            function addHiddenFields(form, geolocation, language, country, city, region) {
-                // Check if fields already exist
-                if (!form.querySelector('input[name="geolocation"]')) {
-                    const geoField = document.createElement('input');
-                    geoField.type = 'hidden';
-                    geoField.name = 'geolocation';
-                    geoField.value = geolocation;
-                    form.appendChild(geoField);
-                } else {
-                    form.querySelector('input[name="geolocation"]').value = geolocation;
-                }
-
-                if (!form.querySelector('input[name="language"]')) {
-                    const langField = document.createElement('input');
-                    langField.type = 'hidden';
-                    langField.name = 'language';
-                    langField.value = language;
-                    form.appendChild(langField);
-                } else {
-                    form.querySelector('input[name="language"]').value = language;
-                }
-
-                if (!form.querySelector('input[name="country"]')) {
-                    const countryField = document.createElement('input');
-                    countryField.type = 'hidden';
-                    countryField.name = 'country';
-                    countryField.value = country;
-                    form.appendChild(countryField);
-                } else {
-                    form.querySelector('input[name="country"]').value = country;
-                }
-
-                if (!form.querySelector('input[name="city"]')) {
-                    const cityField = document.createElement('input');
-                    cityField.type = 'hidden';
-                    cityField.name = 'city';
-                    cityField.value = city;
-                    form.appendChild(cityField);
-                } else {
-                    form.querySelector('input[name="city"]').value = city;
-                }
-
-                if (!form.querySelector('input[name="region"]')) {
-                    const regionField = document.createElement('input');
-                    regionField.type = 'hidden';
-                    regionField.name = 'region';
-                    regionField.value = region;
-                    form.appendChild(regionField);
-                } else {
-                    form.querySelector('input[name="region"]').value = region;
-                }
-            }
-
-            // Add event listener for manual lat/lng entry to update map
-            const latitudeInput = document.getElementById('latitude');
-            const longitudeInput = document.getElementById('longitude');
-            
-            if (latitudeInput && longitudeInput) {
-                const updateMapFromCoords = function() {
-                    const lat = parseFloat(latitudeInput.value);
-                    const lng = parseFloat(longitudeInput.value);
-                    
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        // Update the target-region input
-                        document.getElementById('target-region').value = `${lat}, ${lng}`;
-                        
-                        // Clear existing markers and add a new one
-                        window.markersLayer.clearLayers();
-                        
-                        // Add marker and center map
-                        L.marker([lat, lng])
-                            .addTo(window.markersLayer)
-                            .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-                            .openPopup();
-                        
-                        // Center the map on the new location with appropriate zoom
-                        window.map.setView([lat, lng], 5);
-                    }
-                };
-                
-                // Add blur event listeners to update map when user finishes typing
-                latitudeInput.addEventListener('blur', updateMapFromCoords);
-                longitudeInput.addEventListener('blur', updateMapFromCoords);
-                
-                // Also add a button to manually update from the inputs
-                const coordsCard = latitudeInput.closest('.custom-card');
-                if (coordsCard) {
-                    const updateButton = document.createElement('button');
-                    updateButton.type = 'button';
-                    updateButton.className = 'btn btn-primary mt-2';
-                    updateButton.textContent = 'Update Map';
-                    updateButton.addEventListener('click', updateMapFromCoords);
-                    coordsCard.appendChild(updateButton);
-                }
-            }
-        });
-    </script>
-    <i class="bi bi-moon-stars-fill my-1" style="font-size: 16px;"></i>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
-
 </html>

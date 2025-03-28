@@ -21,7 +21,7 @@ def main():
         parser.add_argument('--language', default='en-US', help='Language setting (e.g., en-US, pt-BR)')
         parser.add_argument('--geolocation', help='Geolocation coordinates (format: latitude,longitude)')
         parser.add_argument('--keep-open', action='store_true', help='Keep browser open until manually closed')
-        parser.add_argument('--wait-time', type=int, default=60, help='Time to keep browser open (in seconds) if --keep-open is not used')
+        parser.add_argument('--wait-time', type=int, default=10, help='Time to keep browser open (in seconds) if --keep-open is not used')
         args = parser.parse_args()
 
         # Log the parameters

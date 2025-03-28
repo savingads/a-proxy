@@ -5,8 +5,8 @@
     <h1>Memento Viewer</h1>
     
     <div class="mb-4">
-        <a href="{{ url_for('view_archive', archived_website_id=archived_website.id) }}" class="btn btn-primary">Back to Archive</a>
-        <a href="{{ url_for('list_archives') }}" class="btn btn-secondary">Back to Archives</a>
+        <a href="{{ url_for('archives.view_archive', archived_website_id=archived_website.id) }}" class="btn btn-primary">Back to Archive</a>
+        <a href="{{ url_for('archives.list_archives') }}" class="btn btn-secondary">Back to Archives</a>
     </div>
     
     <div class="row mb-4">

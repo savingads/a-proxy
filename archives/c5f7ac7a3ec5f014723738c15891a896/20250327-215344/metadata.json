@@ -1,0 +1,18 @@
+{
+  "url": "http://www.yahoo.com",
+  "title": "Yahoo | Mail, Weather, Search, Politics, News, Finance, Sports & Videos",
+  "timestamp": "20250327-215344",
+  "language": "",
+  "geolocation": null,
+  "persona_id": null,
+  "http_status": 429,
+  "content_type": "text/html",
+  "content_length": 23,
+  "headers": {
+    "Date": "Fri, 28 Mar 2025 01:53:52 GMT",
+    "Connection": "close",
+    "Server": "ATS",
+    "Content-Length": "23",
+    "Content-Type": "text/html"
+  }
+}

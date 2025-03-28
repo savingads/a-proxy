@@ -181,14 +181,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (setLanguageButton) {
         setLanguageButton.addEventListener('click', function () {
             var selectedLanguage = document.getElementById('target-language').value;
+            
             // Update language in the Persona section
             var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
             if (personaLanguageElement) {
                 personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + selectedLanguage;
             }
 
-            // Update the hidden language input field in the form
-            var languageInput = document.querySelector('form input[name="language"]');
+            // Update the hidden language input field in the preview form
+            var languageInput = document.querySelector('#preview-form input[name="language"]');
             if (languageInput) {
                 languageInput.value = selectedLanguage;
             }
@@ -205,6 +206,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 testLanguageInput.value = selectedLanguage;
                 console.log("Set language to:", selectedLanguage);
             }
+            
+            // Alert user that language has been set
+            console.log("Language set to:", selectedLanguage);
         });
     }
 
@@ -225,9 +229,12 @@ document.addEventListener('DOMContentLoaded', function () {
             var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
             
             // Update geolocation in the Persona section
-            document.getElementById('geolocation').textContent = combinedGeolocation;
+            var geoElement = document.getElementById('geolocation');
+            if (geoElement) {
+                geoElement.textContent = combinedGeolocation;
+            }
 
-            // Update the hidden geolocation field in the form
+            // Update the hidden geolocation field in the preview form
             var geolocationInput = document.getElementById('form-geolocation');
             if (geolocationInput) {
                 geolocationInput.value = combinedGeolocation;
@@ -251,30 +258,30 @@ document.addEventListener('DOMContentLoaded', function () {
             const lng = parseFloat(targetLongitude);
             
             if (!isNaN(lat) && !isNaN(lng)) {
-                
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    // Update latitude and longitude input fields
-                    const latitudeInput = document.getElementById('latitude');
-                    const longitudeInput = document.getElementById('longitude');
-                    if (latitudeInput && longitudeInput) {
-                        latitudeInput.value = lat;
-                        longitudeInput.value = lng;
-                    }
-                    
-                    // Clear existing markers and add a new one
-                    if (window.markersLayer) {
-                        window.markersLayer.clearLayers();
-                    }
-                    
-                    // Add marker and center map
-                    L.marker([lat, lng])
-                        .addTo(window.markersLayer)
-                        .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-                        .openPopup();
-                    
-                    // Center the map on the new location with appropriate zoom
-                    window.map.setView([lat, lng], 5);
+                // Update latitude and longitude input fields
+                const latitudeInput = document.getElementById('latitude');
+                const longitudeInput = document.getElementById('longitude');
+                if (latitudeInput && longitudeInput) {
+                    latitudeInput.value = lat;
+                    longitudeInput.value = lng;
                 }
+                
+                // Clear existing markers and add a new one
+                if (window.markersLayer) {
+                    window.markersLayer.clearLayers();
+                }
+                
+                // Add marker and center map
+                L.marker([lat, lng])
+                    .addTo(window.markersLayer)
+                    .bindPopup(`<b>Custom Location</b><br>Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                    .openPopup();
+                
+                // Center the map on the new location with appropriate zoom
+                window.map.setView([lat, lng], 5);
+                
+                // Alert user that geolocation has been set
+                console.log("Geolocation set to:", combinedGeolocation);
             }
         });
     }
@@ -297,31 +304,61 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Initialize test browser form with current values
-    // Set initial language value
-    var currentLanguage = document.getElementById('target-language').value;
-    var testLanguageInput = document.getElementById('test-language-input');
-    if (testLanguageInput && currentLanguage) {
-        testLanguageInput.value = currentLanguage;
-    }
+    // Initialize the test browser form with current values
+    function initializeTestForm() {
+        // Set initial language value from target language dropdown
+        var currentLanguage = document.getElementById('target-language').value;
+        var testLanguageInput = document.getElementById('test-language-input');
+        if (testLanguageInput && currentLanguage) {
+            testLanguageInput.value = currentLanguage;
+            
+            // Also update the language in the Persona section
+            var personaLanguageElement = document.querySelector('.custom-card .row .col:nth-child(2)');
+            if (personaLanguageElement) {
+                personaLanguageElement.innerHTML = '<strong>Language:</strong> ' + currentLanguage;
+            }
+            
+            // Update the save persona form language field
+            var saveLanguageInput = document.getElementById('save-language');
+            if (saveLanguageInput) {
+                saveLanguageInput.value = currentLanguage;
+            }
+        }
 
-    // Set initial geolocation value from target latitude and longitude
-    var targetLatitude = document.getElementById('target-latitude').value.trim();
-    var targetLongitude = document.getElementById('target-longitude').value.trim();
-    var testGeolocationInput = document.getElementById('test-geolocation-input');
-    
-    if (testGeolocationInput && targetLatitude && targetLongitude) {
-        var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
-        testGeolocationInput.value = combinedGeolocation;
-        console.log("Setting test geolocation input to:", combinedGeolocation);
-    } else if (testGeolocationInput) {
-        // If no geolocation is set, use the current geolocation from the persona section
-        var personaGeolocation = document.getElementById('geolocation').textContent;
-        if (personaGeolocation && personaGeolocation !== 'Fetching...' && personaGeolocation !== 'Unavailable' && personaGeolocation !== 'Not supported') {
-            testGeolocationInput.value = personaGeolocation;
-            console.log("Setting test geolocation input from persona:", personaGeolocation);
+        // Set initial geolocation value from target latitude and longitude fields
+        var targetLatitude = document.getElementById('target-latitude').value.trim();
+        var targetLongitude = document.getElementById('target-longitude').value.trim();
+        var testGeolocationInput = document.getElementById('test-geolocation-input');
+        
+        if (testGeolocationInput && targetLatitude && targetLongitude) {
+            var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
+            testGeolocationInput.value = combinedGeolocation;
+            
+            // Also update the geolocation in the Persona section
+            var geoElement = document.getElementById('geolocation');
+            if (geoElement && combinedGeolocation) {
+                geoElement.textContent = combinedGeolocation;
+            }
+            
+            // Update the save persona form geolocation field
+            var saveGeolocationInput = document.getElementById('save-geolocation');
+            if (saveGeolocationInput) {
+                saveGeolocationInput.value = combinedGeolocation;
+            }
+            
+            console.log("Setting test geolocation input to:", combinedGeolocation);
+        } else if (testGeolocationInput) {
+            // If no geolocation is set, use the current geolocation from the persona section
+            var personaGeolocation = document.getElementById('geolocation').textContent;
+            if (personaGeolocation && personaGeolocation !== 'Fetching...' && personaGeolocation !== 'Unavailable' && personaGeolocation !== 'Not supported') {
+                testGeolocationInput.value = personaGeolocation;
+                console.log("Setting test geolocation input from persona:", personaGeolocation);
+            }
         }
     }
+    
+    // Initialize the form values when the document is loaded
+    initializeTestForm();
 
     // Set current browser metadata
     function updateBrowserMetadata() {

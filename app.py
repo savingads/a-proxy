@@ -109,7 +109,15 @@ def prepare_form_object(persona):
     
     # Set demographic data
     demographic = persona.get('demographic', {})
-    form_obj.geolocation = demographic.get('geolocation', '')
+    
+    # Combine latitude and longitude into geolocation string if they exist
+    latitude = demographic.get('latitude')
+    longitude = demographic.get('longitude')
+    if latitude is not None and longitude is not None:
+        form_obj.geolocation = f"{latitude}, {longitude}"
+    else:
+        form_obj.geolocation = demographic.get('geolocation', '')
+    
     form_obj.language = demographic.get('language', 'en-US')
     form_obj.country = demographic.get('country', '')
     form_obj.city = demographic.get('city', '')
@@ -191,10 +199,92 @@ def index():
             
             # Use language and geolocation from persona if available
             language = form_obj.language
-            geolocation = form_obj.geolocation
+            
+            # Get latitude and longitude from demographic data
+            demographic = persona.get('demographic', {})
+            latitude = demographic.get('latitude')
+            longitude = demographic.get('longitude')
+            geolocation = None
+            
+            # Create a geolocation string if latitude and longitude exist
+            if latitude is not None and longitude is not None:
+                geolocation = f"{latitude}, {longitude}"
+                
+                # Add latitude and longitude to ip_info to populate target fields
+                if 'loc' not in ip_info:
+                    ip_info = ip_info or {}
+                    ip_info['loc'] = geolocation
             
             # Set fields at top of page
             flash(f"Using persona: {persona['name']}", "success")
+            
+            # Get language from the persona
+            persona_language = demographic.get('language', 'en-US')
+            
+            # Set additional template variables for JavaScript to use
+            extra_script = f"""
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {{
+                    // Update target latitude and longitude fields
+                    const targetLatitudeInput = document.getElementById('target-latitude');
+                    const targetLongitudeInput = document.getElementById('target-longitude');
+                    const latitudeInput = document.getElementById('latitude');
+                    const longitudeInput = document.getElementById('longitude');
+                    const targetLanguageSelect = document.getElementById('target-language');
+                    
+                    if (targetLatitudeInput && targetLongitudeInput) {{
+                        targetLatitudeInput.value = "{latitude or ''}";
+                        targetLongitudeInput.value = "{longitude or ''}";
+                    }}
+                    
+                    if (latitudeInput && longitudeInput) {{
+                        latitudeInput.value = "{latitude or ''}";
+                        longitudeInput.value = "{longitude or ''}";
+                    }}
+                    
+                    // Set the language dropdown to match the persona's language
+                    if (targetLanguageSelect) {{
+                        // Try to find the option with the matching value
+                        const languageValue = "{persona_language}";
+                        const options = targetLanguageSelect.options;
+                        
+                        let found = false;
+                        for (let i = 0; i < options.length; i++) {{
+                            if (options[i].value === languageValue) {{
+                                targetLanguageSelect.selectedIndex = i;
+                                found = true;
+                                break;
+                            }}
+                        }}
+                        
+                        // If not found, dynamically add the option
+                        if (!found && languageValue) {{
+                            const newOption = document.createElement('option');
+                            newOption.value = languageValue;
+                            newOption.text = languageValue;
+                            targetLanguageSelect.add(newOption);
+                            targetLanguageSelect.value = languageValue;
+                        }}
+                        
+                        // Trigger the language change event
+                        const setLanguageButton = document.getElementById('set-language');
+                        if (setLanguageButton) {{
+                            setTimeout(function() {{
+                                setLanguageButton.click();
+                            }}, 700);
+                        }}
+                    }}
+                    
+                    // Trigger the geolocation update to update the map
+                    const setGeoButton = document.getElementById('set-geolocation');
+                    if (setGeoButton) {{
+                        setTimeout(function() {{
+                            setGeoButton.click();
+                        }}, 500);
+                    }}
+                }});
+            </script>
+            """
             
             return render_template("index.html", 
                               form=form,
@@ -205,7 +295,8 @@ def index():
                               geolocation=geolocation,
                               country=form_obj.country,
                               city=form_obj.city,
-                              region=form_obj.region)
+                              region=form_obj.region,
+                              extra_script=extra_script)
         except Exception as e:
             logging.error(f"Error using persona: {e}")
             flash(f"Error loading persona: {str(e)}", "danger")

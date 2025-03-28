@@ -164,11 +164,58 @@ def dashboard():
                           city=city,
                           region=region)
 
+@persona_bp.route("/view-persona/<int:persona_id>", methods=["GET"])
+def view_persona(persona_id):
+    """View the details of a persona in read-only mode."""
+    try:
+        # Get persona data from database
+        persona = database.get_persona(persona_id)
+        
+        # Create a form object to use with the template (for display only)
+        form_obj = prepare_form_object(persona)
+        
+        # Prepare page data
+        vpn_running = is_vpn_running()
+        ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+        
+        # Use language from persona
+        language = form_obj.language
+        
+        # Get latitude and longitude from demographic data
+        demographic = persona.get('demographic', {})
+        latitude = demographic.get('latitude')
+        longitude = demographic.get('longitude')
+        geolocation = None
+        
+        if latitude is not None and longitude is not None:
+            geolocation = f"{latitude}, {longitude}"
+            
+            # Add to ip_info for template
+            if 'loc' not in ip_info:
+                ip_info = ip_info or {}
+                ip_info['loc'] = geolocation
+        
+        return render_template("persona_view.html", 
+                          form=form_obj,
+                          vpn_running=vpn_running, 
+                          ip_info=ip_info, 
+                          language=language,
+                          persona_name=persona['name'],
+                          persona_id=persona_id,
+                          geolocation=geolocation,
+                          country=form_obj.country,
+                          city=form_obj.city,
+                          region=form_obj.region)
+                          
+    except Exception as e:
+        logging.error(f"Error viewing persona: {e}")
+        flash(f"Error viewing persona: {str(e)}", "danger")
+        return redirect(url_for('persona.list_personas'))
+
 @persona_bp.route("/use-persona/<int:persona_id>", methods=["GET"])
 def use_persona(persona_id):
-    """Retrieve persona data and redirect to index page with persona_id parameter."""
-    # Simply redirect to index with persona_id as a parameter
-    return redirect(url_for('persona.dashboard', persona_id=persona_id))
+    """Redirect to the view persona page."""
+    return redirect(url_for('persona.view_persona', persona_id=persona_id))
 
 @persona_bp.route("/personas", methods=["GET"])
 def list_personas():

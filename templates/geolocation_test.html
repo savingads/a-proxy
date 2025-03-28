@@ -53,11 +53,11 @@
 <body>
     <!-- Header bar -->
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home') }}">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
             <i class="bi bi-house-door me-2"></i>A-Proxy
         </a>
         <div class="d-flex align-items-center">
-            <a href="{{ url_for('index') }}" class="btn btn-outline-light me-3">
+            <a href="{{ url_for('persona.dashboard') }}" class="btn btn-outline-light me-3">
                 <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
             </a>
         </div>
@@ -140,7 +140,7 @@
                         </div>
                         
                         <div class="text-center mt-4">
-                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <a href="{{ url_for('persona.dashboard') }}" class="btn btn-primary">
                                 <i class="bi bi-arrow-left me-1"></i> Return to Dashboard
                             </a>
                         </div>

@@ -160,6 +160,20 @@ def save_persona(persona_data):
         
         # Insert demographic data
         demographic = persona_data.get('demographic', {})
+        
+        # Parse geolocation string into latitude and longitude if it exists
+        latitude = None
+        longitude = None
+        geolocation = demographic.get('geolocation', '')
+        if geolocation and ',' in geolocation:
+            try:
+                lat_str, lng_str = geolocation.split(',', 1)
+                latitude = float(lat_str.strip())
+                longitude = float(lng_str.strip())
+            except (ValueError, TypeError):
+                # If parsing fails, leave latitude and longitude as None
+                pass
+        
         cursor.execute(
             """
             INSERT INTO demographic_data 
@@ -168,8 +182,8 @@ def save_persona(persona_data):
             """,
             (
                 persona_id,
-                demographic.get('latitude'),
-                demographic.get('longitude'),
+                latitude,
+                longitude,
                 demographic.get('language'),
                 demographic.get('country'),
                 demographic.get('city'),

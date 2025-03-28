@@ -760,6 +760,9 @@
     <!-- Include the external JavaScript file -->
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <i class="bi bi-moon-stars-fill my-1" style="font-size: 16px;"></i>
+    
+    <!-- Extra script for persona data -->
+    {{ extra_script|safe if extra_script else '' }}
 </body>
 
 </html>

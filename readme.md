@@ -19,6 +19,7 @@ A-Proxy is a tool that allows you to test websites with different geolocation an
 - Linux-based system (Ubuntu/Debian recommended)
 - Python 3.6+
 - pip (Python package manager)
+- Node.js and npm (for frontend dependencies)
 - sudo privileges for VPN setup
 
 ### Clone the Repository
@@ -36,6 +37,14 @@ It is recommended to use a virtual environment to avoid conflicts with system-wi
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Install Node.js Dependencies
+
+The application uses some JavaScript libraries for the frontend. Install them with:
+
+```bash
+npm install
 ```
 
 ### Install OpenVPN
@@ -95,6 +104,28 @@ If you want to use a different VPN provider:
 2. Place them in a directory structure similar to `nordvpn/ovpn_udp/`
 3. Update the VPN paths in `services.py` and `app.py` to point to your configuration files
 
+## Database Setup
+
+### For Fresh Installation
+
+The application will automatically create and initialize the database on first run, but you can also manually set up the database and add sample data:
+
+```bash
+# Initialize the database
+python database.py
+
+# (Optional) Add sample personas
+python create_sample_personas.py
+```
+
+### For Existing Installations
+
+If you're upgrading from a previous version, update your database schema:
+
+```bash
+python migrate_database.py
+```
+
 ## Running the Application
 
 Start the Flask web server:
@@ -140,7 +171,7 @@ The application comes pre-configured with the following regions:
 
 ## Updating to the Latest Version
 
-If you already have A-Proxy installed and want to update to include the new archiving functionality, follow these steps:
+If you already have A-Proxy installed and want to update to the latest version with new features, follow these steps:
 
 1. Pull the latest changes from the repository:
    ```bash
@@ -148,12 +179,24 @@ If you already have A-Proxy installed and want to update to include the new arch
    git pull origin main
    ```
 
-2. Update the database schema to include the new archive tables:
+2. Update Python dependencies (activate your virtual environment first if you're using one):
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Update Node.js dependencies for the frontend:
+   ```bash
+   npm install
+   ```
+
+4. Update the database schema to include new tables and fields:
    ```bash
    python migrate_database.py
    ```
 
-3. Restart the application:
+5. Check for any new configuration requirements in the updated readme or by examining the code changes.
+
+6. Restart the application:
    ```bash
    python app.py --port 5001
    ```
@@ -188,6 +231,20 @@ The archive feature allows you to save snapshots of websites for future referenc
 - Ensure Google Chrome or Chromium is installed
 - Verify the browser path in `selenium_proxy.py` matches your installation
 - Install the required Selenium dependencies with `pip install selenium webdriver-manager`
+
+### Database and Upgrade Issues
+
+- If you encounter database errors after upgrading, try:
+  - Backing up your personas.db file (`cp personas.db personas.db.backup`)
+  - Running the migration script again (`python migrate_database.py`)
+  - If problems persist, consider initializing a fresh database (`python database.py`) after backing up your data
+- For changes that don't appear after updating:
+  - Clear your browser cache or use incognito/private mode
+  - Restart the application completely
+  - Check the console for JavaScript errors
+- If you experience errors with the archive feature:
+  - Ensure the 'archives' directory exists and is writable
+  - Check that the required Python packages are installed
 
 ## License
 

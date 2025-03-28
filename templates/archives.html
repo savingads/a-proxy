@@ -1,0 +1,57 @@
+{% extends "home.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Archived Websites</h1>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+    
+    {% if archived_websites %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Persona</th>
+                        <th>Archive Type</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for website in archived_websites %}
+                    <tr>
+                        <td>
+                            <a href="{{ website.uri_r }}" target="_blank" title="Open original URL">
+                                {{ website.uri_r|truncate(50) }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if website.persona_id %}
+                                {{ website.persona_name }}
+                            {% else %}
+                                <em>None</em>
+                            {% endif %}
+                        </td>
+                        <td>{{ website.archive_type }}</td>
+                        <td>{{ website.created_at }}</td>
+                        <td>
+                            <a href="{{ url_for('view_archive', archived_website_id=website.id) }}" 
+                               class="btn btn-sm btn-info">
+                                View Mementos
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No archived websites found. Visit a page and use the "Archive Page" button to create archives.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

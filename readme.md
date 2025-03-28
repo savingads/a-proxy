@@ -10,7 +10,8 @@ A-Proxy is a tool that allows you to test websites with different geolocation an
 - Create and manage user personas with demographic, psychographic, behavioral, and contextual data
 - Take screenshots of websites with the simulated settings
 - Web interface for easy management
-- Planned additions for archving webpages in WARC format
+- Archive webpages with metadata and screenshots
+- Store multiple mementos (snapshots) of the same URL over time
 ## Installation
 
 ### Prerequisites
@@ -34,8 +35,6 @@ It is recommended to use a virtual environment to avoid conflicts with system-wi
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-
-```bash
 pip install -r requirements.txt
 ```
 
@@ -57,14 +56,6 @@ sudo apt install -y chromium-browser
 ```
 
 After installation, verify that Chrome is installed at `/usr/bin/google-chrome`. If it's installed at a different location, update the `binary_location` in `selenium_proxy.py`.
-
-### Install Selenium WebDriver Dependencies
-
-Install the required Python dependencies (including Selenium and WebDriver Manager) using:
-
-```bash
-pip install -r requirements.txt
-```
 
 ## VPN Configuration
 
@@ -147,6 +138,42 @@ The application comes pre-configured with the following regions:
 - Japan (JP)
 - South Africa (ZA)
 
+## Updating to the Latest Version
+
+If you already have A-Proxy installed and want to update to include the new archiving functionality, follow these steps:
+
+1. Pull the latest changes from the repository:
+   ```bash
+   cd a-proxy
+   git pull origin main
+   ```
+
+2. Update the database schema to include the new archive tables:
+   ```bash
+   python migrate_database.py
+   ```
+
+3. Restart the application:
+   ```bash
+   python app.py --port 5001
+   ```
+
+### Using the Archive Feature
+
+The archive feature allows you to save snapshots of websites for future reference:
+
+1. Enter a URL in the main interface
+2. Click the "Archive" button instead of "Preview"
+3. The page will be archived with its current state, including:
+   - HTML content
+   - Screenshot
+   - HTTP headers and metadata
+   - Association with the selected persona (if any)
+
+4. Access your archived pages by clicking on "Archived Pages" in the sidebar
+5. View details of an archived page by clicking "View Mementos"
+6. Each archived URL can have multiple mementos (snapshots taken at different times)
+
 ## Troubleshooting
 
 ### VPN Connection Issues
@@ -165,4 +192,3 @@ The application comes pre-configured with the following regions:
 ## License
 
 GPL-3.0 License
-

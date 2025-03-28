@@ -96,6 +96,37 @@ def init_db():
     )
     ''')
     
+    # Create archived websites table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS archived_websites (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uri_r TEXT NOT NULL,
+        persona_id INTEGER,
+        archive_type TEXT NOT NULL,
+        archive_location TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (persona_id) REFERENCES personas (id) ON DELETE SET NULL
+    )
+    ''')
+    
+    # Create mementos table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS mementos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        archived_website_id INTEGER NOT NULL,
+        memento_datetime TIMESTAMP NOT NULL,
+        memento_location TEXT NOT NULL,
+        http_status INTEGER,
+        content_type TEXT,
+        content_length INTEGER,
+        headers TEXT,
+        screenshot_path TEXT,
+        internet_archive_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (archived_website_id) REFERENCES archived_websites (id) ON DELETE CASCADE
+    )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -332,6 +363,224 @@ def get_persona(persona_id):
     
     conn.close()
     return persona
+
+def save_archived_website(url, persona_id=None, archive_type='filesystem', archive_location=None):
+    """
+    Save an archived website to the database
+    
+    Args:
+        url: The URL of the website (URI-R)
+        persona_id: The ID of the persona used to visit the website (optional)
+        archive_type: The type of archive (filesystem, postgres, internet_archive)
+        archive_location: The path or identifier for the archive
+    
+    Returns:
+        The ID of the newly created archived website
+    """
+    if not archive_location:
+        # Create a default archive location based on a hash of the URL
+        import hashlib
+        url_hash = hashlib.md5(url.encode()).hexdigest()
+        archive_location = f"archives/{url_hash}"
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute(
+            """
+            INSERT INTO archived_websites 
+            (uri_r, persona_id, archive_type, archive_location, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                url,
+                persona_id,
+                archive_type,
+                archive_location,
+                datetime.now()
+            )
+        )
+        
+        archived_website_id = cursor.lastrowid
+        conn.commit()
+        return archived_website_id
+    
+    except Exception as e:
+        conn.rollback()
+        raise e
+    
+    finally:
+        conn.close()
+
+def save_memento(archived_website_id, memento_location, http_status=None, 
+                content_type=None, content_length=None, headers=None, 
+                screenshot_path=None, internet_archive_id=None):
+    """
+    Save a memento for an archived website
+    
+    Args:
+        archived_website_id: The ID of the archived website
+        memento_location: The path or identifier for this specific memento
+        http_status: The HTTP status code of the response
+        content_type: The Content-Type of the response
+        content_length: The size of the archived content
+        headers: JSON string of response headers
+        screenshot_path: Path to the screenshot
+        internet_archive_id: ID/URL if submitted to Internet Archive
+    
+    Returns:
+        The ID of the newly created memento
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute(
+            """
+            INSERT INTO mementos 
+            (archived_website_id, memento_datetime, memento_location, http_status, 
+             content_type, content_length, headers, screenshot_path, internet_archive_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                archived_website_id,
+                datetime.now(),
+                memento_location,
+                http_status,
+                content_type,
+                content_length,
+                json.dumps(headers) if headers else None,
+                screenshot_path,
+                internet_archive_id,
+                datetime.now()
+            )
+        )
+        
+        memento_id = cursor.lastrowid
+        conn.commit()
+        return memento_id
+    
+    except Exception as e:
+        conn.rollback()
+        raise e
+    
+    finally:
+        conn.close()
+
+def get_archived_website(archived_website_id):
+    """
+    Retrieve a specific archived website with its associated persona
+    
+    Args:
+        archived_website_id: The ID of the archived website
+    
+    Returns:
+        Dictionary containing the archived website data
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+    SELECT aw.*, p.name as persona_name
+    FROM archived_websites aw
+    LEFT JOIN personas p ON aw.persona_id = p.id
+    WHERE aw.id = ?
+    """, (archived_website_id,))
+    
+    archived_website = cursor.fetchone()
+    if not archived_website:
+        conn.close()
+        return None
+    
+    result = dict(archived_website)
+    conn.close()
+    return result
+
+def get_all_archived_websites():
+    """
+    Retrieve all archived websites with their associated personas
+    
+    Returns:
+        List of dictionaries containing archived website data
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+    SELECT aw.*, p.name as persona_name
+    FROM archived_websites aw
+    LEFT JOIN personas p ON aw.persona_id = p.id
+    ORDER BY aw.created_at DESC
+    """)
+    
+    archived_websites = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return archived_websites
+
+def get_mementos_for_website(archived_website_id):
+    """
+    Retrieve all mementos for a specific archived website
+    
+    Args:
+        archived_website_id: The ID of the archived website
+    
+    Returns:
+        List of dictionaries containing memento data
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+    SELECT *
+    FROM mementos
+    WHERE archived_website_id = ?
+    ORDER BY memento_datetime DESC
+    """, (archived_website_id,))
+    
+    mementos = [dict(row) for row in cursor.fetchall()]
+    
+    # Parse JSON fields
+    for memento in mementos:
+        if memento['headers']:
+            memento['headers'] = json.loads(memento['headers'])
+    
+    conn.close()
+    return mementos
+
+def get_memento(memento_id):
+    """
+    Retrieve a specific memento
+    
+    Args:
+        memento_id: The ID of the memento
+    
+    Returns:
+        Dictionary containing the memento data
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+    SELECT m.*, aw.uri_r
+    FROM mementos m
+    JOIN archived_websites aw ON m.archived_website_id = aw.id
+    WHERE m.id = ?
+    """, (memento_id,))
+    
+    memento = cursor.fetchone()
+    if not memento:
+        conn.close()
+        return None
+    
+    result = dict(memento)
+    
+    # Parse JSON fields
+    if result['headers']:
+        result['headers'] = json.loads(result['headers'])
+    
+    conn.close()
+    return result
 
 # Initialize the database when the module is imported
 init_db()

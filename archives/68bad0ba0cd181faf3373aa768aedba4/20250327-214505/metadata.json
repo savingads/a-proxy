@@ -1,0 +1,23 @@
+{
+  "url": "https://ollama.com/search",
+  "title": "Ollama Search",
+  "timestamp": "20250327-214505",
+  "language": "",
+  "geolocation": null,
+  "persona_id": null,
+  "http_status": 200,
+  "content_type": "text/html; charset=utf-8",
+  "content_length": 545514,
+  "headers": {
+    "content-type": "text/html; charset=utf-8",
+    "set-cookie": "aid=681762f3-3e1e-412f-b6d5-071ec6c8dd09; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax",
+    "x-build-commit": "b131d4f77d02a4e87329d0336a3641fc2af228f0",
+    "x-build-time": "1743029875",
+    "x-frame-options": "DENY",
+    "x-request-id": "ea12a438-3c4f-47e5-b939-afbd6e03d33a",
+    "date": "Fri, 28 Mar 2025 01:45:10 GMT",
+    "via": "1.1 google",
+    "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+    "Transfer-Encoding": "chunked"
+  }
+}

@@ -259,10 +259,74 @@ def visit_page():
     return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}. Screenshot saved."
 
 @app.route("/archive_page", methods=["POST"])
-def archive_page():
-    #language = request.form.get("language", "en-US")
-    #os.system(f"python3 /home/chris/a-proxy/archive_page.py {language}")
-    return "Archived Page."
+def archive_page_route():
+    url = request.form.get("url", "https://www.google.com")
+    language = request.form.get("language", "en-US")
+    geolocation = request.form.get("geolocation")
+    persona_id = request.form.get("persona_id")
+    
+    # Convert persona_id to int if it's not None
+    if persona_id:
+        try:
+            persona_id = int(persona_id)
+        except ValueError:
+            persona_id = None
+    
+    # Build the command with proper argument formatting
+    command = f"python3 /home/chris/a-proxy/archive_page.py '{url}' --language '{language}'"
+    if geolocation:
+        command += f" --geolocation '{geolocation}'"
+    if persona_id:
+        command += f" --persona-id {persona_id}"
+    
+    logging.debug(f"Executing command: {command}")
+    os.system(command)
+    
+    flash(f"Archived {url} with language {language} and geolocation {geolocation or 'not specified'}.", "success")
+    return redirect(url_for('index'))
+
+@app.route("/archives")
+def list_archives():
+    """List all archived websites"""
+    archived_websites = database.get_all_archived_websites()
+    return render_template("archives.html", archived_websites=archived_websites)
+
+@app.route("/archives/<int:archived_website_id>")
+def view_archive(archived_website_id):
+    """View a specific archived website and its mementos"""
+    archived_website = database.get_archived_website(archived_website_id)
+    if not archived_website:
+        flash("Archived website not found.", "danger")
+        return redirect(url_for('list_archives'))
+    
+    mementos = database.get_mementos_for_website(archived_website_id)
+    return render_template("archive_detail.html", archived_website=archived_website, mementos=mementos)
+
+@app.route("/archives/<int:archived_website_id>/mementos/<int:memento_id>")
+def view_memento(archived_website_id, memento_id):
+    """View a specific memento"""
+    archived_website = database.get_archived_website(archived_website_id)
+    if not archived_website:
+        flash("Archived website not found.", "danger")
+        return redirect(url_for('list_archives'))
+    
+    memento = database.get_memento(memento_id)
+    if not memento or memento['archived_website_id'] != archived_website_id:
+        flash("Memento not found.", "danger")
+        return redirect(url_for('view_archive', archived_website_id=archived_website_id))
+    
+    # Check if the memento HTML file exists
+    html_file_path = os.path.join(memento['memento_location'], 'content.html')
+    if os.path.exists(html_file_path):
+        with open(html_file_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+    else:
+        html_content = "<p>HTML content not available.</p>"
+    
+    return render_template("memento_viewer.html", 
+                          archived_website=archived_website, 
+                          memento=memento, 
+                          html_content=html_content)
 
 @app.route("/geolocation-test")
 def geolocation_test():

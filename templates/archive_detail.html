@@ -1,0 +1,117 @@
+{% extends "home.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Archive Details</h1>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('list_archives') }}" class="btn btn-primary">Back to Archives</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Website Information</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 font-weight-bold">URL:</div>
+                <div class="col-md-9">
+                    <a href="{{ archived_website.uri_r }}" target="_blank">
+                        {{ archived_website.uri_r }}
+                    </a>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 font-weight-bold">Persona:</div>
+                <div class="col-md-9">
+                    {% if archived_website.persona_id %}
+                        {{ archived_website.persona_name }}
+                    {% else %}
+                        <em>None</em>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 font-weight-bold">Archive Type:</div>
+                <div class="col-md-9">{{ archived_website.archive_type }}</div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 font-weight-bold">Archive Location:</div>
+                <div class="col-md-9">{{ archived_website.archive_location }}</div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 font-weight-bold">First Archived:</div>
+                <div class="col-md-9">{{ archived_website.created_at }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2>Mementos</h2>
+        </div>
+        <div class="card-body">
+            {% if mementos %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>HTTP Status</th>
+                                <th>Content Type</th>
+                                <th>Size</th>
+                                <th>Internet Archive</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for memento in mementos %}
+                            <tr>
+                                <td>{{ memento.memento_datetime }}</td>
+                                <td>
+                                    {% if memento.http_status %}
+                                        <span class="badge {% if memento.http_status >= 200 and memento.http_status < 300 %}badge-success{% elif memento.http_status >= 300 and memento.http_status < 400 %}badge-info{% elif memento.http_status >= 400 and memento.http_status < 500 %}badge-warning{% else %}badge-danger{% endif %}">
+                                            {{ memento.http_status }}
+                                        </span>
+                                    {% else %}
+                                        <em>Unknown</em>
+                                    {% endif %}
+                                </td>
+                                <td>{{ memento.content_type or 'Unknown' }}</td>
+                                <td>
+                                    {% if memento.content_length %}
+                                        {{ (memento.content_length / 1024)|round(1) }} KB
+                                    {% else %}
+                                        <em>Unknown</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if memento.internet_archive_id %}
+                                        <a href="{{ memento.internet_archive_id }}" target="_blank">
+                                            View in Internet Archive
+                                        </a>
+                                    {% else %}
+                                        <em>Not submitted</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_memento', archived_website_id=archived_website.id, memento_id=memento.id) }}" 
+                                       class="btn btn-sm btn-info">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No mementos found for this archived website.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

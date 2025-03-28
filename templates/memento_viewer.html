@@ -1,0 +1,154 @@
+{% extends "home.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1>Memento Viewer</h1>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('view_archive', archived_website_id=archived_website.id) }}" class="btn btn-primary">Back to Archive</a>
+        <a href="{{ url_for('list_archives') }}" class="btn btn-secondary">Back to Archives</a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Memento Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 font-weight-bold">URL:</div>
+                        <div class="col-md-10">
+                            <a href="{{ archived_website.uri_r }}" target="_blank">
+                                {{ archived_website.uri_r }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">Archived:</div>
+                        <div class="col-md-10">{{ memento.memento_datetime }}</div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">HTTP Status:</div>
+                        <div class="col-md-10">
+                            {% if memento.http_status %}
+                                <span class="badge {% if memento.http_status >= 200 and memento.http_status < 300 %}badge-success{% elif memento.http_status >= 300 and memento.http_status < 400 %}badge-info{% elif memento.http_status >= 400 and memento.http_status < 500 %}badge-warning{% else %}badge-danger{% endif %}">
+                                    {{ memento.http_status }}
+                                </span>
+                            {% else %}
+                                <em>Unknown</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">Content Type:</div>
+                        <div class="col-md-10">{{ memento.content_type or 'Unknown' }}</div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">Size:</div>
+                        <div class="col-md-10">
+                            {% if memento.content_length %}
+                                {{ (memento.content_length / 1024)|round(1) }} KB
+                            {% else %}
+                                <em>Unknown</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">Location:</div>
+                        <div class="col-md-10">{{ memento.memento_location }}</div>
+                    </div>
+                    {% if memento.internet_archive_id %}
+                    <div class="row mt-2">
+                        <div class="col-md-2 font-weight-bold">Internet Archive:</div>
+                        <div class="col-md-10">
+                            <a href="{{ memento.internet_archive_id }}" target="_blank">
+                                View in Internet Archive
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Screenshot</h2>
+                </div>
+                <div class="card-body text-center">
+                    {% if memento.screenshot_path %}
+                        <img src="/{{ memento.screenshot_path }}" class="img-fluid border" alt="Screenshot" style="max-width: 100%;">
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No screenshot available for this memento.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>HTML Content</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>Note:</strong> This is a simple viewer showing the raw HTML. Some elements like images, CSS, and JavaScript may not work correctly.
+                    </div>
+                    
+                    <ul class="nav nav-tabs" id="contentTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="rendered-tab" data-toggle="tab" href="#rendered" role="tab">
+                                Rendered View
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="source-tab" data-toggle="tab" href="#source" role="tab">
+                                Source Code
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3" id="contentTabsContent">
+                        <div class="tab-pane fade show active" id="rendered" role="tabpanel">
+                            <div class="border p-3" style="height: 600px; overflow: auto;">
+                                <iframe id="content-frame" srcdoc="{{ html_content|e }}" style="width: 100%; height: 100%; border: none;"></iframe>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="source" role="tabpanel">
+                            <div class="border p-3" style="height: 600px; overflow: auto;">
+                                <pre><code>{{ html_content|e }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if memento.headers %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>HTTP Headers</h2>
+                </div>
+                <div class="card-body">
+                    <div class="border p-3" style="max-height: 300px; overflow: auto;">
+                        <pre><code>{% for key, value in memento.headers.items() %}{{ key }}: {{ value }}
+{% endfor %}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

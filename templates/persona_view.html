@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
 
@@ -168,10 +169,21 @@
             margin: 1rem 0;
         }
         
-        /* Styling for data display in view mode */
+        /* Styling for data display in view mode - Table format */
+        .data-row {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 0;
+        }
+
+        .field-label {
+            flex: 0 0 40%;
+            font-weight: 500;
+            color: #9aa0a6;
+        }
+
         .data-value {
-            padding: 0.375rem 0;
-            margin-bottom: 1rem;
+            flex: 0 0 60%;
         }
     </style>
 
@@ -376,29 +388,29 @@
                                     <div class="col-md-6">
                                         <div class="custom-card">
                                             <h4>Demographic Information</h4>
-                                            <div class="mb-3">
-                                                <label class="form-label">Name:</label>
-                                                <div class="data-value">{{ form.persona_name }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">Name:</span>
+                                                <span class="data-value">{{ form.persona_name }}</span>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Country:</label>
-                                                <div class="data-value">{{ form.country }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">Country:</span>
+                                                <span class="data-value">{{ form.country }}</span>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">City:</label>
-                                                <div class="data-value">{{ form.city }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">City:</span>
+                                                <span class="data-value">{{ form.city }}</span>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Region:</label>
-                                                <div class="data-value">{{ form.region }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">Region:</span>
+                                                <span class="data-value">{{ form.region }}</span>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Language:</label>
-                                                <div class="data-value">{{ form.language }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">Language:</span>
+                                                <span class="data-value">{{ form.language }}</span>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Geolocation:</label>
-                                                <div class="data-value">{{ form.geolocation }}</div>
+                                            <div class="data-row">
+                                                <span class="field-label">Geolocation:</span>
+                                                <span class="data-value">{{ form.geolocation }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -443,29 +455,29 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Psychographic Data</h4>
-                                    <div class="mb-3">
-                                        <label class="form-label">Interests:</label>
-                                        <div class="data-value">{{ form.interests }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Interests:</span>
+                                        <span class="data-value">{{ form.interests }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Personal Values:</label>
-                                        <div class="data-value">{{ form.personal_values }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Personal Values:</span>
+                                        <span class="data-value">{{ form.personal_values }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Attitudes:</label>
-                                        <div class="data-value">{{ form.attitudes }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Attitudes:</span>
+                                        <span class="data-value">{{ form.attitudes }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Lifestyle:</label>
-                                        <div class="data-value">{{ form.lifestyle }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Lifestyle:</span>
+                                        <span class="data-value">{{ form.lifestyle }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Personality:</label>
-                                        <div class="data-value">{{ form.personality }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Personality:</span>
+                                        <span class="data-value">{{ form.personality }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Opinions:</label>
-                                        <div class="data-value">{{ form.opinions }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Opinions:</span>
+                                        <span class="data-value">{{ form.opinions }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -474,25 +486,25 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Behavioral Data</h4>
-                                    <div class="mb-3">
-                                        <label class="form-label">Browsing Habits:</label>
-                                        <div class="data-value">{{ form.browsing_habits }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Browsing Habits:</span>
+                                        <span class="data-value">{{ form.browsing_habits }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Purchase History:</label>
-                                        <div class="data-value">{{ form.purchase_history }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Purchase History:</span>
+                                        <span class="data-value">{{ form.purchase_history }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Online Activity:</label>
-                                        <div class="data-value">{{ form.online_activity }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Online Activity:</span>
+                                        <span class="data-value">{{ form.online_activity }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Content Consumption:</label>
-                                        <div class="data-value">{{ form.content_consumption }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Content Consumption:</span>
+                                        <span class="data-value">{{ form.content_consumption }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Technology Usage:</label>
-                                        <div class="data-value">{{ form.tech_usage }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Technology Usage:</span>
+                                        <span class="data-value">{{ form.tech_usage }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -501,37 +513,37 @@
                             <div class="container mt-4">
                                 <div class="custom-card">
                                     <h4>Contextual Data</h4>
-                                    <div class="mb-3">
-                                        <label class="form-label">Device:</label>
-                                        <div class="data-value">{{ form.device_type }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Device:</span>
+                                        <span class="data-value">{{ form.device_type }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Time of Day:</label>
-                                        <div class="data-value">{{ form.time_of_day }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Time of Day:</span>
+                                        <span class="data-value">{{ form.time_of_day }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Day of Week:</label>
-                                        <div class="data-value">{{ form.day_of_week }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Day of Week:</span>
+                                        <span class="data-value">{{ form.day_of_week }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Season:</label>
-                                        <div class="data-value">{{ form.season }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Season:</span>
+                                        <span class="data-value">{{ form.season }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Weather:</label>
-                                        <div class="data-value">{{ form.weather }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Weather:</span>
+                                        <span class="data-value">{{ form.weather }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Browser:</label>
-                                        <div class="data-value">{{ form.browser_type }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Browser:</span>
+                                        <span class="data-value">{{ form.browser_type }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Screen Size:</label>
-                                        <div class="data-value">{{ form.screen_size }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Screen Size:</span>
+                                        <span class="data-value">{{ form.screen_size }}</span>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Connection Type:</label>
-                                        <div class="data-value">{{ form.connection_type }}</div>
+                                    <div class="data-row">
+                                        <span class="field-label">Connection Type:</span>
+                                        <span class="data-value">{{ form.connection_type }}</span>
                                     </div>
                                 </div>
                             </div>

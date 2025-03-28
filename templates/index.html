@@ -459,12 +459,18 @@
                                         <div class="custom-card">
                                             <h4>Target Browser Settings</h4>
                                             <div class="form-group">
-                                                <label for="target-region">Geolocation:</label>
-                                                <input type="text" id="target-region" class="form-control"
-                                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}"
-                                                    placeholder="0.000, 0.000">
-                                                <button id="set-geolocation" class="btn btn-secondary mt-2">Set</button>
+                                                <label for="target-latitude">Latitude:</label>
+                                                <input type="text" id="target-latitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[0] }}{% endif %}"
+                                                    placeholder="0.000">
                                             </div>
+                                            <div class="form-group mt-2">
+                                                <label for="target-longitude">Longitude:</label>
+                                                <input type="text" id="target-longitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[1] }}{% endif %}"
+                                                    placeholder="0.000">
+                                            </div>
+                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set Geolocation</button>
                                             <div class="form-group mt-3">
                                                 <label for="target-language">Language:</label>
                                                 <select id="target-language" class="form-select">
@@ -773,33 +779,7 @@
                 });
             }
 
-            var setGeolocationButton = document.getElementById('set-geolocation');
-            if (setGeolocationButton) {
-                setGeolocationButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
-                    // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
-
-                    // Update the hidden geolocation field in the form
-                    var geolocationInput = document.getElementById('form-geolocation');
-                    if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
-                    }
-
-                    // Update the save persona form geolocation field
-                    var saveGeolocationInput = document.getElementById('save-geolocation');
-                    if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
-                    }
-
-                    // Update the test browser form geolocation input
-                    var testGeolocationInput = document.getElementById('test-geolocation-input');
-                    if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
-                    }
-                });
-            }
+            // This block is replaced by the updated setGeolocationButton handler below
 
             let pollAttempts = 0;
             function pollVpnStatus() {
@@ -855,7 +835,7 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.geolocation) {
-                                    document.getElementById('target-region').value = data.geolocation;
+                                    // Update the geolocation display
                                     document.getElementById('geolocation').textContent = data.geolocation;
 
                                     // Parse the geolocation coordinates
@@ -863,6 +843,14 @@
                                     if (coordinates.length === 2) {
                                         const lat = parseFloat(coordinates[0].trim());
                                         const lng = parseFloat(coordinates[1].trim());
+                                        
+                                        // Update target latitude and longitude fields
+                                        const targetLatitudeInput = document.getElementById('target-latitude');
+                                        const targetLongitudeInput = document.getElementById('target-longitude');
+                                        if (targetLatitudeInput && targetLongitudeInput) {
+                                            targetLatitudeInput.value = lat;
+                                            targetLongitudeInput.value = lng;
+                                        }
                                         
                                         // Update latitude and longitude input fields
                                         const latitudeInput = document.getElementById('latitude');
@@ -972,36 +960,9 @@
                 });
             }
 
-            // Update test browser form when geolocation is set
-            var setGeolocationButton = document.getElementById('set-geolocation');
-            if (setGeolocationButton) {
-                setGeolocationButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
-                    // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
+            // This duplicate event handler is removed as it's already handled by the updated setGeolocationButton handler below
 
-                    // Update the hidden geolocation field in the form
-                    var geolocationInput = document.getElementById('form-geolocation');
-                    if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
-                    }
-
-                    // Update the save persona form geolocation field
-                    var saveGeolocationInput = document.getElementById('save-geolocation');
-                    if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
-                    }
-
-                    // Update the test browser form geolocation input
-                    var testGeolocationInput = document.getElementById('test-geolocation-input');
-                    if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
-                    }
-                });
-            }
-
-            // Update our duplicate setGeolocationButton handler to avoid conflicts
+            // Update our setGeolocationButton handler to work with separate lat/lng fields
             var setGeolocationButton = document.getElementById('set-geolocation');
             if (setGeolocationButton) {
                 // Clear previous event listeners by cloning and replacing
@@ -1009,34 +970,39 @@
                 setGeolocationButton.parentNode.replaceChild(newSetGeoButton, setGeolocationButton);
                 
                 newSetGeoButton.addEventListener('click', function () {
-                    var targetRegion = document.getElementById('target-region').value;
+                    var targetLatitude = document.getElementById('target-latitude').value.trim();
+                    var targetLongitude = document.getElementById('target-longitude').value.trim();
+                    
+                    // Combine latitude and longitude into a single string
+                    var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
+                    
                     // Update geolocation in the Persona section
-                    document.getElementById('geolocation').textContent = targetRegion;
+                    document.getElementById('geolocation').textContent = combinedGeolocation;
 
                     // Update the hidden geolocation field in the form
                     var geolocationInput = document.getElementById('form-geolocation');
                     if (geolocationInput) {
-                        geolocationInput.value = targetRegion;
+                        geolocationInput.value = combinedGeolocation;
                     }
 
                     // Update the save persona form geolocation field
                     var saveGeolocationInput = document.getElementById('save-geolocation');
                     if (saveGeolocationInput) {
-                        saveGeolocationInput.value = targetRegion;
+                        saveGeolocationInput.value = combinedGeolocation;
                     }
                     
                     // Update the test browser form geolocation input
                     var testGeolocationInput = document.getElementById('test-geolocation-input');
                     if (testGeolocationInput) {
-                        testGeolocationInput.value = targetRegion;
-                        console.log("Set geolocation to:", targetRegion);
+                        testGeolocationInput.value = combinedGeolocation;
+                        console.log("Set geolocation to:", combinedGeolocation);
                     }
                     
                     // Update map with the new coordinates
-                    const coordinates = targetRegion.split(',');
-                    if (coordinates.length === 2) {
-                        const lat = parseFloat(coordinates[0].trim());
-                        const lng = parseFloat(coordinates[1].trim());
+                    const lat = parseFloat(targetLatitude);
+                    const lng = parseFloat(targetLongitude);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
                         
                         if (!isNaN(lat) && !isNaN(lng)) {
                             // Update latitude and longitude input fields
@@ -1071,13 +1037,15 @@
                 testBrowserForm.addEventListener('submit', function (event) {
                     // Get current values
                     var currentLanguage = document.getElementById('target-language').value;
-                    var currentGeolocation = document.getElementById('target-region').value;
+                    var targetLatitude = document.getElementById('target-latitude').value.trim();
+                    var targetLongitude = document.getElementById('target-longitude').value.trim();
+                    var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
 
-                    console.log("Applying and testing with language:", currentLanguage, "and geolocation:", currentGeolocation);
+                    console.log("Applying and testing with language:", currentLanguage, "and geolocation:", combinedGeolocation);
 
                     // Update the form fields
                     document.getElementById('test-language-input').value = currentLanguage;
-                    document.getElementById('test-geolocation-input').value = currentGeolocation;
+                    document.getElementById('test-geolocation-input').value = combinedGeolocation;
                 });
             }
 
@@ -1089,12 +1057,15 @@
                 testLanguageInput.value = currentLanguage;
             }
 
-            // Set initial geolocation value
-            var currentGeolocation = document.getElementById('target-region').value;
+            // Set initial geolocation value from target latitude and longitude
+            var targetLatitude = document.getElementById('target-latitude').value.trim();
+            var targetLongitude = document.getElementById('target-longitude').value.trim();
             var testGeolocationInput = document.getElementById('test-geolocation-input');
-            if (testGeolocationInput && currentGeolocation) {
-                testGeolocationInput.value = currentGeolocation;
-                console.log("Setting test geolocation input to:", currentGeolocation);
+            
+            if (testGeolocationInput && targetLatitude && targetLongitude) {
+                var combinedGeolocation = targetLatitude + ', ' + targetLongitude;
+                testGeolocationInput.value = combinedGeolocation;
+                console.log("Setting test geolocation input to:", combinedGeolocation);
             } else if (testGeolocationInput) {
                 // If no geolocation is set, use the current geolocation from the persona section
                 var personaGeolocation = document.getElementById('geolocation').textContent;
@@ -1234,8 +1205,13 @@
                     const lng = parseFloat(longitudeInput.value);
                     
                     if (!isNaN(lat) && !isNaN(lng)) {
-                        // Update the target-region input
-                        document.getElementById('target-region').value = `${lat}, ${lng}`;
+                        // Update the target latitude and longitude inputs
+                        const targetLatitudeInput = document.getElementById('target-latitude');
+                        const targetLongitudeInput = document.getElementById('target-longitude');
+                        if (targetLatitudeInput && targetLongitudeInput) {
+                            targetLatitudeInput.value = lat;
+                            targetLongitudeInput.value = lng;
+                        }
                         
                         // Clear existing markers and add a new one
                         window.markersLayer.clearLayers();

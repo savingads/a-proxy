@@ -1,2 +1,6 @@
 Flask
 requests
+flask-wtf
+wtforms
+selenium
+webdriver-manager

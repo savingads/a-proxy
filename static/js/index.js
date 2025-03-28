@@ -323,23 +323,39 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Set language
-    document.getElementById('browser-language').textContent = navigator.language || 'Unavailable';
+    // Set current browser metadata
+    function updateBrowserMetadata() {
+        // Set language
+        const browserLanguageElement = document.getElementById('browser-language');
+        if (browserLanguageElement) {
+            browserLanguageElement.textContent = navigator.language || 'Unavailable';
+        }
 
-    // Set user agent
-    document.getElementById('browser-user-agent').textContent = navigator.userAgent || 'Unavailable';
+        // Set user agent
+        const browserUserAgentElement = document.getElementById('browser-user-agent');
+        if (browserUserAgentElement) {
+            browserUserAgentElement.textContent = navigator.userAgent || 'Unavailable';
+        }
 
-    // Set geolocation
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            document.getElementById('browser-geolocation').textContent =
-                position.coords.latitude + ', ' + position.coords.longitude;
-        }, function () {
-            document.getElementById('browser-geolocation').textContent = 'Unavailable';
-        });
-    } else {
-        document.getElementById('browser-geolocation').textContent = 'Not supported';
+        // Set geolocation
+        const browserGeolocationElement = document.getElementById('browser-geolocation');
+        if (browserGeolocationElement) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    browserGeolocationElement.textContent =
+                        position.coords.latitude + ', ' + position.coords.longitude;
+                }, function (error) {
+                    console.error("Browser geolocation error:", error);
+                    browserGeolocationElement.textContent = 'Unavailable';
+                });
+            } else {
+                browserGeolocationElement.textContent = 'Not supported';
+            }
+        }
     }
+    
+    // Update browser metadata when page loads
+    updateBrowserMetadata();
 
     // Handle flash messages from cookies
     function getCookie(name) {

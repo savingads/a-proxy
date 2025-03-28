@@ -49,20 +49,25 @@
 
   // Handle region selection to update target browser settings
   document.addEventListener('DOMContentLoaded', function() {
-    // Get region select element
-    const regionSelect = document.getElementById('region');
-    if (regionSelect) {
-      regionSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const regionCode = selectedOption.getAttribute('data-code');
-        
-        // Update target language based on region
-        updateTargetLanguage(regionCode);
-        
-        // Update target geolocation based on region
-        updateTargetGeolocation(regionCode);
-      });
-    }
+    // Get all region select elements (there might be multiple on the page)
+    const regionSelects = document.querySelectorAll('select[name="region"]');
+    
+    regionSelects.forEach(regionSelect => {
+      if (regionSelect) {
+        regionSelect.addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const regionCode = selectedOption.getAttribute('data-code');
+          
+          if (regionCode) {
+            // Update target language based on region
+            updateTargetLanguage(regionCode);
+            
+            // Update target geolocation based on region
+            updateTargetGeolocation(regionCode);
+          }
+        });
+      }
+    });
 
     // Initialize form fields
     initializeFormFields();
@@ -125,6 +130,37 @@
       if (testGeolocationInput) {
         testGeolocationInput.value = `${geolocation.lat},${geolocation.lng}`;
       }
+      
+      // Update the map to show the new location
+      updateMapLocation(geolocation.lat, geolocation.lng, regionCode);
+    }
+  }
+  
+  // Function to update the map with a new location
+  function updateMapLocation(lat, lng, regionCode) {
+    if (window.map && window.markersLayer) {
+      // Clear existing markers
+      window.markersLayer.clearLayers();
+      
+      // Add new marker at the specified location
+      const marker = L.marker([lat, lng]).addTo(window.markersLayer);
+      
+      // Get region name for popup
+      const regionNames = {
+        'US': 'United States',
+        'BR': 'Brazil',
+        'DE': 'Germany',
+        'JP': 'Japan',
+        'ZA': 'South Africa'
+      };
+      
+      const regionName = regionNames[regionCode] || regionCode;
+      
+      // Add popup with region information
+      marker.bindPopup(`<b>${regionName}</b><br>Lat: ${lat}, Lng: ${lng}`).openPopup();
+      
+      // Center map on the new location
+      window.map.setView([lat, lng], 4);
     }
   }
 

@@ -139,3 +139,5 @@ npm-debug.log
 yarn-error.log
 .pnp/
 .pnp.js
+archives
+CLAUDE.md

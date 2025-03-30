@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
 
@@ -158,7 +157,8 @@
             padding-top: 20px;
         }
 
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -168,7 +168,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             margin: 1rem 0;
         }
-        
+
         /* Styling for data display in view mode - Table format */
         .data-row {
             display: flex;
@@ -194,10 +194,10 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
-<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}" 
-      data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}" 
-      data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}" 
-      data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}"
+    data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}"
+    data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}"
+    data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
     <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
@@ -211,7 +211,8 @@
             <input type="hidden" name="geolocation" id="form-geolocation"
                 value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
-            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
+            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}"
+                class="btn btn-secondary">Archive</button>
         </form>
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
@@ -248,7 +249,8 @@
                         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home.index') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('home.index') }}">
                                         <i class="bi bi-house-fill"></i>
                                         Home
                                     </a>
@@ -281,7 +283,8 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('archives.list_archives') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('archives.list_archives') }}">
                                         <i class="bi bi-archive"></i>
                                         Archived Pages
                                     </a>
@@ -346,10 +349,11 @@
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 subtle-divider">
                     <h3>{{ persona_name }}</h3>
                     <div>
-                        <a href="{{ url_for('persona.dashboard', persona_id=persona_id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ url_for('persona.edit_persona', persona_id=persona_id) }}"
+                            class="btn btn-primary">Edit</a>
                     </div>
                 </div>
-                
+
                 <div class="custom-card mb-4">
                     <div class="row">
                         <div class="col">
@@ -424,23 +428,23 @@
                                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                             }).addTo(window.map);
-                                            
+
                                             // Initialize the markers layer as a global variable
                                             window.markersLayer = L.layerGroup().addTo(window.map);
-                                            
+
                                             {% if geolocation %}
                                             // Parse geolocation string into coordinates
                                             var coords = "{{ geolocation }}".split(',');
                                             if (coords.length === 2) {
                                                 var lat = parseFloat(coords[0].trim());
                                                 var lng = parseFloat(coords[1].trim());
-                                                
+
                                                 // Add the marker and center the map
                                                 L.marker([lat, lng])
                                                     .addTo(window.markersLayer)
                                                     .bindPopup('<b>{{ form.city }}</b><br>{{ form.region }}, {{ form.country }}')
                                                     .openPopup();
-                                                
+
                                                 // Center the map on the location
                                                 window.map.setView([lat, lng], 10);
                                             }
@@ -557,4 +561,5 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
+
 </html>

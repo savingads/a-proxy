@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
 
@@ -16,176 +15,8 @@
 
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/persona.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
-
-    <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-
-        .b-example-divider {
-            width: 100%;
-            height: 3rem;
-            background-color: rgba(0, 0, 0, .1);
-            border: solid rgba(0, 0, 0, .15);
-            border-width: 1px 0;
-            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
-        }
-
-        .b-example-vr {
-            flex-shrink: 0;
-            width: 1.5rem;
-            height: 100vh;
-        }
-
-        .bi {
-            vertical-align: -.125em;
-            fill: currentColor;
-        }
-
-        .nav-scroller {
-            position: relative;
-            z-index: 2;
-            height: 2.75rem;
-            overflow-y: hidden;
-        }
-
-        .nav-scroller .nav {
-            display: flex;
-            flex-wrap: nowrap;
-            padding-bottom: 1rem;
-            margin-top: -1px;
-            overflow-x: auto;
-            text-align: center;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .btn-bd-primary {
-            --bd-violet-bg: #712cf9;
-            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
-
-            --bs-btn-font-weight: 600;
-            --bs-btn-color: var(--bs-white);
-            --bs-btn-bg: var(--bd-violet-bg);
-            --bs-btn-border-color: var(--bd-violet-bg);
-            --bs-btn-hover-color: var(--bs-white);
-            --bs-btn-hover-bg: #6528e0;
-            --bs-btn-hover-border-color: #6528e0;
-            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
-            --bs-btn-active-color: var(--bs-btn-hover-color);
-            --bs-btn-active-bg: #5a23c8;
-            --bs-btn-active-border-color: #5a23c8;
-        }
-
-        .bd-mode-toggle {
-            z-index: 1500;
-        }
-
-        .bd-mode-toggle .dropdown-menu .active .bi {
-            display: block !important;
-        }
-
-        /* Replace high-contrast white borders with subtle card styling */
-        .show-grid [class^="col"] {
-            position: relative;
-            padding-top: 10px;
-            padding-bottom: 10px;
-            background-color: var(--bs-dark-bg-subtle);
-            border: none;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 100;
-            padding: 48px 0 0;
-            /* Height of navbar */
-        }
-
-        .main-content {
-            margin-left: 250px;
-            /* Adjust this value based on the width of your sidebar */
-        }
-
-        /* Anthropic-style card styling */
-        .custom-card {
-            background-color: var(--bs-dark-bg-subtle);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-            padding: 15px;
-        }
-
-        .custom-list-group .list-group-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 2px;
-            border-radius: 4px;
-        }
-
-        #map {
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-tabs .nav-link {
-            border: none;
-            border-bottom: 2px solid transparent;
-        }
-
-        .nav-tabs .nav-link.active {
-            border-bottom: 2px solid var(--bs-primary);
-            background-color: transparent;
-            color: var(--bs-primary);
-        }
-
-        .tab-content {
-            padding-top: 20px;
-        }
-
-        .form-control, .form-select {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Subtle divider */
-        .subtle-divider {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            margin: 1rem 0;
-        }
-        
-        /* Styling for data display in view mode - Table format */
-        .data-row {
-            display: flex;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.5rem 0;
-        }
-
-        .field-label {
-            flex: 0 0 40%;
-            font-weight: 500;
-            color: #9aa0a6;
-        }
-
-        .data-value {
-            flex: 0 0 60%;
-        }
-    </style>
 
 
     <!-- Custom styles for this template -->
@@ -194,10 +25,10 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
-<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}" 
-      data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}" 
-      data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}" 
-      data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}"
+    data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}"
+    data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}"
+    data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
     <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
@@ -211,7 +42,8 @@
             <input type="hidden" name="geolocation" id="form-geolocation"
                 value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
-            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
+            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}"
+                class="btn btn-secondary">Archive</button>
         </form>
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
@@ -248,7 +80,8 @@
                         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home.index') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('home.index') }}">
                                         <i class="bi bi-house-fill"></i>
                                         Home
                                     </a>
@@ -281,7 +114,8 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('archives.list_archives') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('archives.list_archives') }}">
                                         <i class="bi bi-archive"></i>
                                         Archived Pages
                                     </a>
@@ -308,26 +142,6 @@
                             </ul>
 
                             <hr class="my-3">
-                            <!-- Browser Details Section -->
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>This Browser</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>Language:</strong> <span
-                                            id="browser-language">Fetching...</span></span>
-                                </li>
-                                <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>Geolocation:</strong> <span
-                                            id="browser-geolocation">Fetching...</span></span>
-                                </li>
-                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>User Agent:</strong> <span
-                                            id="browser-user-agent">Fetching...</span></span>
-                                </li>
-                            </ul>
-                            <hr class="my-3">
                             <ul class="nav flex-column mb-auto">
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center gap-2" href="#">
@@ -346,10 +160,11 @@
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 subtle-divider">
                     <h3>{{ persona_name }}</h3>
                     <div>
-                        <a href="{{ url_for('persona.dashboard', persona_id=persona_id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ url_for('persona.edit_persona', persona_id=persona_id) }}"
+                            class="btn btn-primary">Edit</a>
                     </div>
                 </div>
-                
+
                 <div class="custom-card mb-4">
                     <div class="row">
                         <div class="col">
@@ -424,23 +239,23 @@
                                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                             }).addTo(window.map);
-                                            
+
                                             // Initialize the markers layer as a global variable
                                             window.markersLayer = L.layerGroup().addTo(window.map);
-                                            
+
                                             {% if geolocation %}
                                             // Parse geolocation string into coordinates
                                             var coords = "{{ geolocation }}".split(',');
                                             if (coords.length === 2) {
                                                 var lat = parseFloat(coords[0].trim());
                                                 var lng = parseFloat(coords[1].trim());
-                                                
+
                                                 // Add the marker and center the map
                                                 L.marker([lat, lng])
                                                     .addTo(window.markersLayer)
                                                     .bindPopup('<b>{{ form.city }}</b><br>{{ form.region }}, {{ form.country }}')
                                                     .openPopup();
-                                                
+
                                                 // Center the map on the location
                                                 window.map.setView([lat, lng], 10);
                                             }
@@ -556,5 +371,7 @@
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
+
 </html>

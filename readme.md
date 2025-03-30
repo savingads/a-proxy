@@ -144,9 +144,9 @@ http://localhost:5001
 
 ### Basic Usage
 
-1. From the web interface, select a region to connect to via VPN
+1. From the web interface choose to start the vpn or attempt to use the user profile in your current connection.
+2. If you have not activated the VPN optionally, customize language and geolocation settings
 2. Enter a URL to visit
-3. Optionally, customize language and geolocation settings
 4. Click "Visit Page" to open a Chrome browser with the specified settings
 5. A screenshot will be saved to the project directory
 

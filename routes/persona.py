@@ -212,6 +212,123 @@ def view_persona(persona_id):
         flash(f"Error viewing persona: {str(e)}", "danger")
         return redirect(url_for('persona.list_personas'))
 
+@persona_bp.route("/edit-persona/<int:persona_id>", methods=["GET"])
+def edit_persona(persona_id):
+    """Edit a persona's details."""
+    try:
+        # Get persona data from database
+        persona = database.get_persona(persona_id)
+        
+        # Create a form object to populate form fields
+        form_obj = prepare_form_object(persona)
+        
+        # Prepare page data
+        vpn_running = is_vpn_running()
+        ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+        
+        # Use language from persona
+        language = form_obj.language
+        
+        # Get latitude and longitude from demographic data
+        demographic = persona.get('demographic', {})
+        latitude = demographic.get('latitude')
+        longitude = demographic.get('longitude')
+        geolocation = None
+        
+        if latitude is not None and longitude is not None:
+            geolocation = f"{latitude}, {longitude}"
+            
+            # Add to ip_info for template
+            if 'loc' not in ip_info:
+                ip_info = ip_info or {}
+                ip_info['loc'] = geolocation
+        
+        return render_template("persona_edit.html", 
+                          form=form_obj,
+                          vpn_running=vpn_running, 
+                          ip_info=ip_info, 
+                          language=language,
+                          persona_name=persona['name'],
+                          persona_id=persona_id,
+                          geolocation=geolocation,
+                          country=form_obj.country,
+                          city=form_obj.city,
+                          region=form_obj.region)
+                          
+    except Exception as e:
+        logging.error(f"Error editing persona: {e}")
+        flash(f"Error editing persona: {str(e)}", "danger")
+        return redirect(url_for('persona.list_personas'))
+
+@persona_bp.route("/update_persona", methods=["POST"])
+def update_persona():
+    """Update basic demographic data for a persona."""
+    try:
+        persona_id = request.form.get("persona_id")
+        
+        if not persona_id:
+            flash("Persona ID not provided", "danger")
+            return redirect(url_for('persona.list_personas'))
+            
+        # Get form data
+        persona_name = request.form.get("persona_name")
+        language = request.form.get("language")
+        country = request.form.get("country")
+        city = request.form.get("city")
+        region = request.form.get("region")
+        geolocation = request.form.get("geolocation")
+        
+        # Parse latitude and longitude from geolocation
+        latitude = None
+        longitude = None
+        if geolocation and ',' in geolocation:
+            try:
+                lat_str, lng_str = geolocation.split(',', 1)
+                latitude = float(lat_str.strip())
+                longitude = float(lng_str.strip())
+            except (ValueError, TypeError):
+                # If parsing fails, leave latitude and longitude as None
+                pass
+        
+        # Update the database
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Update persona name
+        cursor.execute(
+            "UPDATE personas SET name = ?, updated_at = ? WHERE id = ?",
+            (persona_name, database.datetime.now(), persona_id)
+        )
+        
+        # Update demographic data
+        cursor.execute(
+            """
+            UPDATE demographic_data 
+            SET latitude = ?, longitude = ?, language = ?, country = ?, city = ?, region = ?
+            WHERE persona_id = ?
+            """,
+            (
+                latitude, 
+                longitude,
+                language,
+                country,
+                city,
+                region,
+                persona_id
+            )
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        flash(f"Persona {persona_name} updated successfully!", "success")
+        return redirect(url_for('persona.view_persona', persona_id=persona_id))
+        
+    except Exception as e:
+        logging.error(f"Error updating persona: {e}")
+        flash(f"Error updating persona: {str(e)}", "danger")
+        return redirect(url_for('persona.list_personas'))
+
 @persona_bp.route("/use-persona/<int:persona_id>", methods=["GET"])
 def use_persona(persona_id):
     """Redirect to the view persona page."""
@@ -335,7 +452,7 @@ def save_psychographic_data():
             conn.close()
             
             flash(f"Psychographic data updated for persona {persona_id}!", "success")
-            return redirect(url_for('persona.dashboard'))
+            return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:
         logging.error(f"Error saving psychographic data: {e}")
@@ -406,7 +523,7 @@ def save_behavioral_data():
             conn.close()
             
             flash(f"Behavioral data updated for persona {persona_id}!", "success")
-            return redirect(url_for('persona.dashboard'))
+            return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:
         logging.error(f"Error saving behavioral data: {e}")
@@ -481,7 +598,7 @@ def save_contextual_data():
             conn.close()
             
             flash(f"Contextual data updated for persona {persona_id}!", "success")
-            return redirect(url_for('persona.dashboard'))
+            return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:
         logging.error(f"Error saving contextual data: {e}")

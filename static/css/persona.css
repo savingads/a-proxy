@@ -1,0 +1,181 @@
+/* Common styling for persona pages */
+
+/* Placeholder image styling */
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
+}
+
+/* Dividers and spacers */
+.b-example-divider {
+    width: 100%;
+    height: 3rem;
+    background-color: rgba(0, 0, 0, .1);
+    border: solid rgba(0, 0, 0, .15);
+    border-width: 1px 0;
+    box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+.b-example-vr {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 100vh;
+}
+
+/* Icon styling */
+.bi {
+    vertical-align: -.125em;
+    fill: currentColor;
+}
+
+/* Navigation scroller */
+.nav-scroller {
+    position: relative;
+    z-index: 2;
+    height: 2.75rem;
+    overflow-y: hidden;
+}
+
+.nav-scroller .nav {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-bottom: 1rem;
+    margin-top: -1px;
+    overflow-x: auto;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Button styling */
+.btn-bd-primary {
+    --bd-violet-bg: #712cf9;
+    --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+    --bs-btn-font-weight: 600;
+    --bs-btn-color: var(--bs-white);
+    --bs-btn-bg: var(--bd-violet-bg);
+    --bs-btn-border-color: var(--bd-violet-bg);
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-hover-bg: #6528e0;
+    --bs-btn-hover-border-color: #6528e0;
+    --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+    --bs-btn-active-color: var(--bs-btn-hover-color);
+    --bs-btn-active-bg: #5a23c8;
+    --bs-btn-active-border-color: #5a23c8;
+}
+
+/* Mode toggle */
+.bd-mode-toggle {
+    z-index: 1500;
+}
+
+.bd-mode-toggle .dropdown-menu .active .bi {
+    display: block !important;
+}
+
+/* Grid styling */
+.show-grid [class^="col"] {
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: var(--bs-dark-bg-subtle);
+    border: none;
+}
+
+/* Sidebar positioning */
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    /* Height of navbar */
+}
+
+/* Main content positioning */
+.main-content {
+    margin-left: 250px;
+    /* Adjust this value based on the width of your sidebar */
+}
+
+/* Custom card styling */
+.custom-card {
+    background-color: var(--bs-dark-bg-subtle);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.custom-list-group .list-group-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2px;
+    border-radius: 4px;
+}
+
+/* Map styling */
+#map {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 300px;
+}
+
+/* Tab styling */
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    border-bottom: 2px solid var(--bs-primary);
+    background-color: transparent;
+    color: var(--bs-primary);
+}
+
+.tab-content {
+    padding-top: 20px;
+}
+
+/* Form input styling */
+.form-control,
+.form-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Subtle divider */
+.subtle-divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 1rem 0;
+}
+
+/* Styling for data display in view mode - Table format */
+.data-row {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 0;
+}
+
+.field-label {
+    flex: 0 0 40%;
+    font-weight: 500;
+    color: #9aa0a6;
+}
+
+.data-value {
+    flex: 0 0 60%;
+}

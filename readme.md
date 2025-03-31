@@ -131,13 +131,13 @@ python migrate_database.py
 Start the Flask web server:
 
 ```bash
-python app.py --port 5001
+python app.py
 ```
 
 Then open your browser and navigate to:
 
 ```
-http://localhost:5001
+http://localhost:5002
 ```
 
 ## Usage
@@ -191,6 +191,10 @@ If you already have A-Proxy installed and want to update to the latest version w
 
 4. Update the database schema to include new tables and fields:
    ```bash
+   # It's recommended to backup your database before migrating
+   cp personas.db personas.db.backup
+   
+   # Run the migration script to upgrade to the latest schema version
    python migrate_database.py
    ```
 
@@ -198,8 +202,10 @@ If you already have A-Proxy installed and want to update to the latest version w
 
 6. Restart the application:
    ```bash
-   python app.py --port 5001
+   python app.py
    ```
+
+The migration script will detect your current database version and apply only the necessary updates. It will also provide feedback on the success or failure of each migration step.
 
 ### Using the Archive Feature
 
@@ -238,6 +244,11 @@ The archive feature allows you to save snapshots of websites for future referenc
   - Backing up your personas.db file (`cp personas.db personas.db.backup`)
   - Running the migration script again (`python migrate_database.py`)
   - If problems persist, consider initializing a fresh database (`python database.py`) after backing up your data
+- The database migration script now uses versioning to track applied changes:
+  - It will show the current version of your database when run
+  - It will only apply migrations that haven't been applied yet
+  - It provides detailed feedback on each migration step
+  - A final success/failure message will indicate if all migrations were applied correctly
 - For changes that don't appear after updating:
   - Clear your browser cache or use incognito/private mode
   - Restart the application completely

@@ -32,25 +32,25 @@ Before starting A-Proxy, ensure you have:
 The recommended way to start A-Proxy is:
 
 ```bash
-python app.py --port 5001
+python app.py
 ```
 
 This command:
-- Launches the Flask web server on port 5001
+- Launches the Flask web server on port 5002 (default)
 - Enables debug mode for development
 - Activates auto-reloading on code changes
 
 You can then access the application by opening a web browser and navigating to:
 ```
-http://localhost:5001
+http://localhost:5002
 ```
 
 ## Custom Port Configuration
 
-If port 5001 is already in use, you can specify a different port:
+If port 5002 is already in use, you can specify a different port:
 
 ```bash
-python app.py --port 5002
+python app.py --port 5003
 ```
 
 ## Troubleshooting

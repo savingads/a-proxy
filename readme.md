@@ -131,13 +131,13 @@ python migrate_database.py
 Start the Flask web server:
 
 ```bash
-python app.py --port 5001
+python app.py
 ```
 
 Then open your browser and navigate to:
 
 ```
-http://localhost:5001
+http://localhost:5002
 ```
 
 ## Usage
@@ -202,7 +202,7 @@ If you already have A-Proxy installed and want to update to the latest version w
 
 6. Restart the application:
    ```bash
-   python app.py --port 5001
+   python app.py
    ```
 
 The migration script will detect your current database version and apply only the necessary updates. It will also provide feedback on the success or failure of each migration step.

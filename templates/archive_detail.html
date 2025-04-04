@@ -96,11 +96,16 @@
                             </td>
                             <td>
                                 {% if memento.internet_archive_id %}
-                                <a href="{{ memento.internet_archive_id }}" target="_blank">
-                                    View in Internet Archive
+                                <a href="{{ memento.internet_archive_id }}" target="_blank" class="btn btn-sm btn-success">
+                                    <i class="bi bi-box-arrow-up-right"></i> View in Internet Archive
                                 </a>
                                 {% else %}
-                                <em>Not submitted</em>
+                                <form action="{{ url_for('archives.submit_to_internet_archive', memento_id=memento.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" id="submit-ia-{{ memento.id }}">
+                                        <i class="bi bi-cloud-upload"></i> Submit to Internet Archive
+                                    </button>
+                                </form>
+                                <div class="ia-status-message text-muted mt-1" id="ia-status-{{ memento.id }}"></div>
                                 {% endif %}
                             </td>
                             <td>
@@ -122,4 +127,38 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Check Internet Archive status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        checkInternetArchiveStatus();
+    });
+    
+    // Function to check Internet Archive status
+    function checkInternetArchiveStatus() {
+        fetch('{{ url_for("archives.get_internet_archive_status") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Update all submit buttons based on status
+                const submitButtons = document.querySelectorAll('[id^="submit-ia-"]');
+                const statusMessages = document.querySelectorAll('[id^="ia-status-"]');
+                
+                submitButtons.forEach((button, index) => {
+                    if (!data.enabled) {
+                        button.disabled = true;
+                        statusMessages[index].innerHTML = '<em>Internet Archive integration is disabled. <a href="{{ url_for("archives.settings") }}">Enable in settings</a>.</em>';
+                    } else if (!data.can_submit) {
+                        button.disabled = true;
+                        statusMessages[index].innerHTML = `<em>Rate limit reached (${data.submissions_today}/${data.rate_limit}). Try again tomorrow.</em>`;
+                    } else {
+                        button.disabled = false;
+                        statusMessages[index].innerHTML = `<em>${data.remaining} submissions remaining today</em>`;
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching Internet Archive status:', error);
+            });
+    }
+</script>
 {% endblock %}

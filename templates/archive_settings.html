@@ -1,0 +1,65 @@
+{% extends "home.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Archive Settings</h1>
+
+    <div class="mb-4">
+        <a href="{{ url_for('archives.list_archives') }}" class="btn btn-primary">Back to Archives</a>
+        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Internet Archive Integration</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('archives.settings') }}" method="post">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="internet_archive_enabled" name="internet_archive_enabled" {% if settings.internet_archive_enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="internet_archive_enabled">Enable Internet Archive Integration</label>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="internet_archive_rate_limit" class="form-label">Daily Submission Limit</label>
+                    <input type="number" class="form-control" id="internet_archive_rate_limit" name="internet_archive_rate_limit" 
+                          value="{{ settings.internet_archive_rate_limit }}" min="1" max="100">
+                    <div class="form-text">Maximum number of submissions to Internet Archive per day (1-100)</div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <p><strong>Current Status:</strong> {{ settings.internet_archive_submissions_today }} / {{ settings.internet_archive_rate_limit }} 
+                    submissions today</p>
+                    <p>Remaining: {{ settings.internet_archive_rate_limit - settings.internet_archive_submissions_today }}</p>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2>About Internet Archive Integration</h2>
+        </div>
+        <div class="card-body">
+            <p>The <a href="https://archive.org/" target="_blank">Internet Archive</a> is a non-profit library of millions of free books, movies, software, music, websites, and more. By enabling this integration, you can submit your archived pages to the Internet Archive for long-term preservation.</p>
+            
+            <h5>How it works:</h5>
+            <ul>
+                <li>When enabled, you'll see a "Submit to Internet Archive" button on archive detail pages for mementos that haven't been submitted yet.</li>
+                <li>Clicking this button will send the original URL to the Internet Archive's "Save Page Now" service.</li>
+                <li>The Internet Archive will crawl and archive the page, and provide a permanent link to the archived version.</li>
+                <li>This link will be saved with your memento for future reference.</li>
+            </ul>
+            
+            <h5>Rate Limiting:</h5>
+            <p>To avoid overwhelming the Internet Archive's services, there is a configurable daily submission limit. This limit resets at midnight.</p>
+            
+            <div class="alert alert-warning">
+                <strong>Note:</strong> Internet Archive submissions are subject to their terms of service. Not all pages may be successfully archived due to robots.txt restrictions, server blocking, or other limitations.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

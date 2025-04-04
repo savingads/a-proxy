@@ -1118,5 +1118,117 @@ def delete_waypoint(waypoint_id):
     finally:
         conn.close()
 
+# Settings-related functions
+def get_setting(key, default=None):
+    """
+    Get a setting value from the database.
+    
+    Args:
+        key: The setting key
+        default: Default value if setting doesn't exist
+    
+    Returns:
+        The setting value or default if not found
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
+    result = cursor.fetchone()
+    
+    conn.close()
+    
+    if result:
+        return result['value']
+    return default
+
+def set_setting(key, value, description=None):
+    """
+    Set a setting value in the database.
+    
+    Args:
+        key: The setting key
+        value: The setting value
+        description: Optional description of the setting
+    
+    Returns:
+        True if successful
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Check if the setting already exists
+        cursor.execute("SELECT key FROM settings WHERE key = ?", (key,))
+        exists = cursor.fetchone()
+        
+        if exists:
+            # Update existing setting
+            cursor.execute(
+                "UPDATE settings SET value = ?, updated_at = ? WHERE key = ?",
+                (value, datetime.now(), key)
+            )
+        else:
+            # Insert new setting
+            cursor.execute(
+                "INSERT INTO settings (key, value, description, updated_at) VALUES (?, ?, ?, ?)",
+                (key, value, description, datetime.now())
+            )
+        
+        conn.commit()
+        return True
+    
+    except Exception as e:
+        conn.rollback()
+        raise e
+    
+    finally:
+        conn.close()
+
+def get_all_settings():
+    """
+    Get all settings from the database.
+    
+    Returns:
+        List of dictionaries containing setting data
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM settings ORDER BY key")
+    settings = [dict(row) for row in cursor.fetchall()]
+    
+    conn.close()
+    return settings
+
+def init_default_settings():
+    """Initialize default settings if they don't exist"""
+    # Internet Archive settings
+    set_setting('internet_archive_enabled', 'true', 'Enable Internet Archive integration')
+    set_setting('internet_archive_rate_limit', '10', 'Maximum Internet Archive submissions per day')
+    set_setting('internet_archive_submissions_today', '0', 'Number of Internet Archive submissions made today')
+    set_setting('internet_archive_last_reset', datetime.now().strftime('%Y-%m-%d'), 'Last date the submission counter was reset')
+
 # Initialize the database when the module is imported
 init_db()
+
+# Add settings table if it doesn't exist
+def init_settings_table():
+    """Initialize the settings table"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        description TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+init_settings_table()
+init_default_settings()

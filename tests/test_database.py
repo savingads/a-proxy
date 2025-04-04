@@ -247,6 +247,46 @@ class TestDatabase(unittest.TestCase):
         
         # Check that the memento is related to the correct website
         self.assertEqual(memento['uri_r'], url)
+        
+    def test_delete_archived_website(self):
+        """Test deleting an archived website and its associated mementos"""
+        # Create a test website archive
+        url = "https://example.com/delete-test"
+        archive_type = "filesystem"
+        archive_location = "archives/delete_test_hash"
+        
+        # Save the archived website
+        archived_website_id = database.save_archived_website(
+            url=url,
+            archive_type=archive_type,
+            archive_location=archive_location
+        )
+        
+        # Create a test memento
+        memento_location = "archives/delete_test_hash/20250330120000"
+        memento_id = database.save_memento(
+            archived_website_id=archived_website_id,
+            memento_location=memento_location,
+            http_status=200
+        )
+        
+        # Verify the archived website and memento exist
+        self.assertIsNotNone(database.get_archived_website(archived_website_id))
+        self.assertIsNotNone(database.get_memento(memento_id))
+        
+        # Delete the archived website
+        result = database.delete_archived_website(archived_website_id)
+        self.assertTrue(result)
+        
+        # Verify the archived website no longer exists
+        self.assertIsNone(database.get_archived_website(archived_website_id))
+        
+        # Verify the memento was also deleted (cascade delete)
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM mementos WHERE id = ?", (memento_id,))
+        self.assertIsNone(cursor.fetchone())
+        conn.close()
 
 if __name__ == '__main__':
     unittest.main()

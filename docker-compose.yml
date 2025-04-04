@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  a-proxy:
+    build: .
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/app/data
+      - ./nordvpn:/app/nordvpn
+    restart: unless-stopped

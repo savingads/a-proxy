@@ -945,10 +945,17 @@ def get_waypoints(journey_id):
     
     waypoints = [dict(row) for row in cursor.fetchall()]
     
-    # Parse metadata JSON if present
+    # Parse metadata JSON if present and convert timestamp to datetime
     for waypoint in waypoints:
         if waypoint['metadata']:
             waypoint['metadata'] = json.loads(waypoint['metadata'])
+        # Convert the timestamp string to a datetime object
+        if waypoint['timestamp'] and isinstance(waypoint['timestamp'], str):
+            try:
+                waypoint['timestamp'] = datetime.fromisoformat(waypoint['timestamp'].replace('Z', '+00:00'))
+            except ValueError:
+                # If we can't parse it, leave it as is
+                pass
     
     conn.close()
     return waypoints

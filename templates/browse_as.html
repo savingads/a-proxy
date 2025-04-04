@@ -456,6 +456,7 @@
                     newJourneyForm.style.display = 'block';
                     existingJourneyForm.style.display = 'none';
                     form.action = "{{ url_for('journey.create_journey') }}";
+                    form.method = "POST";
                 }
             });
 
@@ -463,15 +464,24 @@
                 if (this.checked) {
                     newJourneyForm.style.display = 'none';
                     existingJourneyForm.style.display = 'block';
-                    form.action = "{{ url_for('journey.browse_journey', journey_id=0) }}".replace('0', document.querySelector('input[name="journey_id"]:checked')?.value || '0');
+                    const selectedJourney = document.querySelector('input[name="journey_id"]:checked');
+                    if (selectedJourney) {
+                        updateFormActionForJourney(selectedJourney.value);
+                    }
                 }
             });
+
+            // Helper function to update form action URL
+            function updateFormActionForJourney(journeyId) {
+                form.action = "{{ url_for('journey.browse_journey', journey_id=0) }}".replace('/0', '/' + journeyId);
+                form.method = "GET";
+            }
 
             // Update action when selecting journey
             document.querySelectorAll('.journey-radio').forEach(radio => {
                 radio.addEventListener('change', function () {
                     if (journeyExistingRadio.checked) {
-                        form.action = "{{ url_for('journey.browse_journey', journey_id=0) }}".replace('0', this.value);
+                        updateFormActionForJourney(this.value);
                     }
                 });
             });

@@ -6,7 +6,7 @@ selenium==4.8.3
 webdriver-manager==3.8.5
 pyyaml==6.0
 pywb==2.7.4
-shot_scraper==1.2.1
+shot_scraper==1.8
 Pillow==9.4.0
 beautifulsoup4==4.11.2
 gevent==22.10.2

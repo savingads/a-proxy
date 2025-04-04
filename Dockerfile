@@ -20,6 +20,15 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     build-essential \
     file \
+    pkg-config \
+    libffi-dev \
+    libbz2-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libreadline-dev \
+    liblzma-dev \
+    python3-tk \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

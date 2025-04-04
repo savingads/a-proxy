@@ -127,6 +127,36 @@ class TestTemplates(unittest.TestCase):
         sidebar = soup.select('.sidebar')
         self.assertTrue(len(sidebar) > 0, "Sidebar not found in create journey page")
     
+    def test_edit_journey_page_extends_base_template(self):
+        """Test that the edit journey page extends the base template"""
+        # First create a journey to edit
+        test_journey = {
+            "name": "Test Journey", 
+            "description": "Test journey description", 
+            "journey_type": "research"
+        }
+        journey_id = database.create_journey(**test_journey)
+        
+        # Now try to access the edit page
+        response = self.client.get(f'/journey/{journey_id}/edit')
+        self.assertEqual(response.status_code, 200)
+        
+        # Parse the HTML
+        soup = BeautifulSoup(response.data, 'html.parser')
+        
+        # Check for sidebar navigation
+        sidebar = soup.select('.sidebar')
+        self.assertTrue(len(sidebar) > 0, "Sidebar not found in edit journey page")
+        
+        # Check that form contains the journey data
+        name_input = soup.select('input#name')
+        self.assertTrue(len(name_input) > 0, "Journey name input not found")
+        self.assertEqual(name_input[0].get('value'), "Test Journey")
+        
+        # Check for the Danger Zone section
+        danger_zone = soup.select('.card.border-danger')
+        self.assertTrue(len(danger_zone) > 0, "Danger zone card not found in edit journey page")
+    
     def test_browse_as_page_extends_base_template(self):
         """Test that the browse-as page extends the base template"""
         response = self.client.get('/browse-as')

@@ -195,6 +195,47 @@ class TestApp(unittest.TestCase):
         # Check that the deleted persona is no longer in the database
         for persona in database.get_all_personas():
             self.assertNotEqual(persona['id'], temp_persona_id)
+    
+    def test_journey_browse_page(self):
+        """Test that the journey browse page loads successfully"""
+        # Create a test journey
+        test_journey = {
+            "name": "Test Browse Journey", 
+            "description": "Test journey for browsing", 
+            "journey_type": "research"
+        }
+        journey_id = database.create_journey(**test_journey)
+        
+        # Access the journey browse page
+        response = self.client.get(f'/journey/{journey_id}/browse')
+        self.assertEqual(response.status_code, 200)
+        
+        # Check that the page contains the journey name
+        self.assertIn(b'Test Browse Journey', response.data)
+        
+        # Check that the page contains the browser iframe
+        self.assertIn(b'<iframe name="browser-frame" id="browser-frame"', response.data)
+    
+    def test_journey_edit_page(self):
+        """Test that the journey edit page loads successfully"""
+        # Create a test journey
+        test_journey = {
+            "name": "Test Edit Journey", 
+            "description": "Test journey for editing", 
+            "journey_type": "research"
+        }
+        journey_id = database.create_journey(**test_journey)
+        
+        # Access the journey edit page
+        response = self.client.get(f'/journey/{journey_id}/edit')
+        self.assertEqual(response.status_code, 200)
+        
+        # Check that the page contains the journey name
+        self.assertIn(b'Test Edit Journey', response.data)
+        
+        # Check that the form has the correct values
+        self.assertIn(b'value="Test Edit Journey"', response.data)
+        self.assertIn(b'Test journey for editing', response.data)
 
     def test_save_psychographic_data(self):
         """Test saving psychographic data for a persona"""

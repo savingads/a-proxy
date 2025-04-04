@@ -4,3 +4,6 @@ flask-wtf
 wtforms
 selenium
 webdriver-manager
+pyyaml
+pywb
+shot_scraper

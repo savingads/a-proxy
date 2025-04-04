@@ -77,12 +77,31 @@ def submit_to_internet_archive(memento_id):
         # Get the memento
         memento = database.get_memento(memento_id)
         if not memento:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"success": False, "message": "Memento not found."}), 404
             flash("Memento not found.", "danger")
             return redirect(url_for('archives.list_archives'))
         
         # Check if already submitted
         if memento.get('internet_archive_id'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    "success": True, 
+                    "message": "Already submitted to the Internet Archive.",
+                    "archived_url": memento.get('internet_archive_id')
+                })
             flash("This page has already been submitted to the Internet Archive.", "info")
+            return redirect(url_for('archives.view_archive', archived_website_id=memento['archived_website_id']))
+        
+        # Check rate limit before submission
+        can_submit, submissions_today, rate_limit = internet_archive.check_rate_limit()
+        if not can_submit:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    "success": False, 
+                    "message": f"Rate limit exceeded: {submissions_today}/{rate_limit} submissions today"
+                }), 429
+            flash(f"Rate limit exceeded: {submissions_today}/{rate_limit} submissions today", "danger")
             return redirect(url_for('archives.view_archive', archived_website_id=memento['archived_website_id']))
         
         # Submit to Internet Archive
@@ -91,14 +110,29 @@ def submit_to_internet_archive(memento_id):
         if success:
             # Update the memento with the Internet Archive ID
             internet_archive.update_memento_with_ia_url(memento_id, result)
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    "success": True, 
+                    "message": "Successfully submitted to the Internet Archive.", 
+                    "archived_url": result
+                })
+            
             flash("Successfully submitted to the Internet Archive.", "success")
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"success": False, "message": f"Failed to submit: {result}"}), 500
+            
             flash(f"Failed to submit to Internet Archive: {result}", "danger")
         
         return redirect(url_for('archives.view_archive', archived_website_id=memento['archived_website_id']))
     
     except Exception as e:
         logging.error(f"Error submitting to Internet Archive: {e}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+        
         flash(f"Error submitting to Internet Archive: {str(e)}", "danger")
         return redirect(url_for('archives.list_archives'))
 

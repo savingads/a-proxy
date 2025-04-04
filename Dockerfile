@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     openvpn \
     nodejs \
     npm \
+    python3-dev \
+    build-essential \
+    file \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

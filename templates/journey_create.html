@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Create Journey - A-Proxy</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            width: 100%;
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            /* Height of navbar */
+        }
+
+        .main-content {
+            margin-left: 250px;
+            /* Adjust this value based on the width of your sidebar */
+        }
+
+        .persona-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .persona-card.selected {
+            border: 3px solid #0d6efd;
+        }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
+            <i class="bi bi-house-door me-2"></i>A-Proxy
+        </a>
+        <ul class="navbar-nav flex-row d-md-none">
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false"
+                    aria-label="Toggle search">
+                    <i class="bi bi-search"></i>
+                </button>
+            </li>
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <i class="bi bi-list"></i>
+                </button>
+            </li>
+        </ul>
+        <div id="navbarSearch" class="navbar-search w-100 collapse">
+            <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 p-0 bg-body-tertiary sidebar">
+                <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+                    <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
+                        aria-labelledby="sidebarMenuLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="sidebarMenuLabel">CurrentWeb</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                data-bs-target="#sidebarMenu" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('home.index') }}">
+                                        <i class="bi bi-house-fill"></i>
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('persona.dashboard') }}">
+                                        <i class="bi bi-speedometer2"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('persona.list_personas') }}">
+                                        <i class="bi bi-people"></i>
+                                        Personas
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Web Browsing</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.browse_as') }}">
+                                        <i class="bi bi-globe"></i>
+                                        Browse As
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('archives.list_archives') }}">
+                                        <i class="bi bi-archive"></i>
+                                        Archived Pages
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Journey Tracking</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.list_journeys') }}">
+                                        <i class="bi bi-map"></i>
+                                        Journeys
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
+                                        href="{{ url_for('journey.create_journey') }}">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Create Journey
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <hr class="my-3">
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Analysis</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-graph-up"></i>
+                                        Reports
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-puzzle"></i>
+                                        Integrations
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <hr class="my-3">
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-gear-wide-connected"></i>
+                                        Settings
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Create New Journey</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{{ url_for('journey.list_journeys') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Journeys
+                        </a>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Journey Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('journey.create_journey') }}">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Journey Name *</label>
+                                        <input type="text" class="form-control" id="name" name="name" required
+                                            placeholder="E.g., Holiday Shopping Journey">
+                                        <div class="form-text">Give your journey a descriptive name.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="description" name="description" rows="3"
+                                            placeholder="What is the purpose of this journey?"></textarea>
+                                        <div class="form-text">Provide a brief description of what this journey is
+                                            about.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="journey_type" class="form-label">Journey Type</label>
+                                        <select class="form-select" id="journey_type" name="journey_type">
+                                            <option value="marketing" selected>Marketing</option>
+                                            <option value="research">Research</option>
+                                            <option value="shopping">Shopping</option>
+                                            <option value="entertainment">Entertainment</option>
+                                            <option value="educational">Educational</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <div class="form-text">Select a category that best describes the purpose of this
+                                            journey.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="persona_id" class="form-label">Associated Persona</label>
+                                        <select class="form-select" id="persona_id" name="persona_id">
+                                            <option value="">None (Generic Journey)</option>
+                                            {% for persona in personas %}
+                                            <option value="{{ persona.id }}">{{ persona.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-text">Optionally link this journey to a specific persona.</div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle"></i> Create Journey
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">About Journeys</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>What is a journey?</strong></p>
+                                <p>A journey represents a browsing session with a specific purpose. It allows you to
+                                    track a persona's interactions across websites as a coherent story.</p>
+
+                                <p><strong>Journey Types</strong></p>
+                                <ul>
+                                    <li><strong>Marketing:</strong> Track a marketing funnel from awareness to
+                                        conversion</li>
+                                    <li><strong>Research:</strong> Document research on a specific topic</li>
+                                    <li><strong>Shopping:</strong> Follow a shopping experience from discovery to
+                                        purchase</li>
+                                    <li><strong>Entertainment:</strong> Record an entertainment browsing sequence</li>
+                                    <li><strong>Educational:</strong> Track a learning path</li>
+                                </ul>
+
+                                <p><strong>Using Journeys</strong></p>
+                                <p>After creating a journey, you can add waypoints as you browse the web. Each waypoint
+                                    captures important moments in your persona's experience.</p>
+
+                                <p><strong>Viewing Results</strong></p>
+                                <p>Completed journeys can be visualized as a timeline, showing the progression through
+                                    the browsing experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>

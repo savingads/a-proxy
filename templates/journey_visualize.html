@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Journey Timeline - A-Proxy</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.0/dist/vis-timeline-graph2d.min.css" rel="stylesheet">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            width: 100%;
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            /* Height of navbar */
+        }
+
+        .main-content {
+            margin-left: 250px;
+            /* Adjust this value based on the width of your sidebar */
+        }
+
+        /* Timeline customization */
+        #visualization {
+            width: 100%;
+            height: calc(100vh - 240px);
+            border: 1px solid #495057;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        /* vis-timeline dark theme overrides */
+        .vis-timeline {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+
+        .vis-item {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0a58ca;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .vis-item.vis-selected {
+            background-color: #0a58ca;
+            border-color: #084298;
+        }
+
+        .vis-item .vis-item-content {
+            padding: 8px;
+        }
+
+        .vis-item .vis-item-overflow {
+            overflow: visible;
+        }
+
+        .vis-time-axis .vis-text {
+            color: #adb5bd;
+        }
+
+        .vis-time-axis .vis-grid.vis-minor {
+            border-color: #495057;
+        }
+
+        .vis-time-axis .vis-grid.vis-major {
+            border-color: #6c757d;
+        }
+
+        .vis-panel.vis-center,
+        .vis-panel.vis-top,
+        .vis-panel.vis-bottom {
+            border-color: #495057;
+        }
+
+        .waypoint-content {
+            max-width: 300px;
+        }
+
+        .waypoint-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .waypoint-url {
+            word-break: break-all;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .waypoint-screenshot {
+            max-width: 100%;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        /* Waypoint details modal customization */
+        .modal-screenshot {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #495057;
+            margin-bottom: 1rem;
+        }
+
+        #details-modal .modal-dialog {
+            max-width: 800px;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+        }
+
+        .journey-stat-item {
+            background-color: #343a40;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .journey-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .journey-stat-label {
+            font-size: 0.9rem;
+            color: #adb5bd;
+        }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
+            <i class="bi bi-house-door me-2"></i>A-Proxy
+        </a>
+        <ul class="navbar-nav flex-row d-md-none">
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false"
+                    aria-label="Toggle search">
+                    <i class="bi bi-search"></i>
+                </button>
+            </li>
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <i class="bi bi-list"></i>
+                </button>
+            </li>
+        </ul>
+        <div id="navbarSearch" class="navbar-search w-100 collapse">
+            <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 p-0 bg-body-tertiary sidebar">
+                <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+                    <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
+                        aria-labelledby="sidebarMenuLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="sidebarMenuLabel">CurrentWeb</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                data-bs-target="#sidebarMenu" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('home.index') }}">
+                                        <i class="bi bi-house-fill"></i>
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('persona.dashboard') }}">
+                                        <i class="bi bi-speedometer2"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('persona.list_personas') }}">
+                                        <i class="bi bi-people"></i>
+                                        Personas
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Web Browsing</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.browse_as') }}">
+                                        <i class="bi bi-globe"></i>
+                                        Browse As
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('archives.list_archives') }}">
+                                        <i class="bi bi-archive"></i>
+                                        Archived Pages
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Journey Tracking</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
+                                        href="{{ url_for('journey.list_journeys') }}">
+                                        <i class="bi bi-map"></i>
+                                        Journeys
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.create_journey') }}">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Create Journey
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <hr class="my-3">
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Analysis</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-graph-up"></i>
+                                        Reports
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-puzzle"></i>
+                                        Integrations
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <hr class="my-3">
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <i class="bi bi-gear-wide-connected"></i>
+                                        Settings
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{{ journey.name }} Timeline</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}"
+                            class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left"></i> Back to Journey
+                        </a>
+                        <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}"
+                            class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Waypoints
+                        </a>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <!-- Journey overview stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="journey-stat-item">
+                            <div class="journey-stat-value">{{ waypoints|length }}</div>
+                            <div class="journey-stat-label">Waypoints</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="journey-stat-item">
+                            <div class="journey-stat-value">
+                                {{ waypoints|selectattr('timestamp', 'defined')|list|length > 0 and (
+                                (waypoints|selectattr('timestamp', 'defined')|map(attribute='timestamp')|max -
+                                waypoints|selectattr('timestamp',
+                                'defined')|map(attribute='timestamp')|min).total_seconds() / 60
+                                )|round|int or 0 }}
+                            </div>
+                            <div class="journey-stat-label">Minutes</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="journey-stat-item">
+                            <div class="journey-stat-value">
+                                {{ waypoints|selectattr('domain', 'defined')|map(attribute='domain')|unique|list|length
+                                or 0 }}
+                            </div>
+                            <div class="journey-stat-label">Domains</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="journey-stat-item">
+                            <div class="journey-stat-value">
+                                {{ journey.status|capitalize }}
+                            </div>
+                            <div class="journey-stat-label">Status</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if waypoints %}
+                <!-- Timeline visualization -->
+                <div id="visualization"></div>
+
+                <!-- Controls -->
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="btn-group">
+                        <button id="zoomIn" class="btn btn-outline-secondary">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                        <button id="zoomOut" class="btn btn-outline-secondary">
+                            <i class="bi bi-zoom-out"></i>
+                        </button>
+                        <button id="moveLeft" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <button id="moveRight" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button id="fit" class="btn btn-outline-secondary">
+                            <i class="bi bi-fullscreen"></i> Fit All
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> This journey doesn't have any waypoints yet.
+                </div>
+                <div class="text-center py-5">
+                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/signpost.svg"
+                        alt="Signpost icon" width="64" height="64" class="mb-3 text-muted">
+                    <h5>Start adding waypoints to visualize your journey</h5>
+                    <p class="text-muted">Click the button below to browse and add waypoints to your journey.</p>
+                    <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}"
+                        class="btn btn-primary mt-2">
+                        <i class="bi bi-plus-circle"></i> Add Waypoints
+                    </a>
+                </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Waypoint Details Modal -->
+    <div class="modal fade" id="details-modal" tabindex="-1" aria-labelledby="details-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="details-modal-label">Waypoint Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12 text-center mb-3">
+                                <img id="modal-screenshot" src="" alt="Screenshot" class="modal-screenshot img-fluid">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <ul class="nav nav-pills mb-3" id="waypoint-tab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="details-tab" data-bs-toggle="pill"
+                                            data-bs-target="#details" type="button" role="tab" aria-controls="details"
+                                            aria-selected="true">Details</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="notes-tab" data-bs-toggle="pill"
+                                            data-bs-target="#notes" type="button" role="tab" aria-controls="notes"
+                                            aria-selected="false">Notes</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="metadata-tab" data-bs-toggle="pill"
+                                            data-bs-target="#metadata" type="button" role="tab" aria-controls="metadata"
+                                            aria-selected="false">Metadata</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="waypoint-tabContent">
+                                    <div class="tab-pane fade show active" id="details" role="tabpanel"
+                                        aria-labelledby="details-tab">
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 text-muted">Title:</div>
+                                            <div class="col-md-9" id="modal-title"></div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 text-muted">URL:</div>
+                                            <div class="col-md-9">
+                                                <a href="#" id="modal-url" target="_blank"></a>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 text-muted">Timestamp:</div>
+                                            <div class="col-md-9" id="modal-timestamp"></div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 text-muted">Step:</div>
+                                            <div class="col-md-9" id="modal-step"></div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                                        <div id="modal-notes"></div>
+                                    </div>
+                                    <div class="tab-pane fade" id="metadata" role="tabpanel"
+                                        aria-labelledby="metadata-tab">
+                                        <pre id="modal-metadata" class="bg-dark p-3 rounded"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="#" id="edit-waypoint-btn" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.0/dist/vis-timeline-graph2d.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% if waypoints %}
+            // Timeline data
+            var waypointData = [
+                {% for waypoint in waypoints %}
+                {
+                id: {{ waypoint.id }},
+            title: "{{ waypoint.title or 'Untitled Waypoint' }}",
+            content: `
+                        <div class="waypoint-content">
+                            <div class="waypoint-title">{{ waypoint.title or 'Untitled Waypoint' }}</div>
+                            <div class="waypoint-url">{{ waypoint.url }}</div>
+                            {% if waypoint.screenshot_path %}
+                            <img src="{{ url_for('static', filename=waypoint.screenshot_path) }}" class="waypoint-screenshot">
+                            {% endif %}
+                        </div>
+                    `,
+            start: new Date("{{ waypoint.timestamp.isoformat() if waypoint.timestamp and not waypoint.timestamp is string else (waypoint.timestamp if waypoint.timestamp is string else (journey.created_at.isoformat() if journey.created_at and not journey.created_at is string else journey.created_at)) }}"),
+            url: "{{ waypoint.url }}",
+            screenshot_path: "{% if waypoint.screenshot_path %}{{ url_for('static', filename=waypoint.screenshot_path) }}{% endif %}",
+            notes: "{{ waypoint.notes or 'No notes available.' }}",
+            sequence_number: {{ waypoint.sequence_number }},
+            metadata: JSON.parse('{{ waypoint.metadata|tojson if waypoint.metadata else "{}" }}')
+                }{% if not loop.last %}, {% endif %}
+        {% endfor %}
+            ];
+
+        // Timeline configuration
+        var options = {
+            template: function (item) {
+                return item.content;
+            },
+            timeAxis: { scale: 'minute', step: 5 },
+            orientation: 'top',
+            min: new Date("{{ waypoints[0].timestamp.isoformat() if waypoints[0].timestamp and not waypoints[0].timestamp is string else (waypoints[0].timestamp if waypoints[0].timestamp is string else (journey.created_at.isoformat() if journey.created_at and not journey.created_at is string else journey.created_at)) }}"),
+            max: new Date("{{ waypoints[-1].timestamp.isoformat() if waypoints[-1].timestamp and not waypoints[-1].timestamp is string else (waypoints[-1].timestamp if waypoints[-1].timestamp is string else (journey.updated_at.isoformat() if journey.updated_at and not journey.updated_at is string else journey.updated_at)) }}"),
+            zoomMin: 1000 * 60, // one minute
+            zoomMax: 1000 * 60 * 60 * 24 // one day
+        };
+
+        // Create a DataSet with the items
+        var items = new vis.DataSet(waypointData);
+
+        // Get the container element
+        var container = document.getElementById('visualization');
+
+        // Create the timeline
+        var timeline = new vis.Timeline(container, items, options);
+
+        // Set up zoom and navigation controls
+        document.getElementById('zoomIn').addEventListener('click', function () {
+            timeline.zoomIn(0.5);
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', function () {
+            timeline.zoomOut(0.5);
+        });
+
+        document.getElementById('moveLeft').addEventListener('click', function () {
+            timeline.move(-0.2);
+        });
+
+        document.getElementById('moveRight').addEventListener('click', function () {
+            timeline.move(0.2);
+        });
+
+        document.getElementById('fit').addEventListener('click', function () {
+            timeline.fit();
+        });
+
+        // Handle timeline item selection to show details
+        timeline.on('select', function (properties) {
+            if (properties.items.length > 0) {
+                var selectedItem = waypointData.find(item => item.id == properties.items[0]);
+                if (selectedItem) {
+                    // Update modal content
+                    document.getElementById('modal-title').textContent = selectedItem.title;
+
+                    var urlElement = document.getElementById('modal-url');
+                    urlElement.textContent = selectedItem.url;
+                    urlElement.href = selectedItem.url;
+
+                    document.getElementById('modal-timestamp').textContent = selectedItem.start.toLocaleString();
+                    document.getElementById('modal-step').textContent = selectedItem.sequence_number;
+                    document.getElementById('modal-notes').textContent = selectedItem.notes;
+
+                    if (selectedItem.metadata) {
+                        document.getElementById('modal-metadata').textContent = JSON.stringify(selectedItem.metadata, null, 2);
+                    } else {
+                        document.getElementById('modal-metadata').textContent = "No metadata available.";
+                    }
+
+                    const screenshotElement = document.getElementById('modal-screenshot');
+                    if (selectedItem.screenshot_path) {
+                        screenshotElement.src = selectedItem.screenshot_path;
+                        screenshotElement.style.display = 'block';
+                    } else {
+                        screenshotElement.style.display = 'none';
+                    }
+
+                    // Set up edit button link
+                    document.getElementById('edit-waypoint-btn').href = "#editWaypointModal" + selectedItem.id;
+                    document.getElementById('edit-waypoint-btn').setAttribute('data-bs-toggle', 'modal');
+                    document.getElementById('edit-waypoint-btn').setAttribute('data-bs-target', '#editWaypointModal' + selectedItem.id);
+
+                    // Show the modal
+                    var detailsModal = new bootstrap.Modal(document.getElementById('details-modal'));
+                    detailsModal.show();
+                }
+            }
+        });
+
+        // Initially fit timeline to view all items
+        timeline.fit();
+        {% endif %}
+        });
+    </script>
+
+    <!-- Edit Waypoint Modals -->
+    {% for waypoint in waypoints %}
+    <div class="modal fade" id="editWaypointModal{{ waypoint.id }}" tabindex="-1"
+        aria-labelledby="editWaypointModalLabel{{ waypoint.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editWaypointModalLabel{{ waypoint.id }}">Edit Waypoint</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('journey.edit_waypoint', waypoint_id=waypoint.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="title{{ waypoint.id }}" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title{{ waypoint.id }}" name="title"
+                                value="{{ waypoint.title or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes{{ waypoint.id }}" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes{{ waypoint.id }}" name="notes"
+                                rows="3">{{ waypoint.notes or '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</body>
+
+</html>

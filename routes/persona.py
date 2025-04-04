@@ -321,7 +321,7 @@ def update_persona():
         conn.commit()
         conn.close()
         
-        flash(f"Persona {persona_name} updated successfully!", "success")
+        flash(f"Persona {persona_name} updated successfully", "success")
         return redirect(url_for('persona.view_persona', persona_id=persona_id))
         
     except Exception as e:
@@ -366,7 +366,7 @@ def save_persona():
         persona_id = database.save_persona(persona_data)
         
         # Use a response object to avoid session issues
-        flash(f"Persona '{name}' saved successfully!", "success")
+        flash(f"Persona '{name}' saved successfully", "success")
         return redirect(url_for('persona.dashboard'))
     
     except Exception as e:
@@ -451,7 +451,7 @@ def save_psychographic_data():
             conn.commit()
             conn.close()
             
-            flash(f"Psychographic data updated for persona {persona_id}!", "success")
+            flash(f"Psychographic data updated for persona {persona_id}", "success")
             return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:
@@ -522,7 +522,7 @@ def save_behavioral_data():
             conn.commit()
             conn.close()
             
-            flash(f"Behavioral data updated for persona {persona_id}!", "success")
+            flash(f"Behavioral data updated for persona {persona_id}", "success")
             return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:
@@ -597,7 +597,7 @@ def save_contextual_data():
             conn.commit()
             conn.close()
             
-            flash(f"Contextual data updated for persona {persona_id}!", "success")
+            flash(f"Contextual data updated for persona {persona_id}", "success")
             return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
     except Exception as e:

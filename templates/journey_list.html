@@ -299,10 +299,10 @@
                                 </p>
                                 <p class="card-text">{{ journey.description or 'No description available.' }}</p>
                                 <p class="card-text small text-muted">
-                                    <i class="bi bi-clock"></i> Created: {{ journey.created_at.strftime('%Y-%m-%d
-                                    %H:%M') if journey.created_at else '-' }}<br>
-                                    <i class="bi bi-arrow-clockwise"></i> Updated: {{
-                                    journey.updated_at.strftime('%Y-%m-%d %H:%M') if journey.updated_at else '-' }}
+                                    <i class="bi bi-clock"></i> Created: {{ journey.created_at if journey.created_at
+                                    else '-' }}<br>
+                                    <i class="bi bi-arrow-clockwise"></i> Updated: {{ journey.updated_at if
+                                    journey.updated_at else '-' }}
                                 </p>
                             </div>
                             <div class="card-footer bg-transparent border-top">

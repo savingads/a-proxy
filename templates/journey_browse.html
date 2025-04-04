@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Browse Journey - A-Proxy</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            width: 100%;
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        /* Browser frame layout */
+        .browser-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 100px);
+            border: 1px solid #495057;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .browser-toolbar {
+            display: flex;
+            padding: 8px;
+            background-color: #343a40;
+            border-bottom: 1px solid #495057;
+        }
+
+        .browser-content {
+            flex-grow: 1;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .browser-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .overlay-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* Waypoint list */
+        .waypoint-list {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .waypoint-item {
+            border-left: 3px solid #0d6efd;
+            padding-left: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .waypoint-item:before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 10px;
+            width: 12px;
+            height: 12px;
+            background: #0d6efd;
+            border-radius: 50%;
+        }
+
+        .waypoint-url {
+            word-break: break-all;
+            font-size: 0.8rem;
+        }
+
+        .add-waypoint-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            z-index: 1050;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .journey-info {
+            max-width: 300px;
+        }
+
+        .persona-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">
+            <i class="bi bi-map me-2"></i>Journey: {{ journey.name }}
+        </a>
+
+        <div class="journey-info d-flex align-items-center me-auto ms-3">
+            <div class="text-light me-3">
+                <i class="bi bi-tag-fill me-1"></i> {{ journey.journey_type|capitalize }}
+            </div>
+            {% if persona %}
+            <div class="persona-badge bg-info rounded text-white">
+                <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="d-flex align-items-center me-3">
+            <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}"
+                class="btn btn-sm btn-outline-light me-2">
+                <i class="bi bi-eye"></i> View Journey
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
+                data-bs-target="#addWaypointModal">
+                <i class="bi bi-plus-circle"></i> Add Waypoint
+            </button>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-0">
+                <div class="browser-container">
+                    <div class="browser-toolbar">
+                        <form id="browser-navigation" class="d-flex w-100" method="POST"
+                            action="{{ url_for('browsing.visit_page') }}" target="browser-frame">
+                            <button type="button" class="btn btn-outline-secondary me-2" id="back-button">
+                                <i class="bi bi-arrow-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary me-2" id="forward-button">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary me-2" id="refresh-button">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                            <div class="input-group">
+                                <input type="url" name="url" id="url-input" class="form-control" placeholder="Enter URL"
+                                    required>
+                                <button type="submit" class="btn btn-primary">Go</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="browser-content">
+                        <iframe name="browser-frame" id="browser-frame" class="browser-iframe"
+                            src="about:blank"></iframe>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="p-3">
+                        <h6
+                            class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-body-secondary text-uppercase">
+                            <span>Journey Waypoints</span>
+                            <span class="badge bg-secondary">{{ waypoints|length }}</span>
+                        </h6>
+                        <hr class="my-2">
+                        <div class="waypoint-list">
+                            {% if waypoints %}
+                            {% for waypoint in waypoints %}
+                            <div class="waypoint-item p-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="badge bg-secondary">{{ loop.index }}</span>
+                                    <small class="text-muted">{{ waypoint.timestamp.strftime('%H:%M:%S') if
+                                        waypoint.timestamp else '-' }}</small>
+                                </div>
+                                <h6 class="my-1">{{ waypoint.title or 'Untitled' }}</h6>
+                                <div class="waypoint-url text-muted">{{ waypoint.url }}</div>
+                                {% if waypoint.notes %}
+                                <div class="small mt-1 fst-italic">{{ waypoint.notes }}</div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary load-url"
+                                        data-url="{{ waypoint.url }}">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                        data-bs-target="#editWaypointModal{{ waypoint.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="bi bi-signpost-2 fs-3 mb-2"></i>
+                                    <p>No waypoints added yet.</p>
+                                </div>
+                                <p class="small">Start browsing and add waypoints to track your journey.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Waypoint Button (Fixed) -->
+    <button type="button" class="btn btn-primary add-waypoint-btn" data-bs-toggle="modal"
+        data-bs-target="#addWaypointModal">
+        <i class="bi bi-plus fs-4"></i>
+    </button>
+
+    <!-- Add Waypoint Modal -->
+    <div class="modal fade" id="addWaypointModal" tabindex="-1" aria-labelledby="addWaypointModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addWaypointModalLabel">Add Waypoint</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="add-waypoint-form" action="{{ url_for('journey.add_waypoint', journey_id=journey.id) }}"
+                    method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="waypoint-url" class="form-label">URL</label>
+                            <input type="url" class="form-control" id="waypoint-url" name="url" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="waypoint-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="waypoint-title" name="title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="waypoint-notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="waypoint-notes" name="notes" rows="3"
+                                placeholder="Add any observations or notes about this waypoint"></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="capture-screenshot"
+                                name="capture-screenshot" checked>
+                            <label class="form-check-label" for="capture-screenshot">Capture screenshot</label>
+                        </div>
+                        <input type="hidden" id="screenshot-data" name="screenshot">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Waypoint</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Waypoint Modals -->
+    {% for waypoint in waypoints %}
+    <div class="modal fade" id="editWaypointModal{{ waypoint.id }}" tabindex="-1"
+        aria-labelledby="editWaypointModalLabel{{ waypoint.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editWaypointModalLabel{{ waypoint.id }}">Edit Waypoint</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('journey.edit_waypoint', waypoint_id=waypoint.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="title{{ waypoint.id }}" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title{{ waypoint.id }}" name="title"
+                                value="{{ waypoint.title or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes{{ waypoint.id }}" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes{{ waypoint.id }}" name="notes"
+                                rows="3">{{ waypoint.notes or '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const iframe = document.getElementById('browser-frame');
+            const urlInput = document.getElementById('url-input');
+            const backButton = document.getElementById('back-button');
+            const forwardButton = document.getElementById('forward-button');
+            const refreshButton = document.getElementById('refresh-button');
+            const waypointUrlInput = document.getElementById('waypoint-url');
+            const waypointTitleInput = document.getElementById('waypoint-title');
+            const screenshotDataInput = document.getElementById('screenshot-data');
+            const addWaypointModal = document.getElementById('addWaypointModal');
+            const loadUrlButtons = document.querySelectorAll('.load-url');
+
+            // Initialize the browser with default URL if none is set
+            if (!urlInput.value) {
+                urlInput.value = 'https://www.google.com';
+                document.getElementById('browser-navigation').submit();
+            }
+
+            // Set up navigation buttons
+            backButton.addEventListener('click', function () {
+                iframe.contentWindow.history.back();
+            });
+
+            forwardButton.addEventListener('click', function () {
+                iframe.contentWindow.history.forward();
+            });
+
+            refreshButton.addEventListener('click', function () {
+                iframe.contentWindow.location.reload();
+            });
+
+            // Load URLs from waypoint list
+            loadUrlButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+                    urlInput.value = url;
+                    document.getElementById('browser-navigation').submit();
+                });
+            });
+
+            // Update URL in input when iframe navigates
+            iframe.addEventListener('load', function () {
+                try {
+                    // Only update if we have access to the iframe content
+                    if (iframe.contentWindow && iframe.contentWindow.location.href) {
+                        if (iframe.contentWindow.location.href !== 'about:blank') {
+                            urlInput.value = iframe.contentWindow.location.href;
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin errors will occur if navigating to external sites
+                    console.log('Could not access iframe location due to same-origin policy');
+                }
+            });
+
+            // Prepare waypoint data when opening the modal
+            addWaypointModal.addEventListener('show.bs.modal', function (event) {
+                // Get the current URL from the browser
+                waypointUrlInput.value = urlInput.value;
+
+                // Try to get the title from the iframe
+                try {
+                    waypointTitleInput.value = iframe.contentDocument.title;
+                } catch (e) {
+                    // Default title if we can't access the iframe content
+                    waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
+                }
+
+                // Capture screenshot if checkbox is checked
+                if (document.getElementById('capture-screenshot').checked) {
+                    // Use html2canvas to capture the iframe
+                    html2canvas(iframe).then(canvas => {
+                        const imageData = canvas.toDataURL('image/png');
+                        screenshotDataInput.value = imageData;
+                    }).catch(err => {
+                        console.error('Error capturing screenshot:', err);
+                        screenshotDataInput.value = '';
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

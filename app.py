@@ -9,6 +9,7 @@ from routes.vpn import vpn_bp
 from routes.persona import persona_bp
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
+from routes.journey import journey_bp
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -29,6 +30,7 @@ def create_app():
     app.register_blueprint(persona_bp)
     app.register_blueprint(browsing_bp)
     app.register_blueprint(archives_bp)
+    app.register_blueprint(journey_bp)
     
     return app
 

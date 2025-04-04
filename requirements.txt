@@ -7,3 +7,4 @@ webdriver-manager
 pyyaml
 pywb
 shot_scraper
+Pillow

@@ -71,7 +71,8 @@
             <input type="hidden" name="language" value="{{ language }}">
             <input type="hidden" name="geolocation" id="form-geolocation" value="">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
-            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
+            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}"
+                class="btn btn-secondary">Archive</button>
         </form>
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
@@ -105,7 +106,8 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('persona.dashboard') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('persona.dashboard') }}">
                                         <i class="bi bi-speedometer2"></i>
                                         Dashboard
                                     </a>
@@ -125,15 +127,38 @@
                             </h6>
                             <ul class="nav flex-column mb-auto">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.browse_as') }}">
                                         <i class="bi bi-globe"></i>
                                         Browse As
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('archives.list_archives') }}">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('archives.list_archives') }}">
                                         <i class="bi bi-archive"></i>
                                         Archived Pages
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <h6
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                <span>Journey Tracking</span>
+                            </h6>
+                            <ul class="nav flex-column mb-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.list_journeys') }}">
+                                        <i class="bi bi-map"></i>
+                                        Journeys
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2"
+                                        href="{{ url_for('journey.create_journey') }}">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Create Journey
                                     </a>
                                 </li>
                             </ul>
@@ -183,7 +208,8 @@
                                 </ul>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+                                        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-primary">Go to
+                                            Dashboard</a>
                                         <a href="{{ url_for('persona.list_personas') }}"
                                             class="btn btn-outline-secondary">Manage
                                             Personas</a>
@@ -206,12 +232,14 @@
                                         ip_info.country }}</p>
                                     <p><strong>Coordinates:</strong> {{ ip_info.loc }}</p>
                                 </div>
-                                <a href="{{ url_for('persona.dashboard') }}" class="btn btn-sm btn-outline-primary">Change VPN
+                                <a href="{{ url_for('persona.dashboard') }}"
+                                    class="btn btn-sm btn-outline-primary">Change VPN
                                     Region</a>
                                 {% else %}
                                 <p>VPN is not currently running. Start it from the dashboard to simulate different
                                     locations.</p>
-                                <a href="{{ url_for('persona.dashboard') }}" class="btn btn-sm btn-outline-primary">Start VPN</a>
+                                <a href="{{ url_for('persona.dashboard') }}"
+                                    class="btn btn-sm btn-outline-primary">Start VPN</a>
                                 {% endif %}
                             </div>
                         </div>

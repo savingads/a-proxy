@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+.venv
+
+# Data directories (these will be mounted as volumes)
+data/
+nordvpn/
+personas.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test directories
+tests/
+
+# Docker specific
+Dockerfile
+docker-compose.yml
+DOCKER.md
+.dockerignore
+
+# OS specific files
+.DS_Store

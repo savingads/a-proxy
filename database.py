@@ -3,10 +3,11 @@ import os
 import json
 from datetime import datetime
 
-# Define the database path - use a simple path in the current directory
-DB_PATH = 'personas.db'
+# Define the database path - use data directory for persistence in Docker
+DB_PATH = os.path.join('data', 'personas.db')
 
-# No need to create a directory for a file in the current directory
+# Create data directory if it doesn't exist
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def get_db_connection():
     """Create a connection to the SQLite database"""

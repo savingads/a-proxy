@@ -47,3 +47,24 @@ def view_memento(archived_website_id, memento_id):
                           archived_website=archived_website, 
                           memento=memento, 
                           html_content=html_content)
+
+@archives_bp.route("/delete-archive/<int:archived_website_id>", methods=["POST"])
+def delete_archive(archived_website_id):
+    """Delete an archived website and all its associated mementos."""
+    try:
+        # Get the archive info first for the success message
+        archived_website = database.get_archived_website(archived_website_id)
+        if not archived_website:
+            flash("Archived website not found.", "danger")
+            return redirect(url_for('archives.list_archives'))
+        
+        # Delete the archived website (which also deletes all related mementos)
+        database.delete_archived_website(archived_website_id)
+        
+        flash(f"Archive of {archived_website['uri_r']} and all associated mementos have been deleted successfully.", "success")
+        return redirect(url_for('archives.list_archives'))
+    
+    except Exception as e:
+        logging.error(f"Error deleting archived website: {e}")
+        flash(f"Error deleting archived website: {str(e)}", "danger")
+        return redirect(url_for('archives.list_archives'))

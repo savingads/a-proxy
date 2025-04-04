@@ -12,6 +12,8 @@ def get_db_connection():
     """Create a connection to the SQLite database"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # Enable foreign key constraints support
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 def init_db():
@@ -595,6 +597,43 @@ def get_memento(memento_id):
     
     conn.close()
     return result
+
+def delete_archived_website(archived_website_id):
+    """
+    Delete an archived website and all its associated mementos
+    
+    Args:
+        archived_website_id: The ID of the archived website to delete
+        
+    Returns:
+        True if successful, raises an exception otherwise
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Get all memento locations before deleting for filesystem cleanup if needed
+        cursor.execute("SELECT memento_location, screenshot_path FROM mementos WHERE archived_website_id = ?", 
+                     (archived_website_id,))
+        mementos = cursor.fetchall()
+        
+        # Delete the archived website (CASCADE will delete related mementos)
+        cursor.execute("DELETE FROM archived_websites WHERE id = ?", (archived_website_id,))
+        
+        # Optionally handle filesystem cleanup for memento files
+        # This part would remove the files on disk if needed
+        # for memento in mementos:
+        #     location = memento['memento_location']
+        #     screenshot = memento['screenshot_path']
+        #     # Delete files if they exist
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
 
 # Initialize the database when the module is imported
 init_db()

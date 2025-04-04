@@ -68,7 +68,7 @@
                     </a>
                     <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}"
                         class="btn btn-outline-success btn-sm">
-                        <i class="bi bi-play-fill"></i> Continue
+                        <i class="bi bi-play-fill"></i> {% if journey.waypoint_count and journey.waypoint_count > 0 %}Continue{% else %}Start{% endif %}
                     </a>
                     <a href="{{ url_for('journey.visualize_journey', journey_id=journey.id) }}"
                         class="btn btn-outline-info btn-sm">

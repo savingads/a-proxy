@@ -22,6 +22,7 @@ def main():
         parser.add_argument('--geolocation', help='Geolocation coordinates (format: latitude,longitude)')
         parser.add_argument('--keep-open', action='store_true', help='Keep browser open until manually closed')
         parser.add_argument('--wait-time', type=int, default=10, help='Time to keep browser open (in seconds) if --keep-open is not used')
+        parser.add_argument('--take-screenshot', action='store_true', help='Take a screenshot of the webpage')
         args = parser.parse_args()
 
         # Log the parameters
@@ -43,22 +44,29 @@ def main():
         # Print the page title
         logger.info(f"Browser opened successfully. Page title: {driver.title}")
 
-        # Create screenshots directory if it doesn't exist
-        screenshots_dir = 'screenshots'
-        if not os.path.exists(screenshots_dir):
-            os.makedirs(screenshots_dir)
+        # Only take screenshots if explicitly requested
+        take_screenshot = args.take_screenshot
+        logger.info(f"  Take screenshot: {take_screenshot}")
+        
+        if take_screenshot:
+            # Create screenshots directory if it doesn't exist
+            screenshots_dir = 'screenshots'
+            if not os.path.exists(screenshots_dir):
+                os.makedirs(screenshots_dir)
 
-        # Generate a timestamped filename for the screenshot
-        import datetime
-        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        screenshot_path = os.path.join(screenshots_dir, f'screenshot-{timestamp}.png')
-        
-        # Capture a screenshot
-        driver.save_screenshot(screenshot_path)
-        logger.info(f"Screenshot saved as {screenshot_path}")
-        
-        # Also save as the standard screenshot.png for backward compatibility
-        driver.save_screenshot('screenshot.png')
+            # Generate a timestamped filename for the screenshot
+            import datetime
+            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            screenshot_path = os.path.join(screenshots_dir, f'screenshot-{timestamp}.png')
+            
+            # Capture a screenshot
+            driver.save_screenshot(screenshot_path)
+            logger.info(f"Screenshot saved as {screenshot_path}")
+            
+            # Also save as the standard screenshot.png for backward compatibility
+            driver.save_screenshot('screenshot.png')
+        else:
+            logger.info("Screenshot capture skipped")
 
         # Display notice about browser staying open
         if args.keep_open:

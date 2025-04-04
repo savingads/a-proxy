@@ -215,7 +215,7 @@
             </a>
             <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}"
                 class="btn btn-sm btn-outline-success">
-                <i class="bi bi-play-fill"></i> Continue
+                <i class="bi bi-play-fill"></i> {% if waypoints %}Continue{% else %}Start{% endif %}
             </a>
             <a href="{{ url_for('journey.visualize_journey', journey_id=journey.id) }}"
                 class="btn btn-sm btn-outline-info">

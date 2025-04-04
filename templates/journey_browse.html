@@ -323,7 +323,7 @@
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="capture-screenshot"
-                                name="capture-screenshot" checked>
+                                name="capture-screenshot">
                             <label class="form-check-label" for="capture-screenshot">Capture screenshot</label>
                         </div>
                         <input type="hidden" id="screenshot-data" name="screenshot">
@@ -385,8 +385,15 @@
             const addWaypointModal = document.getElementById('addWaypointModal');
             const loadUrlButtons = document.querySelectorAll('.load-url');
 
-            // Initialize the browser with default URL if none is set
-            if (!urlInput.value) {
+            // Load the latest waypoint URL if available, otherwise use a default URL
+            if (loadUrlButtons.length > 0) {
+                // Get the last waypoint's URL (most recent)
+                const lastWaypoint = loadUrlButtons[loadUrlButtons.length - 1];
+                const latestUrl = lastWaypoint.getAttribute('data-url');
+                urlInput.value = latestUrl;
+                document.getElementById('browser-navigation').submit();
+            } else if (!urlInput.value) {
+                // Fall back to default URL if no waypoints and no URL set
                 urlInput.value = 'https://www.google.com';
                 document.getElementById('browser-navigation').submit();
             }
@@ -432,6 +439,9 @@
             addWaypointModal.addEventListener('show.bs.modal', function (event) {
                 // Get the current URL from the browser
                 waypointUrlInput.value = urlInput.value;
+                
+                // Reset screenshot data
+                screenshotDataInput.value = '';
 
                 // Try to get the title from the iframe
                 try {
@@ -440,10 +450,12 @@
                     // Default title if we can't access the iframe content
                     waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
                 }
-
-                // Capture screenshot if checkbox is checked
-                if (document.getElementById('capture-screenshot').checked) {
-                    // Use html2canvas to capture the iframe
+            });
+            
+            // Add event listener to the checkbox for capturing screenshots
+            document.getElementById('capture-screenshot').addEventListener('change', function() {
+                if (this.checked) {
+                    // Only capture screenshot when checkbox is checked
                     html2canvas(iframe).then(canvas => {
                         const imageData = canvas.toDataURL('image/png');
                         screenshotDataInput.value = imageData;
@@ -451,6 +463,9 @@
                         console.error('Error capturing screenshot:', err);
                         screenshotDataInput.value = '';
                     });
+                } else {
+                    // Clear screenshot data when unchecked
+                    screenshotDataInput.value = '';
                 }
             });
         });

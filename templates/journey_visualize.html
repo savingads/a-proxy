@@ -563,7 +563,7 @@
                             {% endif %}
                         </div>
                     `,
-            start: new Date("{{ waypoint.timestamp.isoformat() if waypoint.timestamp and not waypoint.timestamp is string else (waypoint.timestamp if waypoint.timestamp is string else (journey.created_at.isoformat() if journey.created_at and not journey.created_at is string else journey.created_at)) }}"),
+            start: new Date("{{ waypoint.timestamp if waypoint.timestamp else journey.created_at }}"),
             url: "{{ waypoint.url }}",
             screenshot_path: "{% if waypoint.screenshot_path %}{{ url_for('static', filename=waypoint.screenshot_path) }}{% endif %}",
             notes: "{{ waypoint.notes or 'No notes available.' }}",
@@ -580,8 +580,8 @@
             },
             timeAxis: { scale: 'minute', step: 5 },
             orientation: 'top',
-            min: new Date("{{ waypoints[0].timestamp.isoformat() if waypoints[0].timestamp and not waypoints[0].timestamp is string else (waypoints[0].timestamp if waypoints[0].timestamp is string else (journey.created_at.isoformat() if journey.created_at and not journey.created_at is string else journey.created_at)) }}"),
-            max: new Date("{{ waypoints[-1].timestamp.isoformat() if waypoints[-1].timestamp and not waypoints[-1].timestamp is string else (waypoints[-1].timestamp if waypoints[-1].timestamp is string else (journey.updated_at.isoformat() if journey.updated_at and not journey.updated_at is string else journey.updated_at)) }}"),
+            min: new Date("{{ waypoints[0].timestamp if waypoints[0].timestamp else journey.created_at }}"),
+            max: new Date("{{ waypoints[-1].timestamp if waypoints[-1].timestamp else journey.updated_at }}"),
             zoomMin: 1000 * 60, // one minute
             zoomMax: 1000 * 60 * 60 * 24 // one day
         };

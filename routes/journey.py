@@ -14,6 +14,12 @@ journey_bp = Blueprint('journey', __name__)
 def list_journeys():
     """List all journeys."""
     journeys = database.get_all_journeys()
+    
+    # Add waypoint count for each journey
+    for journey in journeys:
+        waypoints = database.get_waypoints(journey['id'])
+        journey['waypoint_count'] = len(waypoints) if waypoints else 0
+        
     return render_template("journey_list.html", journeys=journeys)
 
 @journey_bp.route("/journey/create", methods=["GET", "POST"])
@@ -97,7 +103,10 @@ def edit_journey(journey_id):
     
     # Get all personas for the persona selection dropdown
     personas = database.get_all_personas()
-    return render_template("journey_edit.html", journey=journey, personas=personas)
+    # Get waypoints for the journey
+    waypoints = database.get_waypoints(journey_id)
+    
+    return render_template("journey_edit.html", journey=journey, personas=personas, waypoints=waypoints)
 
 @journey_bp.route("/journey/<int:journey_id>/delete", methods=["POST"])
 def delete_journey(journey_id):

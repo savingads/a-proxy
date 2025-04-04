@@ -12,6 +12,7 @@ def visit_page():
     url = request.form.get("url", "https://www.google.com")
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation", None)
+    take_screenshot = request.form.get("take_screenshot", "false").lower() == "true"
     
     # If geolocation is not provided in the form, try to get it from the Persona section
     if not geolocation:
@@ -21,11 +22,16 @@ def visit_page():
     command = f"python3 /home/chris/a-proxy/visit_page.py '{url}' --language '{language}'"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
+    if take_screenshot:
+        command += " --take-screenshot"
     
     logging.debug(f"Executing command: {command}")
     os.system(command)
     
-    return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}. Screenshot saved."
+    if take_screenshot:
+        return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}. Screenshot saved."
+    else:
+        return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}."
 
 @browsing_bp.route("/archive_page", methods=["POST"])
 def archive_page():

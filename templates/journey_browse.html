@@ -229,6 +229,7 @@
                             <div class="input-group">
                                 <input type="url" name="url" id="url-input" class="form-control" placeholder="Enter URL"
                                     required>
+                                <input type="hidden" name="take_screenshot" value="false">
                                 <button type="submit" class="btn btn-primary">Go</button>
                             </div>
                         </form>
@@ -385,17 +386,54 @@
             const addWaypointModal = document.getElementById('addWaypointModal');
             const loadUrlButtons = document.querySelectorAll('.load-url');
 
-            // Load the latest waypoint URL if available, otherwise use a default URL
+            // Only load the latest waypoint URL if available (for existing journeys)
             if (loadUrlButtons.length > 0) {
                 // Get the last waypoint's URL (most recent)
                 const lastWaypoint = loadUrlButtons[loadUrlButtons.length - 1];
                 const latestUrl = lastWaypoint.getAttribute('data-url');
                 urlInput.value = latestUrl;
                 document.getElementById('browser-navigation').submit();
-            } else if (!urlInput.value) {
-                // Fall back to default URL if no waypoints and no URL set
+            } else {
+                // For new journeys, just set a placeholder URL but don't submit automatically
                 urlInput.value = 'https://www.google.com';
-                document.getElementById('browser-navigation').submit();
+                // Show a message in the iframe instead of loading a URL
+                iframe.srcdoc = `
+                    <html>
+                    <head>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                margin: 0;
+                                text-align: center;
+                                background-color: #f8f9fa;
+                                color: #212529;
+                            }
+                            .welcome {
+                                max-width: 80%;
+                                padding: 2rem;
+                                border-radius: 0.5rem;
+                                background-color: white;
+                                box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+                            }
+                            h1 { color: #0d6efd; margin-bottom: 1.5rem; }
+                            p { margin-bottom: 1rem; line-height: 1.5; }
+                            .arrow { font-size: 2rem; margin: 1rem 0; color: #6c757d; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="welcome">
+                            <h1>Start Your Journey</h1>
+                            <p>Enter a URL in the address bar above and click "Go" to begin browsing.</p>
+                            <div class="arrow">↑</div>
+                            <p>Once you've found an important page, click the + button to add it as a waypoint.</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
             }
 
             // Set up navigation buttons
@@ -452,21 +490,34 @@
                 }
             });
             
-            // Add event listener to the checkbox for capturing screenshots
-            document.getElementById('capture-screenshot').addEventListener('change', function() {
-                if (this.checked) {
-                    // Only capture screenshot when checkbox is checked
+            // Capture screenshot only when the user submits the form with checkbox checked
+            document.getElementById('add-waypoint-form').addEventListener('submit', function(event) {
+                if (document.getElementById('capture-screenshot').checked) {
+                    // Show a loading indicator
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Capturing...';
+                    submitBtn.disabled = true;
+                    
+                    // Capture the screenshot
+                    event.preventDefault(); // Prevent form submission until screenshot is captured
                     html2canvas(iframe).then(canvas => {
                         const imageData = canvas.toDataURL('image/png');
                         screenshotDataInput.value = imageData;
+                        
+                        // Now submit the form
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        this.submit();
                     }).catch(err => {
                         console.error('Error capturing screenshot:', err);
                         screenshotDataInput.value = '';
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        this.submit(); // Submit anyway, just without screenshot
                     });
-                } else {
-                    // Clear screenshot data when unchecked
-                    screenshotDataInput.value = '';
                 }
+                // If checkbox not checked, form submits normally without capturing screenshot
             });
         });
     </script>

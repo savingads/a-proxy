@@ -34,6 +34,6 @@ RUN apt update && apt install openvpn -y && apt install -y chromium
 RUN python ./database.py
 RUN python ./create_sample_personas.py
 
-EXPOSE 5001
+EXPOSE 5002
 
 CMD ["python", "app.py"]

@@ -28,5 +28,10 @@ RUN python ./create_sample_personas.py
 
 EXPOSE 5002
 
+# Define health check for container monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:5002/ || exit 1
+
 # Run with host 0.0.0.0 to make the application accessible outside the container
-CMD ["python", "app.py", "--host", "0.0.0.0"]
+# Explicitly set port to 5002 to match EXPOSE directive
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "5002"]

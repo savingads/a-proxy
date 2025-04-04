@@ -218,110 +218,24 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-3 col-lg-2 p-0 bg-body-tertiary sidebar">
-                <div class="sidebar border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
-                    <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
-                        aria-labelledby="sidebarMenuLabel">
-                        <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="sidebarMenuLabel">Company name</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
-                                data-bs-target="#sidebarMenu" aria-label="Close"></button>
-                        </div>
-                        <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
-                            <ul class="nav flex-column">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home.index') }}">
-                                        <i class="bi bi-house-fill"></i>
-                                        Home
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
-                                        href="{{ url_for('persona.dashboard') }}">
-                                        <i class="bi bi-speedometer2"></i>
-                                        Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('persona.list_personas') }}">
-                                        <i class="bi bi-people"></i>
-                                        Personas
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Web Browsing</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-globe"></i>
-                                        Browse As
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('archives.list_archives') }}">
-                                        <i class="bi bi-archive"></i>
-                                        Archived Pages
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Analysis</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-graph-up"></i>
-                                        Reports
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-puzzle"></i>
-                                        Integrations
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <hr class="my-3">
-                            <!-- Browser Details Section -->
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>This Browser</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>Language:</strong> <span
-                                            id="browser-language">Fetching...</span></span>
-                                </li>
-                                <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>Geolocation:</strong> <span
-                                            id="browser-geolocation">Fetching...</span></span>
-                                </li>
-                                <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
-                                    <span><strong>User Agent:</strong> <span
-                                            id="browser-user-agent">Fetching...</span></span>
-                                </li>
-                            </ul>
-                            <hr class="my-3">
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-gear-wide-connected"></i>
-                                        Settings
-                                    </a>
-                                </li>
-                            </ul>
-                            <hr class="my-3">
-                        </div>
-                    </div>
-                </div>
+            {% include 'partials/_sidebar.html' %}
+            
+            <!-- Browser Details Section -->
+            <div id="browser-details" class="position-fixed bottom-0 start-0 p-3 bg-body-tertiary" style="width: 250px; z-index: 1000; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-body-secondary text-uppercase">
+                    <span>This Browser</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>Language:</strong> <span id="browser-language">Fetching...</span></span>
+                    </li>
+                    <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>Geolocation:</strong> <span id="browser-geolocation">Fetching...</span></span>
+                    </li>
+                    <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>User Agent:</strong> <span id="browser-user-agent">Fetching...</span></span>
+                    </li>
+                </ul>
             </div>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div

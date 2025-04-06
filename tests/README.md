@@ -2,6 +2,40 @@
 
 This directory contains unit tests for the A-Proxy application.
 
+## Running Tests
+
+### Using Docker (Recommended)
+
+When running A-Proxy in Docker, you can run tests within the container:
+
+```bash
+# Run all tests
+docker-compose exec a-proxy python tests/test_runner.py
+
+# Run a specific test file
+docker-compose exec a-proxy python -m unittest tests/test_database.py
+
+# Run a specific test case or method
+docker-compose exec a-proxy python -m unittest tests.test_database.TestDatabase
+docker-compose exec a-proxy python -m unittest tests.test_database.TestDatabase.test_save_and_get_persona
+```
+
+### Manual Method
+
+If you're running A-Proxy directly on your system:
+
+```bash
+# Run all tests
+python tests/test_runner.py
+
+# Run individual test files
+python -m unittest tests/test_database.py
+
+# Run a specific test case or method
+python -m unittest tests.test_database.TestDatabase
+python -m unittest tests.test_database.TestDatabase.test_save_and_get_persona
+```
+
 ## Test Structure
 
 - `test_runner.py`: Main test runner script that discovers and runs all tests
@@ -9,40 +43,8 @@ This directory contains unit tests for the A-Proxy application.
 - `test_database.py`: Tests for database operations
 - `test_app.py`: Tests for Flask application routes
 - `test_utils_vpn.py`: Tests for VPN utility functions
-
-## Running Tests
-
-### Run All Tests
-
-To run all tests in the suite:
-
-```bash
-python tests/test_runner.py
-```
-
-Or directly from the tests directory:
-
-```bash
-cd tests
-./test_runner.py
-```
-
-### Run Individual Test Files
-
-To run a specific test file:
-
-```bash
-python -m unittest tests/test_database.py
-```
-
-### Run a Specific Test Case or Method
-
-To run a specific test case or method:
-
-```bash
-python -m unittest tests.test_database.TestDatabase
-python -m unittest tests.test_database.TestDatabase.test_save_and_get_persona
-```
+- `test_templates.py`: Tests for template inheritance and rendering
+- `test_migration.py`: Tests for database migration functionality
 
 ## Writing New Tests
 

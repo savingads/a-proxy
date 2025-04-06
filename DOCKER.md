@@ -8,20 +8,36 @@ This guide will help you run A-Proxy in a Docker container, making it easier to 
 - [Docker Compose](https://docs.docker.com/compose/install/) installed on your system
 - NordVPN credentials (if you want to use VPN features)
 
-## Setup
+## Quickstart
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/savingads/a-proxy
-   cd a-proxy
-   ```
+We've provided a helper script to make setup easy:
 
-2. Create required directories for persistent data:
+```bash
+./start-a-proxy.sh
+```
+
+This script will:
+1. Check for Docker permissions and use sudo if needed
+2. Create the necessary directories
+3. Set up placeholder VPN credentials if needed
+4. Build and start the container
+5. Provide status information and helpful commands
+
+Once the container is running, access the application at:
+```
+http://localhost:5002
+```
+
+## Manual Setup
+
+If you prefer to set up manually instead of using the script:
+
+1. Create required directories for persistent data:
    ```bash
    mkdir -p data nordvpn/ovpn_udp nordvpn/ovpn_tcp
    ```
 
-3. Set up VPN configuration (if using VPN features):
+2. Set up VPN configuration (if using VPN features):
    ```bash
    # Create auth.txt file with your NordVPN credentials
    echo "your_nordvpn_username" > nordvpn/auth.txt
@@ -34,34 +50,62 @@ This guide will help you run A-Proxy in a Docker container, making it easier to 
    # Place TCP files in nordvpn/ovpn_tcp/
    ```
 
-## Building and Running
-
-1. Build and start the container:
+3. Build and start the container:
    ```bash
+   docker-compose build --no-cache
    docker-compose up -d
    ```
 
-   This command will:
-   - Build the Docker image using the Dockerfile
-   - Start the container in detached mode
-   - Mount the `./data` and `./nordvpn` directories as volumes
-
-2. Access the application:
-   Open your browser and navigate to:
+4. Access the application:
    ```
    http://localhost:5002
    ```
 
-3. Stop the container:
+5. Stop the container:
    ```bash
    docker-compose down
    ```
+
+## Windows WSL Users
+
+If you're using Docker with WSL (Windows Subsystem for Linux), you might need to:
+
+1. Add your user to the docker group:
+   ```bash
+   sudo usermod -aG docker $USER
+   ```
+
+2. Either log out and log back in, or run:
+   ```bash
+   newgrp docker
+   ```
+
+3. Verify that you can run docker commands:
+   ```bash
+   docker ps
+   ```
+
+If you still have permission issues, try running the commands with sudo.
+
+## VPN Configuration
+
+For VPN functionality to work properly:
+
+1. Create a file with your NordVPN credentials:
+   ```bash
+   echo "your_nordvpn_username" > nordvpn/auth.txt
+   echo "your_nordvpn_password" >> nordvpn/auth.txt
+   ```
+
+2. Download OpenVPN configuration files from [NordVPN's website](https://nordvpn.com/ovpn/):
+   - Place UDP configuration files in `nordvpn/ovpn_udp/`
+   - Place TCP configuration files in `nordvpn/ovpn_tcp/`
 
 ## Container Details
 
 The Docker container:
 - Uses Python 3.11-slim as the base image
-- Installs all necessary dependencies (Chromium, OpenVPN, Node.js)
+- Installs all necessary dependencies (Chromium, OpenVPN, Node.js, build tools)
 - Sets up the database in the `/app/data` directory for persistence
 - Exposes port 5002 for web access
 - Includes a health check to monitor the application status
@@ -116,6 +160,17 @@ If you can't access the application at http://localhost:5002:
    ```bash
    docker-compose logs
    ```
+
+### Python Dependency Issues
+
+If you encounter issues with Python dependency installation:
+
+1. Check the build logs for specific error messages:
+   ```bash
+   docker-compose logs
+   ```
+
+2. If you see errors related to Python package building, the Dockerfile has been updated with necessary build dependencies, so running `docker-compose build --no-cache` should resolve these issues.
 
 ## Advanced Configuration
 

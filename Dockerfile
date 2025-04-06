@@ -37,7 +37,7 @@ RUN mkdir -p /app/data /app/nordvpn/ovpn_udp /app/nordvpn/ovpn_tcp
 
 # Copy requirements and install Python dependencies first (for better caching)
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 
 # Copy package.json and install Node.js dependencies
 COPY package*.json ./

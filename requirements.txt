@@ -1,11 +1,11 @@
-Flask==2.2.3
+Flask==1.1.4
+Jinja2<3.0.0
 requests==2.28.2
 flask-wtf==1.1.1
 wtforms==3.0.1
 selenium==4.8.3
 webdriver-manager==3.8.5
 pyyaml==6.0
-pywb==2.7.4
 shot_scraper==1.8
 Pillow==9.4.0
 beautifulsoup4==4.11.2

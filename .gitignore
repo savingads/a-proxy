@@ -142,3 +142,6 @@ yarn-error.log
 archives
 CLAUDE.md
 screenshots
+personas.db-wal
+personas.db-shm
+personas.db

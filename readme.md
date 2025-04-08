@@ -1,6 +1,6 @@
-# A-Proxy: Web Testing with Geolocation and Language Simulation
+# A-Proxy: A Persona Proxy with Geolocation and Language Emulation
 
-A-Proxy is a tool that allows you to test websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
+A-Proxy is a tool that allows you to view websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
 
 ## Features
 

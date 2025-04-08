@@ -144,7 +144,23 @@ The archive feature allows you to save snapshots of websites for future referenc
 
 A-Proxy includes a comprehensive test suite. For details on running and writing tests, see [tests/README.md](tests/README.md).
 
-For development guidelines, see [CLAUDE.md](CLAUDE.md).
+## Documentation
+
+Detailed documentation for setting up and managing A-Proxy can be found in the `docs` directory:
+
+- [SETUP_DEV_ENVIRONMENT.md](docs/SETUP_DEV_ENVIRONMENT.md) - Guide for setting up a local development environment
+- [WSL_SETUP.md](docs/WSL_SETUP.md) - Specific instructions for Windows Subsystem for Linux users
+- [MULTIPLE_ENVIRONMENTS.md](docs/MULTIPLE_ENVIRONMENTS.md) - Managing multiple development environments
+- [CLAUDE.md](docs/CLAUDE.md) - Development progress and guidelines
+
+## Development Scripts
+
+A-Proxy includes scripts to help with development:
+
+- `start-dev.sh` - Main script for launching the development server (in root directory)
+- `scripts/setup-dev-environment.sh` - Script for setting up a complete development environment
+
+For development guidelines, see [docs/CLAUDE.md](docs/CLAUDE.md).
 
 ## License
 

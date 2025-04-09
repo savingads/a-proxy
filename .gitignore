@@ -145,3 +145,7 @@ screenshots
 personas.db-wal
 personas.db-shm
 personas.db
+
+# Submodule (don't push to main repository)
+acm-demo/
+.gitmodules

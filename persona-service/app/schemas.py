@@ -48,65 +48,13 @@ class DemographicDataSchema(Schema):
         
         return data
 
-class PsychographicDataSchema(Schema):
-    """Schema for psychographic data"""
+class DynamicAttributeSchema(Schema):
+    """Schema for dynamic attribute data"""
     id = fields.Int(dump_only=True)
     persona_id = fields.Int(dump_only=True)
-    interests = fields.List(fields.Str(), allow_none=True)
-    personal_values = fields.List(fields.Str(), allow_none=True)
-    attitudes = fields.List(fields.Str(), allow_none=True)
-    lifestyle = fields.Str(allow_none=True)
-    personality = fields.Str(allow_none=True)
-    opinions = fields.List(fields.Str(), allow_none=True)
+    data = fields.Dict(allow_none=True)
     
-    def dump(self, obj, **kwargs):
-        """Override dump to use decoded fields if available"""
-        result = super().dump(obj, **kwargs)
-        
-        # Use decoded fields if they exist
-        for field in ['interests', 'personal_values', 'attitudes', 'opinions']:
-            decoded_field = f"{field}_decoded"
-            if hasattr(obj, decoded_field) and getattr(obj, decoded_field) is not None:
-                result[field] = getattr(obj, decoded_field)
-        
-        return result
-
-class BehavioralDataSchema(Schema):
-    """Schema for behavioral data"""
-    id = fields.Int(dump_only=True)
-    persona_id = fields.Int(dump_only=True)
-    browsing_habits = fields.List(fields.Str(), allow_none=True)
-    purchase_history = fields.List(fields.Str(), allow_none=True)
-    brand_interactions = fields.List(fields.Str(), allow_none=True)
-    device_usage = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
-    social_media_activity = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
-    content_consumption = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
-    
-    def dump(self, obj, **kwargs):
-        """Override dump to use decoded fields if available"""
-        result = super().dump(obj, **kwargs)
-        
-        # Use decoded fields if they exist
-        for field in ['browsing_habits', 'purchase_history', 'brand_interactions',
-                     'device_usage', 'social_media_activity', 'content_consumption']:
-            decoded_field = f"{field}_decoded"
-            if hasattr(obj, decoded_field) and getattr(obj, decoded_field) is not None:
-                result[field] = getattr(obj, decoded_field)
-        
-        return result
-
-class ContextualDataSchema(Schema):
-    """Schema for contextual data"""
-    id = fields.Int(dump_only=True)
-    persona_id = fields.Int(dump_only=True)
-    time_of_day = fields.Str(allow_none=True)
-    day_of_week = fields.Str(allow_none=True)
-    season = fields.Str(allow_none=True)
-    weather = fields.Str(allow_none=True)
-    device_type = fields.Str(allow_none=True)
-    browser_type = fields.Str(allow_none=True)
-    screen_size = fields.Str(allow_none=True)
-    connection_type = fields.Str(allow_none=True)
+    # This is a flexible schema that adapts to the field configuration
 
 class PersonaSchema(Schema):
     """Schema for persona data"""
@@ -117,9 +65,21 @@ class PersonaSchema(Schema):
     
     # Related data
     demographic = fields.Nested(DemographicDataSchema(), allow_none=True)
-    psychographic = fields.Nested(PsychographicDataSchema(), allow_none=True)
-    behavioral = fields.Nested(BehavioralDataSchema(), allow_none=True)
-    contextual = fields.Nested(ContextualDataSchema(), allow_none=True)
+    
+    # Dynamic attribute categories
+    psychographic = fields.Dict(allow_none=True)
+    behavioral = fields.Dict(allow_none=True)
+    contextual = fields.Dict(allow_none=True)
+    
+    # Override load/dump to handle dynamic attributes
+    def dump(self, obj, **kwargs):
+        """Override dump to handle dynamic attributes"""
+        result = super().dump(obj, **kwargs)
+        
+        # Dynamic attributes are already handled in obj.to_dict()
+        # which is used in the serialization process
+        
+        return result
 
 # Schemas for API requests/responses
 class PersonaListResponseSchema(Schema):
@@ -139,7 +99,4 @@ class ErrorSchema(Schema):
 persona_schema = PersonaSchema()
 personas_schema = PersonaSchema(many=True)
 demographic_schema = DemographicDataSchema()
-psychographic_schema = PsychographicDataSchema()
-behavioral_schema = BehavioralDataSchema()
-contextual_schema = ContextualDataSchema()
 error_schema = ErrorSchema()

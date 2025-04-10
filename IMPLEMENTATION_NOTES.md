@@ -80,9 +80,31 @@ To customize the fields, you can:
 custom_config = persona_field_config.load_custom_config('path/to/config.json')
 ```
 
+## Running the Complete Stack
+
+The simplest way to run the complete A-Proxy with the Persona API service is using the provided script:
+
+```bash
+./start-api-stack.sh
+```
+
+This script will:
+- Create all necessary directories
+- Generate a JWT secret key
+- Build and start both A-Proxy and the Persona API service using Docker Compose
+- Make the services available at:
+  - Persona API: http://localhost:5050
+  - A-Proxy Web UI: http://localhost:5002
+
+If this is your first time running the stack, you'll need to migrate existing personas to the API:
+
+```bash
+python migrate_to_api.py
+```
+
 ## System Restart
 
-After making these changes, restart the application to see the new implementation:
+If you prefer to run the application directly (not using Docker), restart the application to see the new implementation:
 
 ```bash
 # Kill any running instances

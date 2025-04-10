@@ -55,6 +55,28 @@ The Persona Service API provides the following endpoints:
 
 ## Using the System
 
+### Recommended Way to Run the Complete Stack
+
+The simplest way to run the complete A-Proxy with the Persona API service is using the provided script:
+
+```bash
+./start-api-stack.sh
+```
+
+This script will:
+- Create all necessary directories
+- Generate a JWT secret key
+- Build and start both A-Proxy and the Persona API service using Docker Compose
+- Make the services available at:
+  - Persona API: http://localhost:5050
+  - A-Proxy Web UI: http://localhost:5002
+
+If this is your first time running the stack, you'll need to migrate existing personas to the API:
+
+```bash
+python migrate_to_api.py
+```
+
 ### Running the Implementation
 
 To implement the dynamic persona field system:

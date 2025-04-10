@@ -43,6 +43,11 @@ def backup_file(file_path):
 def copy_file(src, dest):
     """Copy a file and create parent directories if needed"""
     try:
+        # Ensure source file exists
+        if not os.path.exists(src):
+            logger.error(f"Source file does not exist: {src}")
+            return False
+            
         # Create parent directories if they don't exist
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         
@@ -114,7 +119,8 @@ def update_import_in_persona_api():
 def run_migration(db_uri=None, dry_run=True):
     """Run the database migration script"""
     try:
-        cmd = ["python", "persona-service/migrate_schema.py"]
+        # Use the fixed migration script
+        cmd = ["python", "persona-service/migrate_schema_fixed.py"]
         
         if dry_run:
             cmd.append("--dry-run")
@@ -150,13 +156,15 @@ def main():
     
     # List of files to copy
     files_to_copy = [
+        # Source file is the current file, destination is the target
         ("persona_field_config.py", "persona_field_config.py"),
         ("persona-service/app/models_updated.py", "persona-service/app/models.py"),
         ("persona-service/app/services_updated.py", "persona-service/app/services.py"),
         ("persona-service/app/routes_updated.py", "persona-service/app/routes.py"),
         ("templates/persona_view_dynamic.html", "templates/persona_view.html"),
         ("templates/persona_edit_dynamic.html", "templates/persona_edit.html"),
-        ("routes/persona_api_updated.py", "routes/persona_api.py")
+        ("routes/persona_api_updated.py", "routes/persona_api.py"),
+        ("persona-service/migrate_schema_fixed.py", "persona-service/migrate_schema.py")
     ]
     
     # Backup and copy files

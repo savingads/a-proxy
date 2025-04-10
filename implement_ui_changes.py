@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-Script to implement the dynamic persona field configuration system
+Script to implement the dynamic UI changes for persona fields
 
 This script:
 1. Backs up existing files
-2. Copies the updated models, services, and routes to their proper locations
-3. Updates the app to use the dynamic templates
-4. Runs the database migration if requested
+2. Copies the dynamic templates
+3. Updates app.py to use the new dynamic persona API
 """
 import os
 import sys
 import shutil
 import argparse
 import logging
-import subprocess
 from datetime import datetime
 
 # Set up logging
@@ -43,6 +41,11 @@ def backup_file(file_path):
 def copy_file(src, dest):
     """Copy a file and create parent directories if needed"""
     try:
+        # Ensure source file exists
+        if not os.path.exists(src):
+            logger.error(f"Source file does not exist: {src}")
+            return False
+            
         # Create parent directories if they don't exist
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         
@@ -110,50 +113,15 @@ def update_import_in_persona_api():
     except Exception as e:
         logger.error(f"Failed to update persona_api_updated.py: {str(e)}")
         return False
-    
-def run_migration(db_uri=None, dry_run=True):
-    """Run the database migration script"""
-    try:
-        cmd = ["python", "persona-service/migrate_schema.py"]
-        
-        if dry_run:
-            cmd.append("--dry-run")
-            
-        if db_uri:
-            cmd.extend(["--db-uri", db_uri])
-            
-        logger.info(f"Running migration: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        logger.info(f"Migration stdout: {result.stdout}")
-        
-        if result.stderr:
-            logger.warning(f"Migration stderr: {result.stderr}")
-            
-        if result.returncode != 0:
-            logger.error(f"Migration failed with return code {result.returncode}")
-            return False
-            
-        logger.info("Migration completed successfully")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to run migration: {str(e)}")
-        return False
 
 def main():
-    parser = argparse.ArgumentParser(description='Implement dynamic persona fields')
-    parser.add_argument('--migrate', action='store_true', help='Run database migration after implementation')
-    parser.add_argument('--db-uri', help='Database URI for migration')
+    parser = argparse.ArgumentParser(description='Implement dynamic persona UI changes')
     parser.add_argument('--no-backup', action='store_true', help='Skip file backups')
-    parser.add_argument('--dry-run', action='store_true', help='Dry run (no actual migration)')
     args = parser.parse_args()
     
     # List of files to copy
     files_to_copy = [
         ("persona_field_config.py", "persona_field_config.py"),
-        ("persona-service/app/models_updated.py", "persona-service/app/models.py"),
-        ("persona-service/app/services_updated.py", "persona-service/app/services.py"),
-        ("persona-service/app/routes_updated.py", "persona-service/app/routes.py"),
         ("templates/persona_view_dynamic.html", "templates/persona_view.html"),
         ("templates/persona_edit_dynamic.html", "templates/persona_edit.html"),
         ("routes/persona_api_updated.py", "routes/persona_api.py")
@@ -169,14 +137,8 @@ def main():
     update_app_for_dynamic_templates()
     update_import_in_persona_api()
     
-    # Run migration if requested
-    if args.migrate:
-        run_migration(args.db_uri, args.dry_run)
-    
-    logger.info("Dynamic persona field implementation completed")
-    
-    if not args.migrate:
-        logger.info("To run the database migration, use: python persona-service/migrate_schema.py")
+    logger.info("Dynamic persona UI implementation completed")
+    logger.info("Note: Database schema migration not performed. Use standalone_migration.py separately if needed.")
     
     return 0
 

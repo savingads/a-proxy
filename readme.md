@@ -1,5 +1,7 @@
 # A-Proxy: A Persona Proxy with Geolocation and Language Emulation
 
+> **Architecture Update**: A-Proxy now has a separated architecture with the Persona Service as a standalone API. This allows reuse of persona profiles across multiple applications.
+
 A-Proxy is a tool that allows you to view websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
 
 ## Features
@@ -12,6 +14,7 @@ A-Proxy is a tool that allows you to view websites with different geolocation an
 - Web interface for easy management
 - Archive webpages with metadata and screenshots
 - Store multiple mementos (snapshots) of the same URL over time
+- Reusable persona profiles through a dedicated API service
 
 ## Running with Docker (Recommended)
 
@@ -160,7 +163,55 @@ A-Proxy includes scripts to help with development:
 - `start-dev.sh` - Main script for launching the development server (in root directory)
 - `scripts/setup-dev-environment.sh` - Script for setting up a complete development environment
 
-For development guidelines, see [docs/CLAUDE.md](docs/CLAUDE.md).
+For development guidelines, see [CLAUDE.md](CLAUDE.md).
+
+## Architecture
+
+A-Proxy now consists of two main components:
+
+1. **Persona Service**: A standalone REST API for managing personas
+2. **Main Application**: A-Proxy web application that handles browsing, VPN control, and web archiving
+
+This separation allows:
+- Reuse of personas across multiple applications
+- Independent scaling of persona management and web browsing components
+- Clear separation of concerns in the codebase
+
+### Persona Service
+
+The Persona Service is a Flask-based REST API that provides endpoints for:
+- Creating, reading, updating, and deleting personas
+- Managing demographic, psychographic, behavioral, and contextual data
+- User authentication and authorization
+
+To run the Persona Service:
+```bash
+cd persona-service
+pip install -r requirements.txt
+python run.py
+```
+
+The service will run on `http://localhost:5050` by default.
+
+### Persona Client
+
+A Python client library is provided to interact with the Persona Service:
+
+```python
+from personaclient import PersonaClient
+
+client = PersonaClient(base_url="http://localhost:5050")
+personas = client.get_all_personas()
+```
+
+### Migration
+
+A migration utility is included to transfer existing personas from the local database to the new API service:
+
+```bash
+python migrate_to_api.py --dry-run  # Test without actually migrating
+python migrate_to_api.py            # Perform the migration
+```
 
 ## License
 

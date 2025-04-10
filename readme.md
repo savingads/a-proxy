@@ -1,8 +1,8 @@
 # A-Proxy: A Persona Proxy with Geolocation and Language Emulation
 
-> **Architecture Update**: A-Proxy now has a flexible architecture with multiple implementation options for the Persona component. This allows reuse of persona profiles across multiple applications. The recommended approach is to use the full stack with both A-Proxy and the separate Persona API service.
-
 A-Proxy is a tool that allows you to view websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
+
+The system uses a flexible architecture with a dynamic persona schema that adapts to configuration, allowing reuse of persona profiles across multiple applications. The recommended approach is to use the full stack with both A-Proxy and the separate Persona API service.
 
 ## Features
 
@@ -237,6 +237,8 @@ Detailed documentation for setting up and managing A-Proxy can be found in the `
 - [WSL_SETUP.md](docs/WSL_SETUP.md) - Specific instructions for Windows Subsystem for Linux users
 - [MULTIPLE_ENVIRONMENTS.md](docs/MULTIPLE_ENVIRONMENTS.md) - Managing multiple development environments
 - [PERSONA_ARCHITECTURE.md](PERSONA_ARCHITECTURE.md) - Detailed persona architecture documentation
+- [PERSONA_API.md](PERSONA_API.md) - The Dynamic Persona API System
+- [PERSONA_SCHEMA.md](docs/PERSONA_SCHEMA.md) - Details of the dynamic schema implementation
 
 ## Architecture
 

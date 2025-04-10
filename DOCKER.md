@@ -114,22 +114,24 @@ The Docker container:
 
 ### Database Issues
 
-If the database doesn't initialize properly or you encounter database-related errors:
+If you encounter database-related errors:
 
 1. Stop the container:
    ```bash
    docker-compose down
    ```
 
-2. Remove the database file from the data directory:
+2. Remove the database files:
    ```bash
-   rm data/personas.db
+   rm -f data/personas.db persona-service/data/persona_service.db
    ```
 
 3. Restart the container:
    ```bash
    docker-compose up -d
    ```
+
+This will recreate both the main application database and the persona service database with fresh schemas.
 
 ### VPN Connection Issues
 

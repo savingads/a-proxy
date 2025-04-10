@@ -227,9 +227,33 @@ Each implementation has its own advantages:
 - **Mock Implementation** - Best for development and testing, or when you need temporary in-memory data.
 - **Database Implementation** - Best for simplicity and when you don't need a separate service.
 
-## Docker Setup
+## Production Deployment
 
-For production deployments with the API service, use the Docker Compose configuration in `docker-compose-api.yml`:
+### Recommended Approach with Docker
+
+The recommended approach for production deployment is to use the provided script:
+
+```bash
+./start-api-stack.sh
+```
+
+This script will:
+- Create all necessary directories
+- Generate a JWT secret key
+- Build and start both A-Proxy and the Persona API service using Docker Compose
+- Make the services available at:
+  - Persona API: http://localhost:5050
+  - A-Proxy Web UI: http://localhost:5002
+
+If this is your first time running the stack, you'll need to migrate existing personas to the API:
+
+```bash
+python migrate_to_api.py
+```
+
+### Manual Docker Setup
+
+For manual deployment with Docker, use the Docker Compose configuration in `docker-compose-api.yml`:
 
 ```bash
 docker-compose -f docker-compose-api.yml up

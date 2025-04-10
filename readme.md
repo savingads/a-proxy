@@ -1,6 +1,6 @@
 # A-Proxy: A Persona Proxy with Geolocation and Language Emulation
 
-> **Architecture Update**: A-Proxy now has a flexible architecture with multiple implementation options for the Persona component. This allows reuse of persona profiles across multiple applications.
+> **Architecture Update**: A-Proxy now has a flexible architecture with multiple implementation options for the Persona component. This allows reuse of persona profiles across multiple applications. The recommended approach is to use the full stack with both A-Proxy and the separate Persona API service.
 
 A-Proxy is a tool that allows you to view websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
 
@@ -64,7 +64,29 @@ For convenience, a unified startup script is provided:
 ./start_a_proxy_all.py --implementation api
 ```
 
-## Running with Docker (Recommended)
+## Running the Complete Stack (Recommended)
+
+The simplest way to run the complete A-Proxy with the Persona service is using the provided script:
+
+```bash
+./start-api-stack.sh
+```
+
+This script will:
+- Create all necessary directories
+- Generate a JWT secret key
+- Build and start both A-Proxy and the Persona API service using Docker Compose
+- Make the services available at:
+  - Persona API: http://localhost:5050
+  - A-Proxy Web UI: http://localhost:5002
+
+If this is your first time running the stack, you'll need to migrate existing personas to the API:
+
+```bash
+python migrate_to_api.py
+```
+
+## Running with Docker
 
 The easiest way to run A-Proxy is using Docker, which handles all dependencies and environment setup automatically.
 

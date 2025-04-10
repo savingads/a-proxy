@@ -5,7 +5,7 @@ import json
 import logging
 from flask import Blueprint, jsonify, request, current_app
 from http import HTTPStatus
-from app.services_updated import PersonaService
+from app.services import PersonaService
 from app.__init__ import db  # Import db from __init__ directly
 
 # Configure logging
@@ -18,6 +18,23 @@ api_blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
 # Helper function to get database session
 def get_db_session():
     """Get a database session"""
+    if db.session is None:
+        # If db.session is None, log error and try to reinitialize
+        logger.error("Database session is None. Trying to reinitialize...")
+        from app.config import SQLALCHEMY_DATABASE_URI
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker, scoped_session
+        
+        try:
+            engine = create_engine(SQLALCHEMY_DATABASE_URI)
+            session_factory = sessionmaker(bind=engine)
+            session = scoped_session(session_factory)
+            db.session = session
+            db.engine = engine
+            logger.info("Database session reinitialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to reinitialize database session: {str(e)}")
+    
     return db.session
 
 @api_blueprint.route('/personas', methods=['GET'])

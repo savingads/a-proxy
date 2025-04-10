@@ -6,7 +6,7 @@ import sys
 import os
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.models_updated import (
+from app.models import (
     Persona, DemographicData, PersonaAttributes, 
     AttributeCategory, PsychographicData, BehavioralData, ContextualData
 )

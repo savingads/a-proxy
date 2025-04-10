@@ -1,0 +1,24 @@
+{
+  "name": "a-proxy-demo",
+  "version": "1.0.0",
+  "description": "Demonstration script for A-Proxy features",
+  "main": "demo-script.js",
+  "scripts": {
+    "demo": "node demo-script.js",
+    "report": "node create-pdf-report.js",
+    "clean": "rm -rf screenshots/*.png videos/*.mp4 *.pdf",
+    "full-demo": "npm run clean && npm run demo && npm run report"
+  },
+  "keywords": [
+    "puppeteer",
+    "automation",
+    "demo",
+    "a-proxy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^19.0.0",
+    "puppeteer-screen-recorder": "^2.1.2"
+  }
+}

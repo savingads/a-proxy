@@ -5,7 +5,10 @@ import os
 from datetime import timedelta
 
 # Database settings
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///persona_service.db")
+# Use absolute path for SQLite default
+data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
+os.makedirs(data_dir, exist_ok=True)
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", f"sqlite:///{os.path.join(data_dir, 'persona_service.db')}")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # API settings

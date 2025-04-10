@@ -205,8 +205,8 @@ class PsychographicData(Base):
     personality = Column(String)
     opinions = Column(String)  # JSON string
     
-    # Relationship
-    persona = relationship("Persona", back_populates="psychographic")
+    # Relationship - one way only, no back reference
+    persona = relationship("Persona")
     
     def to_dict(self):
         """Convert psychographic data to dictionary representation"""
@@ -234,8 +234,8 @@ class BehavioralData(Base):
     social_media_activity = Column(String)  # JSON string
     content_consumption = Column(String)  # JSON string
     
-    # Relationship
-    persona = relationship("Persona", back_populates="behavioral")
+    # Relationship - one way only, no back reference
+    persona = relationship("Persona")
     
     def to_dict(self):
         """Convert behavioral data to dictionary representation"""
@@ -265,8 +265,8 @@ class ContextualData(Base):
     screen_size = Column(String)
     connection_type = Column(String)
     
-    # Relationship
-    persona = relationship("Persona", back_populates="contextual")
+    # Relationship - one way only, no back reference
+    persona = relationship("Persona")
     
     def to_dict(self):
         """Convert contextual data to dictionary representation"""

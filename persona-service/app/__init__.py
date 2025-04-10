@@ -3,6 +3,7 @@ Persona Service - An API for managing user personas
 """
 import os
 import logging
+import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -63,23 +64,65 @@ def create_app(config_filename=None):
     @app.route('/health')
     def health_check():
         """Health check endpoint for monitoring"""
-        return jsonify({'status': 'healthy'})
+        try:
+            # Check database connectivity
+            if db.session:
+                from sqlalchemy import text
+                db.session.execute(text("SELECT 1")).first()
+                db_status = "connected"
+            else:
+                db_status = "disconnected"
+                
+            return jsonify({
+                'status': 'healthy',
+                'database': db_status,
+                'timestamp': datetime.datetime.utcnow().isoformat()
+            })
+        except Exception as e:
+            app.logger.error(f"Health check failed: {str(e)}")
+            return jsonify({
+                'status': 'unhealthy',
+                'error': str(e),
+                'timestamp': datetime.datetime.utcnow().isoformat()
+            }), 500
     
     return app
 
 def init_db(database_uri):
     """Initialize database connection"""
-    # Create engine and session
-    engine = create_engine(database_uri)
-    session_factory = sessionmaker(bind=engine)
-    session = scoped_session(session_factory)
-    
-    # Store in db object
-    db.engine = engine
-    db.session = session
-    
-    # Import models to ensure they're registered with the engine
-    from app.models import Base, Persona, DemographicData, PsychographicData, BehavioralData, ContextualData
-    
-    # Create tables if they don't exist
-    Base.metadata.create_all(engine)
+    try:
+        # Make sure we have an absolute path for SQLite URI
+        if database_uri.startswith('sqlite:///') and not database_uri.startswith('sqlite:////'):
+            # Convert to absolute path in the data directory
+            import os
+            data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
+            os.makedirs(data_dir, exist_ok=True)
+            db_file = database_uri.replace('sqlite:///', '')
+            database_uri = f'sqlite:///{os.path.join(data_dir, db_file)}'
+            print(f"Using database at: {database_uri}")
+            
+        # Create engine and session
+        engine = create_engine(database_uri)
+        session_factory = sessionmaker(bind=engine)
+        session = scoped_session(session_factory)
+        
+        # Store in db object
+        db.engine = engine
+        db.session = session
+        
+        # Import models to ensure they're registered with the engine
+        from app.models import Base, Persona, DemographicData, PsychographicData, BehavioralData, ContextualData
+        
+        # Create tables if they don't exist
+        Base.metadata.create_all(engine)
+        
+        # Test if database is actually working
+        from sqlalchemy import text
+        session.execute(text("SELECT 1"))
+        print("Database connection successful")
+        
+    except Exception as e:
+        import traceback
+        print(f"Database initialization failed: {str(e)}")
+        print(traceback.format_exc())
+        raise

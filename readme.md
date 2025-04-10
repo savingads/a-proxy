@@ -49,9 +49,29 @@ python run.py
 python app.py
 ```
 
-### Unified Startup Script
+### Unified Startup Scripts
 
-For convenience, a unified startup script is provided:
+For convenience, several startup scripts are provided:
+
+#### Development Environment
+
+For developers, the recommended script launches both the API and the application in a developer-friendly way:
+
+```bash
+# Run the complete stack (API + A-Proxy) for development environment
+./run_dev_stack.sh
+```
+
+This script:
+- Creates necessary directories
+- Activates virtual environment if available
+- Installs dependencies if needed
+- Launches the Persona API in a separate terminal window
+- Sets up the required environment variables
+- Runs the A-Proxy application
+- Automatically cleans up when stopped with Ctrl+C
+
+#### Other Startup Options
 
 ```bash
 # Database mode (default)

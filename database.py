@@ -192,7 +192,7 @@ def save_memento(archived_website_id, memento_location, http_status=None,
 
 def get_archived_website(archived_website_id):
     """
-    Retrieve a specific archived website with its associated persona
+    Retrieve a specific archived website
     
     Args:
         archived_website_id: The ID of the archived website
@@ -204,9 +204,8 @@ def get_archived_website(archived_website_id):
     cursor = conn.cursor()
     
     cursor.execute("""
-    SELECT aw.*, p.name as persona_name
+    SELECT aw.*
     FROM archived_websites aw
-    LEFT JOIN personas p ON aw.persona_id = p.id
     WHERE aw.id = ?
     """, (archived_website_id,))
     
@@ -216,12 +215,16 @@ def get_archived_website(archived_website_id):
         return None
     
     result = dict(archived_website)
+    
+    # Add placeholder for persona_name for compatibility
+    result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
+    
     conn.close()
     return result
 
 def get_all_archived_websites():
     """
-    Retrieve all archived websites with their associated personas
+    Retrieve all archived websites
     
     Returns:
         List of dictionaries containing archived website data
@@ -230,13 +233,17 @@ def get_all_archived_websites():
     cursor = conn.cursor()
     
     cursor.execute("""
-    SELECT aw.*, p.name as persona_name
+    SELECT aw.*
     FROM archived_websites aw
-    LEFT JOIN personas p ON aw.persona_id = p.id
     ORDER BY aw.created_at DESC
     """)
     
     archived_websites = [dict(row) for row in cursor.fetchall()]
+    
+    # Add placeholder for persona_name for compatibility
+    for website in archived_websites:
+        website['persona_name'] = None if website['persona_id'] is None else f"Persona #{website['persona_id']}"
+    
     conn.close()
     return archived_websites
 
@@ -390,7 +397,7 @@ def create_journey(name, description=None, persona_id=None, journey_type='market
 
 def get_journey(journey_id):
     """
-    Retrieve a specific journey with its associated persona
+    Retrieve a specific journey
     
     Args:
         journey_id: The ID of the journey
@@ -402,9 +409,8 @@ def get_journey(journey_id):
     cursor = conn.cursor()
     
     cursor.execute("""
-    SELECT j.*, p.name as persona_name
+    SELECT j.*
     FROM journeys j
-    LEFT JOIN personas p ON j.persona_id = p.id
     WHERE j.id = ?
     """, (journey_id,))
     
@@ -414,12 +420,16 @@ def get_journey(journey_id):
         return None
     
     result = dict(journey)
+    
+    # Add placeholder for persona_name for compatibility
+    result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
+    
     conn.close()
     return result
 
 def get_all_journeys():
     """
-    Retrieve all journeys with their associated personas
+    Retrieve all journeys
     
     Returns:
         List of dictionaries containing journey data
@@ -428,13 +438,18 @@ def get_all_journeys():
     cursor = conn.cursor()
     
     cursor.execute("""
-    SELECT j.*, p.name as persona_name
+    SELECT j.*
     FROM journeys j
-    LEFT JOIN personas p ON j.persona_id = p.id
     ORDER BY j.updated_at DESC
     """)
     
     journeys = [dict(row) for row in cursor.fetchall()]
+    
+    # If we need persona names, we would need to fetch them from the API
+    # But for now, just include null persona_name to maintain compatibility
+    for journey in journeys:
+        journey['persona_name'] = None if journey['persona_id'] is None else f"Persona #{journey['persona_id']}"
+    
     conn.close()
     return journeys
 

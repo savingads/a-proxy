@@ -8,7 +8,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models import (
     Persona, DemographicData, PersonaAttributes, 
-    AttributeCategory, PsychographicData, BehavioralData, ContextualData
+    AttributeCategory
 )
 
 # Add the parent directory to sys.path for imports

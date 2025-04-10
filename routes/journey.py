@@ -52,8 +52,19 @@ def create_journey():
             logging.error(f"Error creating journey: {e}")
             flash(f"Error creating journey: {str(e)}", "danger")
     
-    # Get all personas for the persona selection dropdown
-    personas = database.get_all_personas()
+    # Import inside function to avoid circular imports
+    from utils.persona_client import get_client
+    
+    try:
+        # Get personas from the API
+        client = get_client()
+        result = client.get_personas(page=1, per_page=100)
+        personas = result.get('personas', [])
+    except Exception as e:
+        logging.error(f"Error getting personas from API: {e}")
+        personas = []
+        flash(f"Error loading personas: {str(e)}", "danger")
+        
     return render_template("journey_create.html", personas=personas)
 
 @journey_bp.route("/journey/<int:journey_id>")
@@ -101,8 +112,19 @@ def edit_journey(journey_id):
             logging.error(f"Error updating journey: {e}")
             flash(f"Error updating journey: {str(e)}", "danger")
     
-    # Get all personas for the persona selection dropdown
-    personas = database.get_all_personas()
+    # Import inside function to avoid circular imports
+    from utils.persona_client import get_client
+    
+    try:
+        # Get personas from the API
+        client = get_client()
+        result = client.get_personas(page=1, per_page=100)
+        personas = result.get('personas', [])
+    except Exception as e:
+        logging.error(f"Error getting personas from API: {e}")
+        personas = []
+        flash(f"Error loading personas: {str(e)}", "danger")
+        
     # Get waypoints for the journey
     waypoints = database.get_waypoints(journey_id)
     
@@ -132,7 +154,14 @@ def browse_journey(journey_id):
     # Get persona data if a persona is associated with this journey
     persona = None
     if journey['persona_id']:
-        persona = database.get_persona(journey['persona_id'])
+        # Import inside function to avoid circular imports
+        from utils.persona_client import get_client
+        try:
+            client = get_client()
+            persona = client.get_persona(journey['persona_id'])
+        except Exception as e:
+            logging.error(f"Error getting persona {journey['persona_id']}: {e}")
+            flash(f"Error loading persona: {str(e)}", "danger")
     
     # Get existing waypoints
     waypoints = database.get_waypoints(journey_id)
@@ -299,6 +328,20 @@ def complete_journey(journey_id):
 @journey_bp.route("/browse-as")
 def browse_as():
     """Browse as a persona by selecting a persona and journey."""
-    personas = database.get_all_personas()
+    # Import inside function to avoid circular imports
+    from utils.persona_client import get_client
+    
+    try:
+        # Get personas from the API
+        client = get_client()
+        result = client.get_personas(page=1, per_page=100)
+        personas = result.get('personas', [])
+    except Exception as e:
+        logging.error(f"Error getting personas from API: {e}")
+        personas = []
+        flash(f"Error loading personas: {str(e)}", "danger")
+    
+    # Get journeys from the database
     journeys = database.get_all_journeys()
+    
     return render_template("browse_as.html", personas=personas, journeys=journeys)

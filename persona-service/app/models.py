@@ -29,7 +29,7 @@ class Persona(Base):
     demographic = relationship("DemographicData", uselist=False, back_populates="persona",
                                cascade="all, delete-orphan")
     
-    # New relationship to PersonaAttributes
+    # Relationship to PersonaAttributes
     attributes = relationship("PersonaAttributes", back_populates="persona",
                            cascade="all, delete-orphan")
     
@@ -190,98 +190,6 @@ class PersonaAttributes(Base):
     def to_dict(self):
         """Convert to dictionary representation"""
         return self.get_data()
-
-# Legacy models - to be deprecated
-class PsychographicData(Base):
-    """Psychographic data associated with a persona"""
-    __tablename__ = 'psychographic_data'
-    
-    id = Column(Integer, primary_key=True)
-    persona_id = Column(Integer, ForeignKey('personas.id', ondelete='CASCADE'), nullable=False)
-    interests = Column(String)  # JSON string
-    personal_values = Column(String)  # JSON string
-    attitudes = Column(String)  # JSON string
-    lifestyle = Column(String)
-    personality = Column(String)
-    opinions = Column(String)  # JSON string
-    
-    # Relationship - one way only, no back reference
-    persona = relationship("Persona")
-    
-    def to_dict(self):
-        """Convert psychographic data to dictionary representation"""
-        return {
-            'id': self.id,
-            'persona_id': self.persona_id,
-            'interests': json.loads(self.interests) if self.interests else [],
-            'personal_values': json.loads(self.personal_values) if self.personal_values else [],
-            'attitudes': json.loads(self.attitudes) if self.attitudes else [],
-            'lifestyle': self.lifestyle,
-            'personality': self.personality,
-            'opinions': json.loads(self.opinions) if self.opinions else []
-        }
-
-class BehavioralData(Base):
-    """Behavioral data associated with a persona"""
-    __tablename__ = 'behavioral_data'
-    
-    id = Column(Integer, primary_key=True)
-    persona_id = Column(Integer, ForeignKey('personas.id', ondelete='CASCADE'), nullable=False)
-    browsing_habits = Column(String)  # JSON string
-    purchase_history = Column(String)  # JSON string
-    brand_interactions = Column(String)  # JSON string
-    device_usage = Column(String)  # JSON string
-    social_media_activity = Column(String)  # JSON string
-    content_consumption = Column(String)  # JSON string
-    
-    # Relationship - one way only, no back reference
-    persona = relationship("Persona")
-    
-    def to_dict(self):
-        """Convert behavioral data to dictionary representation"""
-        return {
-            'id': self.id,
-            'persona_id': self.persona_id,
-            'browsing_habits': json.loads(self.browsing_habits) if self.browsing_habits else [],
-            'purchase_history': json.loads(self.purchase_history) if self.purchase_history else [],
-            'brand_interactions': json.loads(self.brand_interactions) if self.brand_interactions else [],
-            'device_usage': json.loads(self.device_usage) if self.device_usage else {},
-            'social_media_activity': json.loads(self.social_media_activity) if self.social_media_activity else {},
-            'content_consumption': json.loads(self.content_consumption) if self.content_consumption else {}
-        }
-
-class ContextualData(Base):
-    """Contextual data associated with a persona"""
-    __tablename__ = 'contextual_data'
-    
-    id = Column(Integer, primary_key=True)
-    persona_id = Column(Integer, ForeignKey('personas.id', ondelete='CASCADE'), nullable=False)
-    time_of_day = Column(String)
-    day_of_week = Column(String)
-    season = Column(String)
-    weather = Column(String)
-    device_type = Column(String)
-    browser_type = Column(String)
-    screen_size = Column(String)
-    connection_type = Column(String)
-    
-    # Relationship - one way only, no back reference
-    persona = relationship("Persona")
-    
-    def to_dict(self):
-        """Convert contextual data to dictionary representation"""
-        return {
-            'id': self.id,
-            'persona_id': self.persona_id,
-            'time_of_day': self.time_of_day,
-            'day_of_week': self.day_of_week,
-            'season': self.season,
-            'weather': self.weather,
-            'device_type': self.device_type,
-            'browser_type': self.browser_type,
-            'screen_size': self.screen_size,
-            'connection_type': self.connection_type
-        }
 
 def init_db(db_uri=None):
     """Initialize the database and create tables"""

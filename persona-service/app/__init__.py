@@ -111,7 +111,7 @@ def init_db(database_uri):
         db.session = session
         
         # Import models to ensure they're registered with the engine
-        from app.models import Base, Persona, DemographicData, PsychographicData, BehavioralData, ContextualData
+        from app.models import Base, Persona, DemographicData, PersonaAttributes
         
         # Create tables if they don't exist
         Base.metadata.create_all(engine)

@@ -1,6 +1,6 @@
 # Persona Service Architecture
 
-This document outlines the architecture of the persona service component and how it has been separated from the web archival component of A-Proxy.
+This document outlines the architecture of the persona service component and the dynamic schema implementation that separates it from the web archival component of A-Proxy.
 
 ## Overview
 

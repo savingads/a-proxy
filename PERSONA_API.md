@@ -1,6 +1,6 @@
 # Dynamic Persona API System
 
-This implementation separates the persona database and profiling from the web archival portion of A-Proxy, allowing the persona component to be reused with other applications. The system uses a configurable field schema that renders persona attributes dynamically based on a configuration file.
+The A-Proxy system uses a dynamic schema approach for persona management, separating the persona database and profiling from the web archival portion. This allows the persona component to be reused with other applications. The system renders persona attributes dynamically based on a configuration file, providing flexibility without requiring database schema changes.
 
 ## Key Features
 

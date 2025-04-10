@@ -42,15 +42,9 @@ Before starting A-Proxy, ensure you have:
 
 3. Set up the database:
    
-   For a fresh installation:
    ```bash
    python database.py  # Initialize the database
    python create_sample_personas.py  # Optional: Add sample data
-   ```
-   
-   For existing installations (after updates):
-   ```bash
-   python migrate_database.py  # Update database schema to latest version
    ```
 
 ### Starting the Application Manually
@@ -94,12 +88,10 @@ If you encounter issues with manual installation:
 3. Ensure all prerequisites are properly installed
 4. Check database connection by running `python database.py`
 
-For database migration issues:
-1. Check the migration output for specific error messages
-2. Ensure you have the latest version with `git pull origin main`
-3. Try backing up your database before migration:
+If you encounter database issues:
+1. Try removing the existing database and recreating it:
    ```bash
-   cp personas.db personas.db.backup
-   python migrate_database.py
+   rm -f data/personas.db
+   python database.py
    ```
-4. The migrate script will show the current database version and report success or failure
+2. Restart the application after recreating the database

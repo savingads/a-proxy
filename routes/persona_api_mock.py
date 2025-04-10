@@ -1,10 +1,10 @@
 """
-Routes for persona API integration with dynamic field support
+Routes for persona API integration with dynamic field support and mock client
 """
 import json
 import logging
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session, session, session
-from utils.persona_client import PersonaClient
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session
+from utils.persona_client_mock import get_mock_persona_client
 import persona_field_config
 
 # Set up logging
@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 # Blueprint definition
 persona_bp = Blueprint('persona', __name__, url_prefix='')
 
-# Create persona client
+# Use mock client instead of real API client
 def get_persona_client():
-    """Get persona client instance"""
-    return PersonaClient()
+    """Get mock persona client instance"""
+    return get_mock_persona_client()
 
 @persona_bp.route('/personas')
 def list_personas():
@@ -320,7 +320,8 @@ def use_persona(persona_id):
         persona = client.get_persona(persona_id)
         
         # Store active persona in session
-        session = {}
+        if 'active_persona' not in session:
+            session['active_persona'] = {}
         session['active_persona'] = persona
         
         # Extract geolocation and language

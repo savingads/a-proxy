@@ -6,7 +6,9 @@ import logging
 from flask import Blueprint, jsonify, request, current_app
 from http import HTTPStatus
 from app.services_updated import PersonaService
-from app.__init__ import db  # Import db from __init__ directly
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from app import db
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

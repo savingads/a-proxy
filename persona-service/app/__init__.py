@@ -6,8 +6,11 @@ import logging
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from app.routes import api_bp
-from app.models import init_db
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+# Create db object to be imported by other modules
+db = type('DB', (), {'session': None, 'engine': None})
 
 def create_app(config_filename=None):
     """Create and configure the Flask application"""
@@ -41,8 +44,11 @@ def create_app(config_filename=None):
     # Initialize database
     init_db(app.config.get('SQLALCHEMY_DATABASE_URI'))
     
+    # Import routes here to avoid circular imports
+    from app.routes import api_blueprint
+    
     # Register blueprints
-    app.register_blueprint(api_bp)
+    app.register_blueprint(api_blueprint)
     
     # Register error handlers
     @app.errorhandler(404)
@@ -60,3 +66,20 @@ def create_app(config_filename=None):
         return jsonify({'status': 'healthy'})
     
     return app
+
+def init_db(database_uri):
+    """Initialize database connection"""
+    # Create engine and session
+    engine = create_engine(database_uri)
+    session_factory = sessionmaker(bind=engine)
+    session = scoped_session(session_factory)
+    
+    # Store in db object
+    db.engine = engine
+    db.session = session
+    
+    # Import models to ensure they're registered with the engine
+    from app.models import Base, Persona, DemographicData, PsychographicData, BehavioralData, ContextualData
+    
+    # Create tables if they don't exist
+    Base.metadata.create_all(engine)

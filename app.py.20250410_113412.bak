@@ -7,7 +7,8 @@ from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, S
 from routes.home import home_bp
 from routes.vpn import vpn_bp
 # Choose which persona implementation to use (API or direct DB access)
-from routes.persona_api import persona_bp  # Fixed implementation using API
+# from routes.persona import persona_bp  # Original implementation with direct DB access
+from routes.persona_api import persona_bp  # New implementation using API
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
 from routes.journey import journey_bp

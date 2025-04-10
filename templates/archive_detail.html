@@ -6,7 +6,7 @@
 
     <div class="mb-4">
         <a href="{{ url_for('archives.list_archives') }}" class="btn btn-primary">Back to Archives</a>
-        <a href="{{ url_for('persona.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="{{ url_for('persona.create_persona') }}" class="btn btn-secondary">Back to Dashboard</a>
 
         <!-- Delete Archive Button -->
         <form action="{{ url_for('archives.delete_archive', archived_website_id=archived_website.id) }}" method="post"

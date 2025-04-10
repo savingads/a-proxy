@@ -6,8 +6,8 @@ from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, S
 # Import blueprints
 from routes.home import home_bp
 from routes.vpn import vpn_bp
-# Choose which persona implementation to use (API or direct DB access)
-from routes.persona_api import persona_bp  # Fixed implementation using API
+# Use the mock implementation instead of the real API
+from routes.persona_api_mock import persona_bp  # Mock implementation that doesn't require API service
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
 from routes.journey import journey_bp

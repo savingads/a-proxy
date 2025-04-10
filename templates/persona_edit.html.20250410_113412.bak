@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Persona: {{ persona_name }} - A-Proxy{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/persona.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/leaflet.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .subtle-divider {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .custom-card {
+        background-color: #1E1E1E;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block header_content %}
+<form action="{{ url_for('browsing.visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
+    id="preview-form">
+    <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
+    <input type="hidden" name="language" value="{{ language }}">
+    <input type="hidden" name="geolocation" id="form-geolocation"
+        value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+    <button type="submit" class="btn btn-primary me-2">Preview</button>
+    <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
+</form>
+<ul class="navbar-nav flex-row d-md-none">
+    <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSearch"
+            aria-controls="navbarSearch" aria-expanded="false" aria-label="Toggle search">
+            <i class="bi bi-search"></i>
+        </button>
+    </li>
+    <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+    </li>
+</ul>
+<div id="navbarSearch" class="navbar-search w-100 collapse">
+    <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 subtle-divider">
+    <h3>Edit Persona: {{ persona_name }}</h3>
+    <div>
+        <a href="{{ url_for('persona.view_persona', persona_id=persona_id) }}"
+            class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" form="demographic-form" class="btn btn-primary">Save Changes</button>
+    </div>
+</div>
+
+<div class="custom-card mb-4">
+    <div class="row">
+        <div class="col-md-8">
+            <form id="demographic-form" method="post" action="{{ url_for('persona.update_persona') }}">
+                <input type="hidden" name="persona_id" value="{{ persona_id }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="persona_name" class="form-label">Persona Name</label>
+                        <input type="text" class="form-control" id="persona_name" name="persona_name"
+                            value="{{ form.persona_name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="language" class="form-label">Language</label>
+                        <input type="text" class="form-control" id="language" name="language"
+                            value="{{ form.language }}">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" id="country" name="country" value="{{ form.country }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city" value="{{ form.city }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="region" class="form-label">Region</label>
+                        <input type="text" class="form-control" id="region" name="region" value="{{ form.region }}">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="geolocation" class="form-label">Geolocation (latitude, longitude)</label>
+                        <input type="text" class="form-control" id="geolocation" name="geolocation"
+                            value="{{ form.geolocation }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div id="map" style="width: 100%; height: 200px;"></div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs" id="personaTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="psychographic-tab" data-bs-toggle="tab"
+            data-bs-target="#psychographic-tab-pane" type="button" role="tab" aria-controls="psychographic-tab-pane"
+            aria-selected="true">Psychographic</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="behavioral-tab" data-bs-toggle="tab" data-bs-target="#behavioral-tab-pane"
+            type="button" role="tab" aria-controls="behavioral-tab-pane" aria-selected="false">Behavioral</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="contextual-tab" data-bs-toggle="tab" data-bs-target="#contextual-tab-pane"
+            type="button" role="tab" aria-controls="contextual-tab-pane" aria-selected="false">Contextual</button>
+    </li>
+</ul>
+
+<div class="tab-content mt-4" id="myTabContent">
+    <!-- Psychographic Tab -->
+    <div class="tab-pane fade show active" id="psychographic-tab-pane" role="tabpanel"
+        aria-labelledby="psychographic-tab" tabindex="0">
+        <div class="custom-card">
+            <form id="psychographic-form" method="post" action="{{ url_for('persona.save_psychographic_data') }}">
+                <input type="hidden" name="persona_id" value="{{ persona_id }}">
+                <div class="mb-3">
+                    <label for="interests" class="form-label">Interests (comma-separated)</label>
+                    <input type="text" class="form-control" id="interests" name="interests"
+                        value="{{ form.interests }}">
+                </div>
+                <div class="mb-3">
+                    <label for="personal_values" class="form-label">Personal Values (comma-separated)</label>
+                    <input type="text" class="form-control" id="personal_values" name="personal_values"
+                        value="{{ form.personal_values }}">
+                </div>
+                <div class="mb-3">
+                    <label for="attitudes" class="form-label">Attitudes (comma-separated)</label>
+                    <input type="text" class="form-control" id="attitudes" name="attitudes"
+                        value="{{ form.attitudes }}">
+                </div>
+                <div class="mb-3">
+                    <label for="lifestyle" class="form-label">Lifestyle</label>
+                    <input type="text" class="form-control" id="lifestyle" name="lifestyle"
+                        value="{{ form.lifestyle }}">
+                </div>
+                <div class="mb-3">
+                    <label for="personality" class="form-label">Personality</label>
+                    <input type="text" class="form-control" id="personality" name="personality"
+                        value="{{ form.personality }}">
+                </div>
+                <div class="mb-3">
+                    <label for="opinions" class="form-label">Opinions (comma-separated)</label>
+                    <input type="text" class="form-control" id="opinions" name="opinions" value="{{ form.opinions }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Psychographic Data</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Behavioral Tab -->
+    <div class="tab-pane fade" id="behavioral-tab-pane" role="tabpanel" aria-labelledby="behavioral-tab" tabindex="0">
+        <div class="custom-card">
+            <form id="behavioral-form" method="post" action="{{ url_for('persona.save_behavioral_data') }}">
+                <input type="hidden" name="persona_id" value="{{ persona_id }}">
+                <div class="mb-3">
+                    <label for="browsing_habits" class="form-label">Browsing Habits (comma-separated)</label>
+                    <input type="text" class="form-control" id="browsing_habits" name="browsing_habits"
+                        value="{{ form.browsing_habits }}">
+                </div>
+                <div class="mb-3">
+                    <label for="purchase_history" class="form-label">Purchase History (comma-separated)</label>
+                    <input type="text" class="form-control" id="purchase_history" name="purchase_history"
+                        value="{{ form.purchase_history }}">
+                </div>
+                <div class="mb-3">
+                    <label for="brand_interactions" class="form-label">Brand Interactions (comma-separated)</label>
+                    <input type="text" class="form-control" id="brand_interactions" name="brand_interactions"
+                        value="{{ form.brand_interactions }}">
+                </div>
+                <div class="mb-3">
+                    <label for="device_usage" class="form-label">Device Usage (JSON format)</label>
+                    <textarea class="form-control" id="device_usage" name="device_usage"
+                        rows="3">{{ form.device_usage }}</textarea>
+                    <small class="form-text text-muted">Example: {"mobile": "4 hours/day", "desktop": "8
+                        hours/day"}</small>
+                </div>
+                <div class="mb-3">
+                    <label for="social_media_activity" class="form-label">Social Media Activity (JSON format)</label>
+                    <textarea class="form-control" id="social_media_activity" name="social_media_activity"
+                        rows="3">{{ form.social_media_activity }}</textarea>
+                    <small class="form-text text-muted">Example: {"twitter": "daily", "instagram": "weekly"}</small>
+                </div>
+                <div class="mb-3">
+                    <label for="content_consumption" class="form-label">Content Consumption (JSON format)</label>
+                    <textarea class="form-control" id="content_consumption" name="content_consumption"
+                        rows="3">{{ form.content_consumption }}</textarea>
+                    <small class="form-text text-muted">Example: {"videos": "2 hours/day", "articles": "10/day"}</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contextual Tab -->
+    <div class="tab-pane fade" id="contextual-tab-pane" role="tabpanel" aria-labelledby="contextual-tab" tabindex="0">
+        <div class="custom-card">
+            <form id="contextual-form" method="post" action="{{ url_for('persona.save_contextual_data') }}">
+                <input type="hidden" name="persona_id" value="{{ persona_id }}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="time_of_day" class="form-label">Time of Day</label>
+                        <select class="form-select" id="time_of_day" name="time_of_day">
+                            <option value="" {% if not form.time_of_day %}selected{% endif %}>Select time of day
+                            </option>
+                            <option value="morning" {% if form.time_of_day=="morning" %}selected{% endif %}>Morning
+                            </option>
+                            <option value="afternoon" {% if form.time_of_day=="afternoon" %}selected{% endif %}>
+                                Afternoon</option>
+                            <option value="evening" {% if form.time_of_day=="evening" %}selected{% endif %}>Evening
+                            </option>
+                            <option value="night" {% if form.time_of_day=="night" %}selected{% endif %}>Night</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="day_of_week" class="form-label">Day of Week</label>
+                        <select class="form-select" id="day_of_week" name="day_of_week">
+                            <option value="" {% if not form.day_of_week %}selected{% endif %}>Select day of week
+                            </option>
+                            <option value="monday" {% if form.day_of_week=="monday" %}selected{% endif %}>Monday
+                            </option>
+                            <option value="tuesday" {% if form.day_of_week=="tuesday" %}selected{% endif %}>Tuesday
+                            </option>
+                            <option value="wednesday" {% if form.day_of_week=="wednesday" %}selected{% endif %}>
+                                Wednesday</option>
+                            <option value="thursday" {% if form.day_of_week=="thursday" %}selected{% endif %}>Thursday
+                            </option>
+                            <option value="friday" {% if form.day_of_week=="friday" %}selected{% endif %}>Friday
+                            </option>
+                            <option value="saturday" {% if form.day_of_week=="saturday" %}selected{% endif %}>Saturday
+                            </option>
+                            <option value="sunday" {% if form.day_of_week=="sunday" %}selected{% endif %}>Sunday
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="season" class="form-label">Season</label>
+                        <select class="form-select" id="season" name="season">
+                            <option value="" {% if not form.season %}selected{% endif %}>Select season</option>
+                            <option value="spring" {% if form.season=="spring" %}selected{% endif %}>Spring</option>
+                            <option value="summer" {% if form.season=="summer" %}selected{% endif %}>Summer</option>
+                            <option value="fall" {% if form.season=="fall" %}selected{% endif %}>Fall</option>
+                            <option value="winter" {% if form.season=="winter" %}selected{% endif %}>Winter</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="weather" class="form-label">Weather</label>
+                        <input type="text" class="form-control" id="weather" name="weather" value="{{ form.weather }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="device_type" class="form-label">Device Type</label>
+                        <select class="form-select" id="device_type" name="device_type">
+                            <option value="" {% if not form.device_type %}selected{% endif %}>Select device type
+                            </option>
+                            <option value="desktop" {% if form.device_type=="desktop" %}selected{% endif %}>Desktop
+                            </option>
+                            <option value="laptop" {% if form.device_type=="laptop" %}selected{% endif %}>Laptop
+                            </option>
+                            <option value="tablet" {% if form.device_type=="tablet" %}selected{% endif %}>Tablet
+                            </option>
+                            <option value="mobile" {% if form.device_type=="mobile" %}selected{% endif %}>Mobile
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="browser_type" class="form-label">Browser Type</label>
+                        <select class="form-select" id="browser_type" name="browser_type">
+                            <option value="" {% if not form.browser_type %}selected{% endif %}>Select browser type
+                            </option>
+                            <option value="chrome" {% if form.browser_type=="chrome" %}selected{% endif %}>Chrome
+                            </option>
+                            <option value="firefox" {% if form.browser_type=="firefox" %}selected{% endif %}>Firefox
+                            </option>
+                            <option value="safari" {% if form.browser_type=="safari" %}selected{% endif %}>Safari
+                            </option>
+                            <option value="edge" {% if form.browser_type=="edge" %}selected{% endif %}>Edge</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="screen_size" class="form-label">Screen Size</label>
+                        <input type="text" class="form-control" id="screen_size" name="screen_size"
+                            value="{{ form.screen_size }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="connection_type" class="form-label">Connection Type</label>
+                        <select class="form-select" id="connection_type" name="connection_type">
+                            <option value="" {% if not form.connection_type %}selected{% endif %}>Select connection type
+                            </option>
+                            <option value="wifi" {% if form.connection_type=="wifi" %}selected{% endif %}>WiFi</option>
+                            <option value="ethernet" {% if form.connection_type=="ethernet" %}selected{% endif %}>
+                                Ethernet</option>
+                            <option value="4g" {% if form.connection_type=="4g" %}selected{% endif %}>4G</option>
+                            <option value="5g" {% if form.connection_type=="5g" %}selected{% endif %}>5G</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Contextual Data</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<script>
+    // Initialize the map when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        var map = L.map('map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Initialize the markers layer
+        var markersLayer = L.layerGroup().addTo(map);
+
+        // Get geolocation value from the form
+        var geolocationInput = document.getElementById('geolocation');
+        var geolocation = geolocationInput.value;
+
+        // Update map with current geolocation
+        if (geolocation) {
+            var coords = geolocation.split(',');
+            if (coords.length === 2) {
+                var lat = parseFloat(coords[0].trim());
+                var lng = parseFloat(coords[1].trim());
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Add marker and center map
+                    L.marker([lat, lng]).addTo(markersLayer);
+                    map.setView([lat, lng], 10);
+                }
+            }
+        }
+
+        // Update map when geolocation is changed
+        geolocationInput.addEventListener('change', function () {
+            var newGeolocation = this.value;
+            markersLayer.clearLayers();
+
+            if (newGeolocation) {
+                var coords = newGeolocation.split(',');
+                if (coords.length === 2) {
+                    var lat = parseFloat(coords[0].trim());
+                    var lng = parseFloat(coords[1].trim());
+
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        // Add marker and center map
+                        L.marker([lat, lng]).addTo(markersLayer);
+                        map.setView([lat, lng], 10);
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

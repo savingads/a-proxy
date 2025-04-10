@@ -1,10 +1,11 @@
 """
-Routes for persona API integration with dynamic field support
+Routes for persona API integration with dynamic field support and database client
 """
 import json
 import logging
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session, session, session
-from utils.persona_client import PersonaClient
+import traceback
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session
+from utils.persona_client_db import get_db_persona_client
 import persona_field_config
 
 # Set up logging
@@ -14,10 +15,10 @@ logger = logging.getLogger(__name__)
 # Blueprint definition
 persona_bp = Blueprint('persona', __name__, url_prefix='')
 
-# Create persona client
+# Use database-backed client instead of real API or mock client
 def get_persona_client():
-    """Get persona client instance"""
-    return PersonaClient()
+    """Get database-backed persona client instance"""
+    return get_db_persona_client()
 
 @persona_bp.route('/personas')
 def list_personas():
@@ -27,10 +28,25 @@ def list_personas():
     
     try:
         client = get_persona_client()
+        logger.info(f"Getting personas with page={page}, per_page={per_page}")
+        
+        # Get result from client
         result = client.get_personas(page=page, per_page=per_page)
-        return render_template('personas.html', personas=result.get('personas', []))
+        
+        # Validate result structure
+        if not isinstance(result, dict):
+            logger.error(f"Invalid result type: {type(result)}")
+            flash(f"Error: Invalid result type from client", 'danger')
+            return render_template('personas.html', personas=[])
+            
+        personas = result.get('personas', [])
+        logger.info(f"Found {len(personas)} personas")
+        
+        return render_template('personas.html', personas=personas)
     except Exception as e:
+        # Detailed error logging
         logger.error(f"Error listing personas: {str(e)}")
+        logger.error(traceback.format_exc())
         flash(f"Error listing personas: {str(e)}", 'danger')
         return render_template('personas.html', personas=[])
 
@@ -67,6 +83,7 @@ def view_persona(persona_id):
                               field_config=field_config)
     except Exception as e:
         logger.error(f"Error viewing persona {persona_id}: {str(e)}")
+        logger.error(traceback.format_exc())
         flash(f"Error viewing persona: {str(e)}", 'danger')
         return redirect(url_for('persona.list_personas'))
 
@@ -144,6 +161,7 @@ def create_persona():
         
         except Exception as e:
             logger.error(f"Error creating persona: {str(e)}")
+            logger.error(traceback.format_exc())
             flash(f"Error creating persona: {str(e)}", 'danger')
             return redirect(url_for('persona.list_personas'))
     
@@ -240,6 +258,7 @@ def edit_persona(persona_id):
         
         except Exception as e:
             logger.error(f"Error updating persona {persona_id}: {str(e)}")
+            logger.error(traceback.format_exc())
             flash(f"Error updating persona: {str(e)}", 'danger')
             return redirect(url_for('persona.view_persona', persona_id=persona_id))
     
@@ -295,6 +314,7 @@ def edit_persona(persona_id):
                              is_new=False)
     except Exception as e:
         logger.error(f"Error getting persona {persona_id} for editing: {str(e)}")
+        logger.error(traceback.format_exc())
         flash(f"Error loading persona: {str(e)}", 'danger')
         return redirect(url_for('persona.list_personas'))
 
@@ -309,6 +329,7 @@ def delete_persona(persona_id):
         return redirect(url_for('persona.list_personas'))
     except Exception as e:
         logger.error(f"Error deleting persona {persona_id}: {str(e)}")
+        logger.error(traceback.format_exc())
         flash(f"Error deleting persona: {str(e)}", 'danger')
         return redirect(url_for('persona.list_personas'))
 
@@ -320,7 +341,8 @@ def use_persona(persona_id):
         persona = client.get_persona(persona_id)
         
         # Store active persona in session
-        session = {}
+        if 'active_persona' not in session:
+            session['active_persona'] = {}
         session['active_persona'] = persona
         
         # Extract geolocation and language
@@ -340,14 +362,20 @@ def use_persona(persona_id):
         return redirect(url_for('persona.view_persona', persona_id=persona_id))
     except Exception as e:
         logger.error(f"Error using persona {persona_id}: {str(e)}")
+        logger.error(traceback.format_exc())
         flash(f"Error using persona: {str(e)}", 'danger')
         return redirect(url_for('persona.list_personas'))
 
 @persona_bp.route('/field-config')
 def get_field_config():
     """Get field configuration as JSON"""
-    category = request.args.get('category')
-    field_name = request.args.get('field')
-    
-    config = persona_field_config.get_field_config(category, field_name)
-    return jsonify(config)
+    try:
+        category = request.args.get('category')
+        field_name = request.args.get('field')
+        
+        config = persona_field_config.get_field_config(category, field_name)
+        return jsonify(config)
+    except Exception as e:
+        logger.error(f"Error getting field config: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500

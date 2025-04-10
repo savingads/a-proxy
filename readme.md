@@ -1,6 +1,6 @@
 # A-Proxy: A Persona Proxy with Geolocation and Language Emulation
 
-> **Architecture Update**: A-Proxy now has a separated architecture with the Persona Service as a standalone API. This allows reuse of persona profiles across multiple applications.
+> **Architecture Update**: A-Proxy now has a flexible architecture with multiple implementation options for the Persona component. This allows reuse of persona profiles across multiple applications.
 
 A-Proxy is a tool that allows you to view websites with different geolocation and language settings by using VPN connections and a customized browser setup. This is useful for testing how websites behave for users in different countries and with different language preferences.
 
@@ -14,7 +14,55 @@ A-Proxy is a tool that allows you to view websites with different geolocation an
 - Web interface for easy management
 - Archive webpages with metadata and screenshots
 - Store multiple mementos (snapshots) of the same URL over time
-- Reusable persona profiles through a dedicated API service
+- Multiple implementation options for persona management
+
+## Implementation Options
+
+A-Proxy now offers three different ways to run the application:
+
+### 1. Database Implementation (Simplest)
+
+This approach uses your existing SQLite database directly, with no additional services needed:
+
+```bash
+python app_with_db.py
+```
+
+### 2. Mock Implementation (For Testing)
+
+Uses an in-memory mock implementation - perfect for development and testing:
+
+```bash
+python app_with_mock.py
+```
+
+### 3. API-Based Implementation (For Multiple Applications)
+
+Uses a separate API service for persona management:
+
+```bash
+# Start API service
+cd persona-service
+python run.py
+
+# In another terminal
+python app.py
+```
+
+### Unified Startup Script
+
+For convenience, a unified startup script is provided:
+
+```bash
+# Database mode (default)
+./start_a_proxy_all.py
+
+# Mock mode
+./start_a_proxy_all.py --implementation mock
+
+# API mode
+./start_a_proxy_all.py --implementation api
+```
 
 ## Running with Docker (Recommended)
 
@@ -116,21 +164,13 @@ python migrate_database.py
 
 ### Run the Application
 
+Choose one of the implementation options described above, such as:
+
 ```bash
-python app.py
+python app_with_db.py
 ```
 
 For more detailed instructions on manual setup, see [HOW_TO_START.md](HOW_TO_START.md).
-
-## Available Regions
-
-The application comes pre-configured with the following regions:
-
-- United States (US)
-- Brazil (BR)
-- Germany (DE)
-- Japan (JP)
-- South Africa (ZA)
 
 ## Using the Archive Feature
 
@@ -154,64 +194,36 @@ Detailed documentation for setting up and managing A-Proxy can be found in the `
 - [SETUP_DEV_ENVIRONMENT.md](docs/SETUP_DEV_ENVIRONMENT.md) - Guide for setting up a local development environment
 - [WSL_SETUP.md](docs/WSL_SETUP.md) - Specific instructions for Windows Subsystem for Linux users
 - [MULTIPLE_ENVIRONMENTS.md](docs/MULTIPLE_ENVIRONMENTS.md) - Managing multiple development environments
-- [CLAUDE.md](docs/CLAUDE.md) - Development progress and guidelines
-
-## Development Scripts
-
-A-Proxy includes scripts to help with development:
-
-- `start-dev.sh` - Main script for launching the development server (in root directory)
-- `scripts/setup-dev-environment.sh` - Script for setting up a complete development environment
-
-For development guidelines, see [CLAUDE.md](CLAUDE.md).
+- [PERSONA_ARCHITECTURE.md](PERSONA_ARCHITECTURE.md) - Detailed persona architecture documentation
 
 ## Architecture
 
-A-Proxy now consists of two main components:
+A-Proxy now supports multiple implementation options:
 
-1. **Persona Service**: A standalone REST API for managing personas
-2. **Main Application**: A-Proxy web application that handles browsing, VPN control, and web archiving
+### 1. Database Implementation
 
-This separation allows:
-- Reuse of personas across multiple applications
-- Independent scaling of persona management and web browsing components
-- Clear separation of concerns in the codebase
+Uses the existing SQLite database directly, without requiring any additional services:
+- `utils/persona_client_db.py` - Client for database operations
+- `routes/persona_api_db.py` - Routes for database implementation
+- `app_with_db.py` - Main application using database implementation
 
-### Persona Service
+### 2. Mock Implementation
 
-The Persona Service is a Flask-based REST API that provides endpoints for:
-- Creating, reading, updating, and deleting personas
-- Managing demographic, psychographic, behavioral, and contextual data
-- User authentication and authorization
+Uses an in-memory implementation for testing:
+- `utils/persona_client_mock.py` - Mock client implementation
+- `routes/persona_api_mock.py` - Routes for mock implementation
+- `app_with_mock.py` - Main application using mock implementation
 
-To run the Persona Service:
-```bash
-cd persona-service
-pip install -r requirements.txt
-python run.py
-```
+### 3. API Service Implementation
 
-The service will run on `http://localhost:5050` by default.
+Uses a standalone RESTful API for managing personas:
+- `persona-service/` - API service implementation
+- `persona-client/` - Python client library
+- `utils/persona_client.py` - Client for API interactions
+- `routes/persona_api.py` - Routes for API implementation
+- `app.py` - Main application using API implementation
 
-### Persona Client
-
-A Python client library is provided to interact with the Persona Service:
-
-```python
-from personaclient import PersonaClient
-
-client = PersonaClient(base_url="http://localhost:5050")
-personas = client.get_all_personas()
-```
-
-### Migration
-
-A migration utility is included to transfer existing personas from the local database to the new API service:
-
-```bash
-python migrate_to_api.py --dry-run  # Test without actually migrating
-python migrate_to_api.py            # Perform the migration
-```
+For detailed architecture documentation, see [PERSONA_ARCHITECTURE.md](PERSONA_ARCHITECTURE.md).
 
 ## License
 

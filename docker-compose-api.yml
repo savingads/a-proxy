@@ -22,6 +22,18 @@ services:
     networks:
       - aproxy-network
 
+  persona-mcp-server:
+    depends_on:
+      - persona-service
+    build:
+      context: ./persona-mcp-server
+      dockerfile: Dockerfile
+    environment:
+      - PERSONA_API_URL=http://persona-service:5050/api/v1
+    restart: unless-stopped
+    networks:
+      - aproxy-network
+
   aproxy:
     depends_on:
       - persona-service

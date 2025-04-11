@@ -1,0 +1,19 @@
+{
+  "name": "persona-mcp-client-examples",
+  "version": "0.1.0",
+  "description": "Examples for the Persona MCP client",
+  "type": "commonjs",
+  "scripts": {
+    "start": "ts-node mcp-client-example.ts",
+    "start:js": "node mcp-client-example.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

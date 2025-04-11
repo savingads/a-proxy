@@ -1,20 +1,20 @@
 /**
- * Example MCP client for the Persona MCP Server
+ * Example MCP client for the Persona MCP Server (JavaScript version)
  * 
  * This example shows how an external application could use MCP to interact with personas.
  * To run this example:
  * 1. Make sure the Persona API service is running
  * 2. Make sure the Persona MCP Server is configured and running
  * 3. Install dependencies: cd examples && npm install
- * 4. Run: npm start
+ * 4. Run: node mcp-client-example.js
  */
 
-// Import directly from the SDK main package
-// The examples directory uses CommonJS format (type: "commonjs" in package.json)
-const { Client, SocketClientTransport } = require('@modelcontextprotocol/sdk');
+// Import directly from the SDK package
+const { Client } = require('@modelcontextprotocol/sdk');
+const { SocketClientTransport } = require('@modelcontextprotocol/sdk');
 
 // Function to access a resource
-async function accessResource(client: any, uri: string) {
+async function accessResource(client, uri) {
   console.log(`\nAccessing resource: ${uri}`);
   try {
     const result = await client.readResource('persona-server', uri);
@@ -30,7 +30,7 @@ async function accessResource(client: any, uri: string) {
 }
 
 // Function to call a tool
-async function callTool(client: any, toolName: string, args: any) {
+async function callTool(client, toolName, args) {
   console.log(`\nCalling tool: ${toolName} with args:`, args);
   try {
     const result = await client.callTool('persona-server', toolName, args);

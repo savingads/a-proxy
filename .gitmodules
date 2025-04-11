@@ -1,0 +1,3 @@
+[submodule "persona-service"]
+path = persona-service
+url = ./persona-service

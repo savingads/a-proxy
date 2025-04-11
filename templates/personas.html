@@ -93,7 +93,7 @@
                 <td>{{ persona.created_at }}</td>
                 <td>
                     <a href="{{ url_for('persona.view_persona', persona_id=persona.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{{ url_for('persona.use_persona', persona_id=persona.id) }}"
+                    <a href="{{ url_for('journey.browse_as') }}?persona_id={{ persona.id }}"
                         class="btn btn-sm btn-outline-secondary">Use</a>
                     <form action="{{ url_for('persona.delete_persona', persona_id=persona.id) }}" method="post"
                         class="d-inline" onsubmit="return confirm('Are you sure you want to delete this persona?');">

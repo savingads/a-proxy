@@ -331,8 +331,9 @@ def update_persona():
 
 @persona_bp.route("/use-persona/<int:persona_id>", methods=["GET"])
 def use_persona(persona_id):
-    """Redirect to the view persona page."""
-    return redirect(url_for('persona.view_persona', persona_id=persona_id))
+    """Redirect to the browse-as page with the persona pre-selected."""
+    # Direct link to browse-as with persona_id as query parameter
+    return redirect(url_for('journey.browse_as') + f"?persona_id={persona_id}")
 
 @persona_bp.route("/personas", methods=["GET"])
 def list_personas():

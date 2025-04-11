@@ -1,64 +1,59 @@
-# Fixing the TypeScript Error in MCP Client Example
+# TypeScript Fix & Development Setup
 
-The MCP client example in the persona-service submodule has a TypeScript syntax error. This file needs to be fixed in the source repository and then the submodule reference needs to be updated.
+## TypeScript Fix
 
-## The Issue
+The issue with the `mcp-client-example.ts` file was that it was using ES Module import syntax (`import {}`) while the project was configured to use CommonJS format. The error was:
 
-In the file `examples/mcp-client/mcp-client-example.ts`, there are syntax errors with missing commas and incorrect import syntax:
-
-```typescript
-// Import directly from the SDK main package
-import { Client SocketClientTransport } from '@modelcontextprotocol/sdk';
-
-// Function to access a resource
-async function accessResource(client: Client uri: string) { ... }
+```
+[ts Error] Line 13: Cannot find module '@modelcontextprotocol/sdk' or its corresponding type declarations.
 ```
 
-## How to Fix It
+This has been fixed by using CommonJS require syntax instead:
 
-### 1. Direct Approach (Quick Fix)
-
-You have two options:
-
-**Option A: Fix in the source repository**
-1. Navigate to the source repository (not the submodule)
-2. Fix the TypeScript file
-3. Commit and push the changes
-4. Update the submodule reference in this project
-
-**Option B: Work inside the submodule**
-1. Navigate into the submodule: `cd persona-service-new`
-2. Make changes, commit, and push them
-3. Navigate back to the main repository
-4. Update the submodule reference: `git add persona-service-new && git commit -m "Update submodule"`
-
-### 2. The Corrected Code
-
-Here's the corrected code for the TypeScript file:
-
-```typescript
-// Import directly from the SDK main package
-import { Client, SocketClientTransport } from '@modelcontextprotocol/sdk';
-
-// Function to access a resource
-async function accessResource(client: Client, uri: string) {
-  // Rest of the function...
-}
+```javascript
+// The examples directory uses CommonJS format (type: "commonjs" in package.json)
+const { Client, SocketClientTransport } = require('@modelcontextprotocol/sdk');
 ```
 
-### 3. Testing the Fix
+## Development Environment Setup
 
-To test if the TypeScript fix works:
+To run the MCP client example without Docker, I've created a few helper scripts to set up and run the development environment.
 
-1. Navigate to the submodule's MCP client example directory: `cd persona-service-new/examples/mcp-client`
-2. Compile the TypeScript: `tsc`
-3. Verify that no TypeScript errors are reported
+### Running the Development Environment
 
-## Why the Error Isn't Showing as a Change
+1. First, set up the development environment:
 
-Git submodules reference a specific commit in another repository. When you modify files inside a submodule:
+   ```bash
+   ./setup-dev-environment.sh
+   ```
+   
+   This script:
+   - Creates a normalized `persona-service` directory with the necessary files
+   - Sets up a Python virtual environment
+   - Installs required Python dependencies
+   - Fixes any syntax errors in the Python files
+   - Sets up the MCP client environment with npm dependencies
 
-1. The changes need to be committed within the submodule first
-2. Then the parent repository needs to update its reference to point to the new submodule commit
+2. Run the development environment:
 
-This is what makes them powerful but also occasionally complex to work with.
+   ```bash
+   ./run-dev-without-docker-fixed.sh
+   ```
+   
+   This script:
+   - Starts the Persona Service API on port 5050
+   - Runs the MCP client example with ts-node
+   - Cleans up processes on exit
+
+### Directory Structure
+
+The development environment uses the following directory structure:
+
+- `persona-service/` - The main service directory (without extra suffixes)
+- `persona-mcp-server/examples/` - Contains the MCP client example
+
+### Notes on Git Submodule
+
+The original project was using Git submodules with inconsistent naming which caused confusion and setup errors. The scripts try to normalize this, but if you need to work with the actual submodule setup, you may need to address some Git configuration issues.
+
+For most development purposes, the scripts provided handle the files directly without requiring submodule configuration to be correct.

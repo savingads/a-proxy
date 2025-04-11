@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  persona-service:
+    build:
+      context: ./persona-service-new
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./persona-service-new/data:/app/data
+    environment:
+      - DATABASE_URI=sqlite:///data/persona_service.db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret-key}
+      - CORS_ORIGINS=http://localhost:5002,http://127.0.0.1:5002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - aproxy-network
+
+  persona-mcp-server:
+    depends_on:
+      - persona-service
+    build:
+      context: ./persona-mcp-server
+      dockerfile: Dockerfile
+    environment:
+      - PERSONA_API_URL=http://persona-service:5050/api/v1
+    restart: unless-stopped
+    networks:
+      - aproxy-network
+
+  aproxy:
+    depends_on:
+      - persona-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/app/data
+      - ./nordvpn:/app/nordvpn
+    environment:
+      - PERSONA_API_URL=http://persona-service:5050
+      - PERSONA_API_VERSION=v1
+      - PERSONA_API_TIMEOUT=10
+    restart: unless-stopped
+    networks:
+      - aproxy-network
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+
+networks:
+  aproxy-network:
+    driver: bridge

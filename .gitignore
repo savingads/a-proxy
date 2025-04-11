@@ -150,3 +150,7 @@ personas.db
 # Submodule (don't push to main repository)
 acm-demo/
 .gitmodules
+
+# Backup directories
+persona-service-backup/
+persona-service-original-backup/

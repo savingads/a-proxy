@@ -544,6 +544,26 @@
                     return false;
                 }
             });
+            
+            // Check for persona_id in URL parameters and select it automatically
+            const urlParams = new URLSearchParams(window.location.search);
+            const personaIdParam = urlParams.get('persona_id');
+            if (personaIdParam) {
+                const personaRadio = document.getElementById(`persona-${personaIdParam}`);
+                if (personaRadio) {
+                    personaRadio.checked = true;
+                    
+                    // Also apply visual selection to the card
+                    const personaCard = document.querySelector(`.persona-card[data-persona-id="${personaIdParam}"]`);
+                    if (personaCard) {
+                        document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
+                        personaCard.classList.add('selected');
+                    }
+                    
+                    // Scroll the persona into view
+                    personaRadio.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         });
     </script>
 </body>

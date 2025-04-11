@@ -1,0 +1,3 @@
+[submodule "persona-service-new"]
+	path = persona-service-new
+	url = file:///home/chris/a-proxy/persona-service-repo

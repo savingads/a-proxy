@@ -311,9 +311,9 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title">{{ persona.name }}</h5>
                                                     <p class="card-text small">
-                                                        <strong>Location:</strong> {{ persona.city or '-' }}, {{
-                                                        persona.country or '-' }}<br>
-                                                        <strong>Language:</strong> {{ persona.language or '-' }}
+                                                        <strong>Location:</strong> {{ persona.demographic.city or '-' }}, {{
+                                                        persona.demographic.country or '-' }}<br>
+                                                        <strong>Language:</strong> {{ persona.demographic.language or '-' }}
                                                     </p>
                                                 </div>
                                                 <div class="card-footer bg-transparent text-center">

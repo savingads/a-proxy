@@ -5,7 +5,7 @@ SQLAlchemy==2.0.20
 cryptography==41.0.3
 pycryptodome==3.18.0
 selenium==4.11.2
-openvpn-api==0.4.1
+openvpn-api==0.3.0
 python-dotenv==1.0.0
 pyOpenSSL==23.2.0
 requests==2.31.0

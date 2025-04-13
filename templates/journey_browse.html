@@ -203,6 +203,10 @@
                 class="btn btn-sm btn-outline-light me-2">
                 <i class="bi bi-eye"></i> View Journey
             </a>
+            <a href="{{ url_for('agent.journey_agent', journey_id=journey.id) }}" 
+                class="btn btn-sm btn-outline-light me-2">
+                <i class="bi bi-robot"></i> Ask Agent
+            </a>
             <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
                 data-bs-target="#addWaypointModal">
                 <i class="bi bi-plus-circle"></i> Add Waypoint

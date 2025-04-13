@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+
+{% block title %}Agent Conversation - Journey: {{ journey.name }}{% endblock %}
+
+{% block extra_style %}
+<style>
+    .chat-container {
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .message-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #212529;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #495057;
+    }
+    
+    .message {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+    }
+    
+    .user-message {
+        background-color: #0d6efd;
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+    
+    .agent-message {
+        background-color: #343a40;
+        border: 1px solid #495057;
+        align-self: flex-start;
+    }
+    
+    .message-input {
+        width: 100%;
+    }
+
+    .agent-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .journey-info {
+        background-color: #343a40;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #495057;
+    }
+
+    .guidelines-panel {
+        background-color: #343a40;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #495057;
+        height: 70vh;
+        overflow-y: auto;
+    }
+
+    .guidelines-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #495057;
+        padding-bottom: 0.5rem;
+    }
+
+    .loading-indicator {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .spinner-border {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Agent Conversation</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Journey
+            </a>
+            <button id="saveConversation" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-save"></i> Save as Waypoint
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Journey information -->
+    <div class="col-md-12 mb-3">
+        <div class="journey-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Journey: {{ journey.name }}</h5>
+                <span class="badge text-bg-{{ 'success' if journey.status == 'active' else 'secondary' }}">
+                    {{ journey.status }}
+                </span>
+            </div>
+            <div class="text-muted small mt-2">
+                {% if journey.persona_name %}
+                <div><strong>Persona:</strong> {{ journey.persona_name }}</div>
+                {% endif %}
+                <div><strong>Type:</strong> {{ journey.journey_type|capitalize }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat section -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="agent-header">
+                    <h5 class="mb-0"><i class="bi bi-robot"></i> Agent Chat</h5>
+                    <div>
+                        <button id="resetChat" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chat-container">
+                    <div id="messageContainer" class="message-container">
+                        <!-- Messages will be added here dynamically -->
+                        <div class="message agent-message">
+                            <p>Hello! I'm your agent assistant. How can I help you today?</p>
+                        </div>
+                    </div>
+                    
+                    <div id="loadingIndicator" class="loading-indicator">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Agent is thinking...</p>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Type your message here...">
+                        <button id="sendMessage" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Guidelines panel -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="guidelines-header">
+                    <h5 class="mb-0">Guidelines</h5>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="guidelines-panel" id="guidelinesPanel">
+                    <h6>Using the Agent</h6>
+                    <p>This agent can help with the following tasks:</p>
+                    <ul>
+                        <li>Answering questions about your current journey</li>
+                        <li>Providing insights based on your browsing activity</li>
+                        <li>Suggesting next steps in your journey</li>
+                        <li>Analyzing patterns in your browsing behavior</li>
+                    </ul>
+                    
+                    <h6>Tips for better interactions:</h6>
+                    <ul>
+                        <li>Be specific with your questions</li>
+                        <li>Provide context when needed</li>
+                        <li>Ask for clarification if the agent's response is unclear</li>
+                        <li>Save important conversations as waypoints in your journey</li>
+                    </ul>
+                    
+                    <h6>Journey Context</h6>
+                    <p>The agent has access to information about your current journey and waypoints, which helps it provide more relevant assistance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Conversation Modal -->
+<div class="modal fade" id="saveConversationModal" tabindex="-1" aria-labelledby="saveConversationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveConversationModalLabel">Save Conversation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="saveConversationForm">
+                    <div class="mb-3">
+                        <label for="conversationTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="conversationTitle" value="Agent Conversation">
+                    </div>
+                    <div class="mb-3">
+                        <label for="conversationNotes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="conversationNotes" rows="3" placeholder="Add notes about this conversation..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSave">Save Waypoint</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const messageContainer = document.getElementById('messageContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        const resetChatBtn = document.getElementById('resetChat');
+        const saveConversationBtn = document.getElementById('saveConversation');
+        const confirmSaveBtn = document.getElementById('confirmSave');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const saveConversationModal = new bootstrap.Modal(document.getElementById('saveConversationModal'));
+        
+        // Store conversation history
+        let conversationHistory = [];
+        let conversationId = Date.now().toString();
+        
+        // Function to add a message to the chat
+        function addMessage(message, sender) {
+            // Add to UI
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'agent-message');
+            
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+            messageDiv.appendChild(messagePara);
+            
+            messageContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+            
+            // Add to history
+            conversationHistory.push({
+                sender: sender,
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        // Function to send message to agent
+        async function sendToAgent(message) {
+            try {
+                loadingIndicator.style.display = 'block';
+                
+                const response = await fetch(`/journey/{{ journey.id }}/agent/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_id: conversationId
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to get response from agent');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage(data.response, 'agent');
+                } else {
+                    addMessage("I'm sorry, I encountered an error processing your request.", 'agent');
+                    console.error('Agent error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error communicating with agent:', error);
+                addMessage("I'm sorry, I encountered an error. Please try again later.", 'agent');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        
+        // Event listener for send button
+        sendMessageBtn.addEventListener('click', function() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                messageInput.value = '';
+                sendToAgent(message);
+            }
+        });
+        
+        // Event listener for Enter key
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const message = messageInput.value.trim();
+                if (message) {
+                    addMessage(message, 'user');
+                    messageInput.value = '';
+                    sendToAgent(message);
+                }
+            }
+        });
+        
+        // Reset chat
+        resetChatBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset the chat? This will clear the current conversation.')) {
+                // Clear UI
+                messageContainer.innerHTML = '';
+                // Add initial message
+                addMessage('Hello! I\'m your agent assistant. How can I help you today?', 'agent');
+                // Reset history and ID
+                conversationHistory = [];
+                conversationId = Date.now().toString();
+            }
+        });
+        
+        // Open save modal
+        saveConversationBtn.addEventListener('click', function() {
+            saveConversationModal.show();
+        });
+        
+        // Save conversation
+        confirmSaveBtn.addEventListener('click', async function() {
+            const title = document.getElementById('conversationTitle').value.trim();
+            const notes = document.getElementById('conversationNotes').value.trim();
+            
+            try {
+                const response = await fetch(`/journey/{{ journey.id }}/agent/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        notes: notes,
+                        conversation_id: conversationId,
+                        conversation_history: conversationHistory
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save conversation');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    saveConversationModal.hide();
+                    alert('Conversation saved successfully as a waypoint!');
+                    // Redirect to journey view
+                    window.location.href = `{{ url_for('journey.view_journey', journey_id=journey.id) }}`;
+                } else {
+                    alert('Error saving conversation: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error saving conversation:', error);
+                alert('Failed to save conversation. Please try again.');
+            }
+        });
+        
+        // Initialize with first message already in the history
+        conversationHistory.push({
+            sender: 'agent',
+            message: 'Hello! I\'m your agent assistant. How can I help you today?',
+            timestamp: new Date().toISOString()
+        });
+    });
+</script>
+{% endblock %}

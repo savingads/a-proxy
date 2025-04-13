@@ -551,7 +551,7 @@ def delete_journey(journey_id):
     finally:
         conn.close()
 
-def add_waypoint(journey_id, url, title=None, notes=None, screenshot_path=None, metadata=None):
+def add_waypoint(journey_id, url, title=None, notes=None, screenshot_path=None, metadata=None, type='url', agent_data=None):
     """
     Add a waypoint to a journey
     
@@ -562,6 +562,8 @@ def add_waypoint(journey_id, url, title=None, notes=None, screenshot_path=None, 
         notes: Any notes about this waypoint (optional)
         screenshot_path: Path to a screenshot of the page (optional)
         metadata: JSON string of additional metadata (optional)
+        type: Type of waypoint ('url' or 'agent') (default: 'url')
+        agent_data: JSON string of agent conversation data (optional)
     
     Returns:
         The ID of the newly created waypoint
@@ -578,8 +580,8 @@ def add_waypoint(journey_id, url, title=None, notes=None, screenshot_path=None, 
         cursor.execute(
             """
             INSERT INTO waypoints 
-            (journey_id, url, title, notes, screenshot_path, timestamp, sequence_number, metadata, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (journey_id, url, title, notes, screenshot_path, timestamp, sequence_number, metadata, created_at, type, agent_data)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 journey_id,
@@ -590,7 +592,9 @@ def add_waypoint(journey_id, url, title=None, notes=None, screenshot_path=None, 
                 datetime.now(),
                 sequence_number,
                 json.dumps(metadata) if metadata else None,
-                datetime.now()
+                datetime.now(),
+                type,
+                agent_data
             )
         )
         
@@ -683,7 +687,7 @@ def get_waypoint(waypoint_id):
     conn.close()
     return result
 
-def update_waypoint(waypoint_id, title=None, notes=None, sequence_number=None):
+def update_waypoint(waypoint_id, title=None, notes=None, sequence_number=None, type=None, agent_data=None):
     """
     Update a waypoint
     
@@ -692,6 +696,8 @@ def update_waypoint(waypoint_id, title=None, notes=None, sequence_number=None):
         title: The new title (optional)
         notes: The new notes (optional)
         sequence_number: The new sequence number (optional)
+        type: The new waypoint type (optional)
+        agent_data: The new agent conversation data (optional)
     
     Returns:
         True if successful, raises an exception otherwise
@@ -714,6 +720,10 @@ def update_waypoint(waypoint_id, title=None, notes=None, sequence_number=None):
             updates['notes'] = notes
         if sequence_number is not None:
             updates['sequence_number'] = sequence_number
+        if type is not None:
+            updates['type'] = type
+        if agent_data is not None:
+            updates['agent_data'] = agent_data
         
         # Only update if there are changes
         if updates:

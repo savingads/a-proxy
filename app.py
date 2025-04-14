@@ -11,7 +11,6 @@ from routes.persona_api import persona_bp  # Fixed implementation using API
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
 from routes.journey import journey_bp
-from routes.agent import agent_bp
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -33,6 +32,9 @@ def create_app():
     app.register_blueprint(browsing_bp)
     app.register_blueprint(archives_bp)
     app.register_blueprint(journey_bp)
+    
+    # Import agent_bp here to prevent circular imports
+    from routes.agent import agent_bp
     app.register_blueprint(agent_bp)
     
     return app

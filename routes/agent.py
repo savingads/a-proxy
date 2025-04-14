@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for, current_app
 import logging
 import json
-from utils.agent import get_agent_service
 import database
 import sys
 import os
@@ -9,6 +8,7 @@ import os
 # Add agent_module to the path
 sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 
+# Create blueprint
 agent_bp = Blueprint('agent', __name__)
 logger = logging.getLogger(__name__)
 
@@ -93,6 +93,8 @@ def save_agent_conversation(journey_id):
             'timestamp': conversation_history[-1].get('timestamp') if conversation_history else None
         }
         
+        # Import here to avoid circular imports
+        from utils.agent import get_agent_service
         # Get agent service
         agent_service = get_agent_service()
         
@@ -116,6 +118,9 @@ def save_agent_conversation(journey_id):
 def register_blueprint():
     """Register the agent blueprint."""
     try:
+        # Import here to avoid circular imports
+        from utils.agent import get_agent_service
+        
         # Get agent service
         agent_service = get_agent_service()
         

@@ -907,6 +907,35 @@ def init_default_settings():
     set_setting('internet_archive_submissions_today', '0', 'Number of Internet Archive submissions made today')
     set_setting('internet_archive_last_reset', datetime.now().strftime('%Y-%m-%d'), 'Last date the submission counter was reset')
 
+# Persona related functions
+def get_all_personas():
+    """
+    Simple implementation to return a list of personas for compatibility
+    with database-backed implementation
+    """
+    return []
+
+def get_persona(persona_id):
+    """
+    Simple implementation to return a persona for compatibility
+    with database-backed implementation
+    """
+    return None
+
+def save_persona(persona_data):
+    """
+    Simple implementation to save a persona for compatibility
+    with database-backed implementation
+    """
+    return 1  # Return a dummy ID
+
+def delete_persona(persona_id):
+    """
+    Simple implementation to delete a persona for compatibility
+    with database-backed implementation
+    """
+    return True
+
 # Initialize the database when the module is imported
 init_db()
 

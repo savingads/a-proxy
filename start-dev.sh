@@ -197,6 +197,61 @@ sleep 2
 # Setup environment
 setup_python_env
 
+# Function to ensure submodules are properly initialized and on correct branches
+ensure_submodules() {
+  echo -e "${YELLOW}Checking submodule status...${NC}"
+  
+  # Initialize submodules if they aren't already
+  if [ ! -f "agent_module/setup.py" ] || [ ! -f "persona-service/run.py" ] || [ ! -f "persona-client/setup.py" ]; then
+    echo -e "${YELLOW}Some submodules are not initialized. Initializing...${NC}"
+    git submodule update --init --recursive
+  fi
+  
+  # Ensure persona-service is on the right branch (develop)
+  if [ -d "persona-service/.git" ]; then
+    echo -e "${YELLOW}Checking persona-service branch...${NC}"
+    cd persona-service
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$CURRENT_BRANCH" != "develop" ]; then
+      echo -e "${YELLOW}Switching persona-service from $CURRENT_BRANCH to develop branch...${NC}"
+      git checkout develop
+      git pull origin develop
+    else
+      echo -e "${GREEN}persona-service is on the correct branch: $CURRENT_BRANCH${NC}"
+    fi
+    cd $ROOT_DIR
+  fi
+  
+  # Ensure agent_module is on the right branch (personas)
+  if [ -d "agent_module/.git" ]; then
+    echo -e "${YELLOW}Checking agent_module branch...${NC}"
+    cd agent_module
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$CURRENT_BRANCH" != "personas" ]; then
+      echo -e "${YELLOW}Switching agent_module from $CURRENT_BRANCH to personas branch...${NC}"
+      git checkout personas
+      git pull origin personas
+    else
+      echo -e "${GREEN}agent_module is on the correct branch: $CURRENT_BRANCH${NC}"
+    fi
+    cd $ROOT_DIR
+  fi
+  
+  # Ensure persona-client is properly initialized
+  if [ -d "persona-client/.git" ]; then
+    echo -e "${YELLOW}Checking persona-client branch...${NC}"
+    cd persona-client
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    echo -e "${GREEN}persona-client is on branch: $CURRENT_BRANCH${NC}"
+    cd $ROOT_DIR
+  fi
+  
+  echo -e "${GREEN}All submodules initialized and on correct branches${NC}"
+}
+
+# Ensure submodules are properly configured
+ensure_submodules
+
 # Initialize and verify database before starting services
 init_persona_db
 

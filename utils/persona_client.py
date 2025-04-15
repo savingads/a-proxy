@@ -2,6 +2,8 @@
 Utility module for interacting with the Persona API Service
 """
 import logging
+import time
+import requests
 from personaclient import PersonaClient
 from personaclient.exceptions import (
     PersonaClientError,
@@ -19,25 +21,76 @@ from persona_config import (
 # Setup logging
 logger = logging.getLogger(__name__)
 
-class ExtendedPersonaClient(PersonaClient):
-    """Extended client with additional methods for compatibility"""
+class ResilientPersonaClient(PersonaClient):
+    """Extended client with additional methods and resilient connection handling"""
+    
+    def __init__(self, base_url, api_version="v1", timeout=10, auth_token=None, max_retries=3, retry_delay=1):
+        """Initialize with retry parameters"""
+        super().__init__(base_url, api_version, timeout, auth_token)
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
     
     def get_personas(self, page=1, per_page=20):
         """Alias for get_all_personas for backward compatibility"""
         return self.get_all_personas(page=page, per_page=per_page)
+    
+    def _make_request(self, method, endpoint, **kwargs):
+        """Override to add retry logic for resilience"""
+        retries = 0
+        last_error = None
+        
+        while retries < self.max_retries:
+            try:
+                # Check if API is up before making the request
+                if method != "GET" or endpoint != "health":  # Don't check health before health check
+                    self._check_api_health()
+                
+                return super()._make_request(method, endpoint, **kwargs)
+            except (requests.ConnectionError, requests.Timeout) as e:
+                retries += 1
+                last_error = e
+                logger.warning(f"Connection error on attempt {retries}/{self.max_retries}: {str(e)}")
+                
+                if retries < self.max_retries:
+                    time.sleep(self.retry_delay)
+                    # Increase delay for next retry (exponential backoff)
+                    self.retry_delay *= 1.5
+            except Exception as e:
+                # For other exceptions, just raise them
+                logger.error(f"Error during API request: {str(e)}")
+                raise
+        
+        # If we got here, all retries failed
+        logger.error(f"All {self.max_retries} connection attempts failed")
+        raise last_error
+    
+    def _check_api_health(self):
+        """Check if the API is up and running"""
+        try:
+            # Use low timeout for health check
+            response = requests.get(f"{self.base_url}/health", timeout=2)
+            if not response.ok:
+                logger.warning(f"API health check failed with status {response.status_code}")
+                return False
+            return True
+        except (requests.ConnectionError, requests.Timeout) as e:
+            logger.warning(f"API health check failed: {str(e)}")
+            return False
         
 def get_persona_client():
     """
     Get a configured Persona API client instance
     
     Returns:
-        ExtendedPersonaClient: Configured client instance
+        ResilientPersonaClient: Configured client instance
     """
-    return ExtendedPersonaClient(
+    return ResilientPersonaClient(
         base_url=PERSONA_API_BASE_URL,
         api_version=PERSONA_API_VERSION,
         timeout=PERSONA_API_TIMEOUT,
-        auth_token=PERSONA_API_AUTH_TOKEN
+        auth_token=PERSONA_API_AUTH_TOKEN,
+        max_retries=3,
+        retry_delay=1
     )
 
 # Create a singleton instance for reuse
@@ -48,7 +101,7 @@ def get_client():
     Get or create a singleton Persona client instance
     
     Returns:
-        ExtendedPersonaClient: Shared client instance
+        ResilientPersonaClient: Shared client instance
     """
     global _persona_client
     if _persona_client is None:

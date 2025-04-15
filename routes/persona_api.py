@@ -4,7 +4,7 @@ Routes for persona API integration with dynamic field support
 import json
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session
-from utils.persona_client import ExtendedPersonaClient, get_persona_client
+from utils.persona_client import ResilientPersonaClient, get_persona_client
 import persona_field_config
 
 # Set up logging

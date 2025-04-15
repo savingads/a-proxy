@@ -35,6 +35,7 @@ check_venv() {
 }
 
 check_command python3
+check_command curl
 check_venv
 
 # Check if necessary directories exist
@@ -45,6 +46,7 @@ fi
 
 # Ensure data directory exists
 mkdir -p "${PERSONA_SERVICE_DIR}/data"
+chmod 755 "${PERSONA_SERVICE_DIR}/data"
 
 # Create Python virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
@@ -64,12 +66,44 @@ setup_python_env() {
   
   # Install additional dependencies that might be needed
   echo -e "${YELLOW}Installing additional dependencies...${NC}"
-  pip install flask-sqlalchemy flask-marshmallow marshmallow-sqlalchemy
+  pip install flask-sqlalchemy flask-marshmallow marshmallow-sqlalchemy requests
   cd $ROOT_DIR
   
   # Install main app requirements
   echo -e "${YELLOW}Installing A-Proxy requirements...${NC}"
   pip install -r requirements.txt
+
+  # Ensure persona-client submodule is initialized and updated
+  echo -e "${YELLOW}Initializing persona-client submodule...${NC}"
+  git submodule update --init --recursive
+
+  # Install persona-client module
+  echo -e "${YELLOW}Installing persona-client module...${NC}"
+  cd persona-client
+  pip install .
+  cd $ROOT_DIR
+}
+
+# Function to initialize the Persona Service database
+init_persona_db() {
+  echo -e "${YELLOW}Ensuring Persona Service database is properly initialized...${NC}"
+  . venv/bin/activate
+  
+  # Make the init_db.py script executable
+  chmod +x "${PERSONA_SERVICE_DIR}/init_db.py"
+  
+  # Run the dedicated initialization script
+  cd $PERSONA_SERVICE_DIR
+  python init_db.py
+  DB_INIT_STATUS=$?
+  cd $ROOT_DIR
+  
+  if [ $DB_INIT_STATUS -ne 0 ]; then
+    echo -e "${RED}Failed to initialize Persona Service database${NC}"
+    exit 1
+  fi
+  
+  echo -e "${GREEN}Persona Service database initialized successfully${NC}"
 }
 
 # Function to start the Persona Service
@@ -85,6 +119,38 @@ start_persona_service() {
   echo -e "${GREEN}Persona Service running with PID: ${PERSONA_PID}${NC}"
   echo -e "${YELLOW}Waiting for service to initialize...${NC}"
   sleep 5  # Give it time to start up and initialize database
+}
+
+# Function to verify the Persona Service API is responsive
+verify_persona_service() {
+  local max_attempts=10
+  local wait_time=2
+  local attempt=1
+  local url="http://localhost:5050/health"
+  
+  echo -e "${YELLOW}Verifying Persona Service API is responsive...${NC}"
+  
+  while [ $attempt -le $max_attempts ]; do
+    echo -e "Attempt $attempt/$max_attempts: Checking $url"
+    
+    response=$(curl -s -o /dev/null -w "%{http_code}" $url)
+    
+    if [ "$response" -eq 200 ]; then
+      echo -e "${GREEN}Persona Service API is responsive!${NC}"
+      return 0
+    fi
+    
+    attempt=$((attempt + 1))
+    
+    if [ $attempt -le $max_attempts ]; then
+      echo -e "${YELLOW}Service not ready, waiting ${wait_time} seconds...${NC}"
+      sleep $wait_time
+    fi
+  done
+  
+  echo -e "${RED}Persona Service API is not responding after ${max_attempts} attempts${NC}"
+  echo -e "${YELLOW}Continuing anyway, but you may experience issues with persona functionality${NC}"
+  return 1
 }
 
 # Function to start the main A-Proxy application
@@ -130,8 +196,12 @@ sleep 2
 # Setup environment
 setup_python_env
 
+# Initialize and verify database before starting services
+init_persona_db
+
 # Start services
 start_persona_service
+verify_persona_service
 start_a_proxy
 
 echo -e "${BLUE}Services are running:${NC}"

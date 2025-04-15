@@ -516,9 +516,9 @@ def create_journey_from_browse(persona_id):
         flash(f"Error creating journey: {str(e)}", "danger")
         return redirect(url_for('journey.direct_browse', persona_id=persona_id))
 
-@journey_bp.route("/browse-as")
-def browse_as():
-    """Browse as a persona by selecting a persona and journey."""
+@journey_bp.route("/interact-as")
+def interact_as():
+    """Choose a persona to interact with (browse or chat)."""
     # Import inside function to avoid circular imports
     from utils.persona_client import get_client
     
@@ -535,4 +535,17 @@ def browse_as():
     # Get journeys from the database
     journeys = database.get_all_journeys()
     
-    return render_template("browse_as.html", personas=personas, journeys=journeys)
+    # Add waypoint count for each journey
+    for journey in journeys:
+        waypoints = database.get_waypoints(journey['id'])
+        journey['waypoint_count'] = len(waypoints) if waypoints else 0
+    
+    # Sort journeys by most recent first
+    journeys = sorted(journeys, key=lambda j: j.get('created_at', 0), reverse=True)
+    
+    return render_template("interact_as.html", personas=personas, journeys=journeys)
+
+@journey_bp.route("/browse-as")
+def browse_as():
+    """Legacy route - redirects to interact-as."""
+    return redirect(url_for('journey.interact_as'))

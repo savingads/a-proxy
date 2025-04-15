@@ -12,6 +12,28 @@ sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 agent_bp = Blueprint('agent', __name__)
 logger = logging.getLogger(__name__)
 
+@agent_bp.route("/direct-chat/<int:persona_id>")
+def direct_chat(persona_id):
+    """Start a direct chat session with a persona without creating a journey."""
+    # Import inside function to avoid circular imports
+    from utils.persona_client import get_client
+    
+    # Get persona data
+    persona = None
+    try:
+        client = get_client()
+        persona = client.get_persona(persona_id)
+        if not persona:
+            flash("Persona not found", "danger")
+            return redirect(url_for('journey.interact_as'))
+    except Exception as e:
+        logging.error(f"Error getting persona {persona_id}: {e}")
+        flash(f"Error loading persona: {str(e)}", "danger")
+        return redirect(url_for('journey.interact_as'))
+    
+    # Render the simple chat template
+    return render_template("simple_chat.html", persona=persona)
+
 @agent_bp.route("/journey/<int:journey_id>/agent")
 def journey_agent(journey_id):
     """Show the agent interface for a journey."""
@@ -20,7 +42,19 @@ def journey_agent(journey_id):
         flash("Journey not found", "danger")
         return redirect(url_for('journey.list_journeys'))
     
-    return render_template("agent_waypoint.html", journey=journey)
+    # Get persona data if a persona is associated with this journey
+    persona = None
+    if journey['persona_id']:
+        # Import inside function to avoid circular imports
+        from utils.persona_client import get_client
+        try:
+            client = get_client()
+            persona = client.get_persona(journey['persona_id'])
+        except Exception as e:
+            logging.error(f"Error getting persona {journey['persona_id']}: {e}")
+            flash(f"Error loading persona: {str(e)}", "warning")
+    
+    return render_template("agent_waypoint.html", journey=journey, persona=persona)
 
 @agent_bp.route("/journey/<int:journey_id>/agent/message", methods=["POST"])
 def agent_message(journey_id):

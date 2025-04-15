@@ -79,9 +79,23 @@ def init_db():
         sequence_number INTEGER,
         metadata TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type TEXT DEFAULT 'browse',
+        agent_data TEXT,
         FOREIGN KEY (journey_id) REFERENCES journeys (id) ON DELETE CASCADE
     )
     ''')
+    
+    # Check if type column exists in waypoints table
+    cursor.execute("PRAGMA table_info(waypoints)")
+    columns = cursor.fetchall()
+    column_names = [col['name'] for col in columns]
+    
+    # Add type and agent_data columns if they don't exist
+    if 'type' not in column_names:
+        cursor.execute("ALTER TABLE waypoints ADD COLUMN type TEXT DEFAULT 'browse'")
+    
+    if 'agent_data' not in column_names:
+        cursor.execute("ALTER TABLE waypoints ADD COLUMN agent_data TEXT")
     
     conn.commit()
     conn.close()

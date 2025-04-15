@@ -1,6 +1,6 @@
 [submodule "persona-service"]
 	path = persona-service
-	url = ./persona-service
+	url = https://github.com/savingads/persona-service
 [submodule "agent_module"]
 	path = agent_module
 	url = https://github.com/cr625/agent_module

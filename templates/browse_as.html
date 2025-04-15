@@ -311,19 +311,28 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title">{{ persona.name }}</h5>
                                                     <p class="card-text small">
-                                                        <strong>Location:</strong> {{ persona.demographic.city or '-' }}, {{
+                                                        <strong>Location:</strong> {{ persona.demographic.city or '-'
+                                                        }}, {{
                                                         persona.demographic.country or '-' }}<br>
-                                                        <strong>Language:</strong> {{ persona.demographic.language or '-' }}
+                                                        <strong>Language:</strong> {{ persona.demographic.language or
+                                                        '-' }}
                                                     </p>
                                                 </div>
-                                                <div class="card-footer bg-transparent text-center">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input persona-radio" type="radio"
-                                                            name="persona_id" id="persona-{{ persona.id }}"
-                                                            value="{{ persona.id }}">
-                                                        <label class="form-check-label" for="persona-{{ persona.id }}">
-                                                            Select
-                                                        </label>
+                                                <div class="card-footer bg-transparent">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input persona-radio" type="radio"
+                                                                name="persona_id" id="persona-{{ persona.id }}"
+                                                                value="{{ persona.id }}">
+                                                            <label class="form-check-label"
+                                                                for="persona-{{ persona.id }}">
+                                                                Select
+                                                            </label>
+                                                        </div>
+                                                        <a href="{{ url_for('journey.direct_browse', persona_id=persona.id) }}"
+                                                            class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-globe"></i> Browse Now
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -544,7 +553,7 @@
                     return false;
                 }
             });
-            
+
             // Check for persona_id in URL parameters and select it automatically
             const urlParams = new URLSearchParams(window.location.search);
             const personaIdParam = urlParams.get('persona_id');
@@ -552,14 +561,14 @@
                 const personaRadio = document.getElementById(`persona-${personaIdParam}`);
                 if (personaRadio) {
                     personaRadio.checked = true;
-                    
+
                     // Also apply visual selection to the card
                     const personaCard = document.querySelector(`.persona-card[data-persona-id="${personaIdParam}"]`);
                     if (personaCard) {
                         document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
                         personaCard.classList.add('selected');
                     }
-                    
+
                     // Scroll the persona into view
                     personaRadio.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }

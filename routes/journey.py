@@ -325,6 +325,108 @@ def complete_journey(journey_id):
         flash(f"Error completing journey: {str(e)}", "danger")
         return redirect(url_for('journey.view_journey', journey_id=journey_id))
 
+@journey_bp.route("/direct-browse/<int:persona_id>")
+def direct_browse(persona_id):
+    """Start a direct browsing session with a persona without creating a journey."""
+    # Import inside function to avoid circular imports
+    from utils.persona_client import get_client
+    
+    # Get persona data
+    persona = None
+    try:
+        client = get_client()
+        persona = client.get_persona(persona_id)
+        if not persona:
+            flash("Persona not found", "danger")
+            return redirect(url_for('journey.browse_as'))
+    except Exception as e:
+        logging.error(f"Error getting persona {persona_id}: {e}")
+        flash(f"Error loading persona: {str(e)}", "danger")
+        return redirect(url_for('journey.browse_as'))
+    
+    # Pass to the journey_browse template but mark as not part of a journey
+    # We'll create a dummy journey object with minimal data
+    dummy_journey = {
+        'id': None,
+        'name': f"Browsing as {persona['name']}",
+        'journey_type': 'direct_browse',
+        'status': 'active',
+        'persona_id': persona_id
+    }
+    
+    return render_template("journey_browse.html", journey=dummy_journey, persona=persona, waypoints=[], is_direct_browse=True)
+
+@journey_bp.route("/create-journey-from-browse/<int:persona_id>", methods=["POST"])
+def create_journey_from_browse(persona_id):
+    """Create a journey from a direct browsing session."""
+    try:
+        # Get form data
+        name = request.form.get("name")
+        description = request.form.get("description", "")
+        journey_type = request.form.get("journey_type", "research")
+        
+        # Get URLs from the form
+        visited_urls = request.form.get("visited_urls", "[]")
+        current_url = request.form.get("current_url", "")
+        
+        try:
+            # Parse the visited URLs from JSON
+            visited_urls = json.loads(visited_urls)
+        except Exception as e:
+            logging.error(f"Error parsing visited URLs: {e}")
+            visited_urls = []
+        
+        # Create the journey
+        journey_id = database.create_journey(
+            name=name,
+            description=description,
+            persona_id=persona_id,
+            journey_type=journey_type
+        )
+        
+        # Add waypoints for each visited URL
+        for url in visited_urls:
+            if url and url != "about:blank":
+                # Create basic metadata
+                metadata = {
+                    "browser_timestamp": datetime.now().isoformat(),
+                    "user_agent": request.headers.get('User-Agent'),
+                }
+                
+                # Add the waypoint with a generic title
+                database.add_waypoint(
+                    journey_id=journey_id,
+                    url=url,
+                    title=f"Visit to {url}",
+                    notes="",
+                    screenshot_path=None,
+                    metadata=metadata
+                )
+        
+        # If current URL isn't in the visited URLs, add it too
+        if current_url and current_url != "about:blank" and current_url not in visited_urls:
+            metadata = {
+                "browser_timestamp": datetime.now().isoformat(),
+                "user_agent": request.headers.get('User-Agent'),
+            }
+            
+            database.add_waypoint(
+                journey_id=journey_id,
+                url=current_url,
+                title=f"Visit to {current_url}",
+                notes="",
+                screenshot_path=None,
+                metadata=metadata
+            )
+        
+        flash(f"Journey '{name}' created successfully!", "success")
+        return redirect(url_for('journey.browse_journey', journey_id=journey_id))
+        
+    except Exception as e:
+        logging.error(f"Error creating journey from browse: {e}")
+        flash(f"Error creating journey: {str(e)}", "danger")
+        return redirect(url_for('journey.direct_browse', persona_id=persona_id))
+
 @journey_bp.route("/browse-as")
 def browse_as():
     """Browse as a persona by selecting a persona and journey."""

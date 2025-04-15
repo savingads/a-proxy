@@ -183,14 +183,22 @@
 
 <body>
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        {% if is_direct_browse %}
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">
+            <i class="bi bi-globe me-2"></i>Browsing as: {{ persona.name }}
+        </a>
+        {% else %}
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">
             <i class="bi bi-map me-2"></i>Journey: {{ journey.name }}
         </a>
+        {% endif %}
 
         <div class="journey-info d-flex align-items-center me-auto ms-3">
+            {% if not is_direct_browse %}
             <div class="text-light me-3">
                 <i class="bi bi-tag-fill me-1"></i> {{ journey.journey_type|capitalize }}
             </div>
+            {% endif %}
             {% if persona %}
             <div class="persona-badge bg-info rounded text-white">
                 <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
@@ -199,14 +207,24 @@
         </div>
 
         <div class="d-flex align-items-center me-3">
+            {% if is_direct_browse %}
+            <button type="button" class="btn btn-sm btn-primary me-2" data-bs-toggle="modal"
+                data-bs-target="#createJourneyModal">
+                <i class="bi bi-plus-circle"></i> Make This a Journey
+            </button>
+            <a href="{{ url_for('journey.browse_as') }}" class="btn btn-sm btn-outline-light me-2">
+                <i class="bi bi-arrow-left"></i> Back to Personas
+            </a>
+            {% else %}
             <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}"
                 class="btn btn-sm btn-outline-light me-2">
                 <i class="bi bi-eye"></i> View Journey
             </a>
-            <a href="{{ url_for('agent.journey_agent', journey_id=journey.id) }}" 
+            <a href="{{ url_for('agent.journey_agent', journey_id=journey.id) }}"
                 class="btn btn-sm btn-outline-light me-2">
                 <i class="bi bi-robot"></i> Ask Agent
             </a>
+            {% endif %}
             <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
                 data-bs-target="#addWaypointModal">
                 <i class="bi bi-plus-circle"></i> Add Waypoint
@@ -342,6 +360,56 @@
         </div>
     </div>
 
+    <!-- Create Journey Modal (for direct browsing mode) -->
+    {% if is_direct_browse %}
+    <div class="modal fade" id="createJourneyModal" tabindex="-1" aria-labelledby="createJourneyModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createJourneyModalLabel">Create Journey</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="create-journey-form"
+                    action="{{ url_for('journey.create_journey_from_browse', persona_id=persona.id) }}" method="POST">
+                    <div class="modal-body">
+                        <p>Create a journey from your current browsing session. Any waypoints you've added will be
+                            included.</p>
+                        <div class="mb-3">
+                            <label for="journey-name" class="form-label">Journey Name</label>
+                            <input type="text" class="form-control" id="journey-name" name="name"
+                                placeholder="E.g., Product Research Journey" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="journey-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="journey-description" name="description" rows="3"
+                                placeholder="Brief description of this journey"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="journey-type" class="form-label">Journey Type</label>
+                            <select class="form-select" id="journey-type" name="journey_type">
+                                <option value="marketing">Marketing</option>
+                                <option value="research">Research</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="educational">Educational</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <!-- Store visited URLs (will be populated by JavaScript) -->
+                        <input type="hidden" id="visited-urls" name="visited_urls" value="">
+                        <input type="hidden" id="current-url" name="current_url" value="">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Journey</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Edit Waypoint Modals -->
     {% for waypoint in waypoints %}
     <div class="modal fade" id="editWaypointModal{{ waypoint.id }}" tabindex="-1"
@@ -389,6 +457,14 @@
             const screenshotDataInput = document.getElementById('screenshot-data');
             const addWaypointModal = document.getElementById('addWaypointModal');
             const loadUrlButtons = document.querySelectorAll('.load-url');
+
+            // For tracking browsing history in direct browse mode
+            const visitedUrls = new Set();
+            {% if is_direct_browse %}
+            const createJourneyModal = document.getElementById('createJourneyModal');
+            const visitedUrlsInput = document.getElementById('visited-urls');
+            const currentUrlInput = document.getElementById('current-url');
+            {% endif %}
 
             // Only load the latest waypoint URL if available (for existing journeys)
             if (loadUrlButtons.length > 0) {
@@ -468,7 +544,16 @@
                     // Only update if we have access to the iframe content
                     if (iframe.contentWindow && iframe.contentWindow.location.href) {
                         if (iframe.contentWindow.location.href !== 'about:blank') {
-                            urlInput.value = iframe.contentWindow.location.href;
+                            const currentUrl = iframe.contentWindow.location.href;
+                            urlInput.value = currentUrl;
+
+                            // Track visited URLs for direct browsing mode
+                            {% if is_direct_browse %}
+                            if (currentUrl && currentUrl !== 'about:blank') {
+                                visitedUrls.add(currentUrl);
+                                console.log('Added URL to history:', currentUrl);
+                            }
+                            {% endif %}
                         }
                     }
                 } catch (e) {
@@ -477,11 +562,45 @@
                 }
             });
 
+            // For direct browsing mode, prepare the journey creation form
+            {% if is_direct_browse %}
+            createJourneyModal.addEventListener('show.bs.modal', function () {
+                // Add the current URL if not already tracked
+                if (urlInput.value && urlInput.value !== 'about:blank') {
+                    visitedUrls.add(urlInput.value);
+                }
+
+                // Convert visited URLs to JSON string and set in the form
+                visitedUrlsInput.value = JSON.stringify(Array.from(visitedUrls));
+                currentUrlInput.value = urlInput.value;
+
+                // Default journey name based on current page or persona
+                try {
+                    const journeyNameInput = document.getElementById('journey-name');
+                    if (!journeyNameInput.value) {
+                        try {
+                            // Try to get page title first
+                            const pageTitle = iframe.contentDocument.title;
+                            if (pageTitle) {
+                                journeyNameInput.value = `${pageTitle} Research`;
+                            } else {
+                                journeyNameInput.value = `{{ persona.name }}'s Journey`;
+                            }
+                        } catch (e) {
+                            journeyNameInput.value = `{{ persona.name }}'s Journey`;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error setting default journey name:', e);
+                }
+            });
+            {% endif %}
+
             // Prepare waypoint data when opening the modal
             addWaypointModal.addEventListener('show.bs.modal', function (event) {
                 // Get the current URL from the browser
                 waypointUrlInput.value = urlInput.value;
-                
+
                 // Reset screenshot data
                 screenshotDataInput.value = '';
 
@@ -493,22 +612,22 @@
                     waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
                 }
             });
-            
+
             // Capture screenshot only when the user submits the form with checkbox checked
-            document.getElementById('add-waypoint-form').addEventListener('submit', function(event) {
+            document.getElementById('add-waypoint-form').addEventListener('submit', function (event) {
                 if (document.getElementById('capture-screenshot').checked) {
                     // Show a loading indicator
                     const submitBtn = this.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Capturing...';
                     submitBtn.disabled = true;
-                    
+
                     // Capture the screenshot
                     event.preventDefault(); // Prevent form submission until screenshot is captured
                     html2canvas(iframe).then(canvas => {
                         const imageData = canvas.toDataURL('image/png');
                         screenshotDataInput.value = imageData;
-                        
+
                         // Now submit the form
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;

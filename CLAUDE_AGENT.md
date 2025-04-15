@@ -2,6 +2,22 @@
 
 This document explains how to use the standalone Claude agent integration in a-proxy.
 
+## Environment Setup
+
+For security reasons, the Claude API key should be stored as an environment variable:
+
+1. Copy the `.env.example` file to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit the `.env` file and add your Claude API key:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-api03-your_actual_key_here
+   ```
+
+3. The application will load this environment variable automatically
+
 ## Overview
 
 We've created a direct Claude interface that lets you interact with Claude without needing to create a journey or persona. This provides a streamlined way to test and use Claude's capabilities.

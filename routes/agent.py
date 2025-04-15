@@ -14,6 +14,54 @@ sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 agent_bp = Blueprint('agent', __name__)
 logger = logging.getLogger(__name__)
 
+@agent_bp.route("/agent")
+def agent_chat():
+    """Show the standalone Claude agent interface."""
+    return render_template("agent_chat.html")
+
+@agent_bp.route("/agent/message", methods=["POST"])
+def standalone_agent_message():
+    """Process a message to the standalone Claude agent."""
+    try:
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        message = data.get('message')
+        conversation_id = data.get('conversation_id')
+        model = data.get('model', 'claude-3-opus-20240229')
+        system_prompt = data.get('system_prompt', 'You are a helpful assistant. Answer questions concisely and accurately.')
+        
+        if not message:
+            return jsonify({"success": False, "error": "No message provided"}), 400
+        
+        # Get agent service
+        from utils.agent import get_agent_service
+        agent_service = get_agent_service()
+        
+        # Prepare context with any provided parameters
+        context = {
+            'model': model,
+            'system_prompt': system_prompt
+        }
+        
+        # Send message to Claude
+        claude_response = agent_service.send_message(message, context)
+        
+        # Extract content from response
+        response_content = claude_response.get('content', 'I apologize, but I wasn\'t able to process your request.')
+        
+        return jsonify({
+            "success": True,
+            "response": response_content,
+            "conversation_id": conversation_id
+        })
+    
+    except Exception as e:
+        logger.error(f"Error processing agent message: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @agent_bp.route("/direct-chat/<int:persona_id>")
 def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
@@ -208,16 +256,37 @@ def agent_message(journey_id):
         # Get additional context for the agent
         waypoints = database.get_waypoints(journey_id)
         
-        # TODO: In a real implementation, we would process the message through
-        # the agent_module and get a response. For now, we'll use a simple mock.
+        # Get persona data if available
+        persona = None
+        if journey['persona_id']:
+            # Import inside function to avoid circular imports
+            from utils.persona_client import get_client
+            try:
+                client = get_client()
+                persona = client.get_persona(journey['persona_id'])
+            except Exception as e:
+                logging.error(f"Error getting persona {journey['persona_id']}: {e}")
         
-        # Mock response for testing
-        response = f"I received your message: '{message}'. This is a simulated response from the agent. " \
-                  f"Your journey '{journey['name']}' has {len(waypoints)} waypoints."
+        # Prepare context for Claude
+        claude_context = {
+            'journey': journey,
+            'waypoints': waypoints,
+            'persona': persona
+        }
+        
+        # Get agent service
+        from utils.agent import get_agent_service
+        agent_service = get_agent_service()
+        
+        # Send message to Claude
+        claude_response = agent_service.send_message(message, claude_context)
+        
+        # Extract content from response
+        response_content = claude_response.get('content', 'I apologize, but I wasn\'t able to process your request.')
         
         return jsonify({
             "success": True,
-            "response": response,
+            "response": response_content,
             "conversation_id": conversation_id
         })
     

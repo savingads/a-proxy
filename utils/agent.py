@@ -17,7 +17,82 @@ class AgentService:
         """Initialize the agent service with configuration."""
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
+        self._claude_adapter = None
         self.logger.info("AgentService initialized")
+        
+    @property
+    def claude_adapter(self):
+        """Get or initialize the Claude adapter."""
+        if self._claude_adapter is None:
+            try:
+                # Initialize Claude adapter directly
+                self.logger.info("Initializing Claude adapter")
+                self._claude_adapter = AProxyClaudeAdapter(
+                    adapter_type='claude'
+                )
+                self.logger.info(f"Claude adapter initialized with model: {self._claude_adapter.model}")
+            except Exception as e:
+                self.logger.error(f"Error initializing Claude adapter: {e}")
+                raise
+        return self._claude_adapter
+    
+    def send_message(self, message, context=None):
+        """
+        Send a message to Claude and get a response.
+        
+        Args:
+            message: The message to send
+            context: Optional context information (journey, persona, etc.)
+                Can also include model selection and system prompt
+            
+        Returns:
+            Response from Claude
+        """
+        try:
+            self.logger.info(f"Sending message to Claude: {message[:50]}...")
+            
+            # Format context if provided
+            formatted_context = {}
+            if context:
+                # Include model selection if provided
+                if 'model' in context:
+                    formatted_context['model'] = context['model']
+                    self.logger.info(f"Using specified model: {context['model']}")
+                
+                # Include system prompt if provided  
+                if 'system_prompt' in context:
+                    formatted_context['system_prompt'] = context['system_prompt']
+                    self.logger.info(f"Using custom system prompt: {context['system_prompt'][:50]}...")
+                
+                # Include journey information if available
+                if 'journey' in context:
+                    formatted_context['journey'] = {
+                        'id': context['journey'].get('id'),
+                        'name': context['journey'].get('name'),
+                        'description': context['journey'].get('description'),
+                        'type': context['journey'].get('journey_type')
+                    }
+                
+                # Include persona information if available
+                if 'persona' in context:
+                    formatted_context['persona'] = context['persona']
+                
+                # Include waypoints if available
+                if 'waypoints' in context:
+                    formatted_context['waypoints'] = context['waypoints']
+            
+            # Get response from Claude
+            response = self.claude_adapter.send_message(message, formatted_context)
+            
+            # Log and return the response
+            self.logger.info(f"Received response from Claude: {response.get('content', '')[:50]}...")
+            return response
+        except Exception as e:
+            self.logger.error(f"Error sending message to Claude: {e}")
+            return {
+                "role": "assistant",
+                "content": f"I'm sorry, but I encountered an error: {str(e)}"
+            }
     
     def create_agent_blueprint(self, url_prefix='/agent'):
         """Create a Flask blueprint for the agent routes."""

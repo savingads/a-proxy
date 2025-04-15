@@ -3,7 +3,8 @@
 # Main development startup script for running A-Proxy without Docker
 # Starts the Persona Service and main application
 
-set -e  # Exit on any error
+# Allow errors without exiting for better error handling
+# set -e
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -199,9 +200,65 @@ setup_python_env
 # Initialize and verify database before starting services
 init_persona_db
 
+# Function to ensure sample personas exist in the database
+ensure_sample_personas() {
+  echo -e "${YELLOW}Checking if sample personas exist in the database...${NC}"
+  . venv/bin/activate
+  
+  # Create a simple Python script to check if personas exist
+  CHECK_SCRIPT=$(mktemp)
+  cat > $CHECK_SCRIPT << 'EOF'
+import sys
+import os
+
+# Add the root directory to the path so we can import personaclient
+sys.path.insert(0, os.path.abspath(os.getcwd()))
+
+try:
+    from personaclient import PersonaClient
+    
+    client = PersonaClient(base_url="http://localhost:5050")
+    result = client.get_all_personas()
+    personas = result.get('personas', [])
+    
+    if len(personas) == 0:
+        print("No personas found in the database")
+        sys.exit(1)
+    else:
+        print(f"Found {len(personas)} personas in the database")
+        sys.exit(0)
+except Exception as e:
+    print(f"Error checking personas: {str(e)}")
+    sys.exit(1)
+EOF
+
+  # Run the script to check if personas exist
+  python $CHECK_SCRIPT
+  HAS_PERSONAS=$?
+  rm $CHECK_SCRIPT
+  
+  if [ $HAS_PERSONAS -ne 0 ]; then
+    echo -e "${YELLOW}No personas found. Creating sample personas...${NC}"
+    
+    # Run the create-personas.py script to add sample personas
+    # Passing count=5 to create all 5 sample personas 
+    python create-personas.py --api-url http://localhost:5050 --count 5
+    
+    # Check the result
+    if [ $? -eq 0 ]; then
+      echo -e "${GREEN}Sample personas created successfully${NC}"
+    else
+      echo -e "${RED}Failed to create sample personas${NC}"
+    fi
+  else
+    echo -e "${GREEN}Sample personas already exist in the database${NC}"
+  fi
+}
+
 # Start services
 start_persona_service
 verify_persona_service
+ensure_sample_personas
 start_a_proxy
 
 echo -e "${BLUE}Services are running:${NC}"

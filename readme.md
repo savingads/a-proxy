@@ -15,6 +15,7 @@ The system uses a flexible architecture with a dynamic persona schema that adapt
 - Archive webpages with metadata and screenshots
 - Store multiple mementos (snapshots) of the same URL over time
 - Multiple implementation options for persona management
+- **AI Assistant Integration**: Interact with an AI agent during journeys and save conversations as waypoints
 
 ## Implementation Options
 
@@ -53,23 +54,36 @@ python app.py
 
 For convenience, several startup scripts are provided:
 
-#### Development Environment
+#### Development Environment (Recommended)
 
-For developers, the recommended script launches both the API and the application in a developer-friendly way:
+The most reliable way to run the development environment is to use the enhanced `start-dev.sh` script:
 
 ```bash
 # Run the complete stack (API + A-Proxy) for development environment
-./run_dev_stack.sh
+./start-dev.sh
 ```
 
 This script:
 - Creates necessary directories
-- Activates virtual environment if available
-- Installs dependencies if needed
-- Launches the Persona API in a separate terminal window
-- Sets up the required environment variables
+- Creates and activates Python virtual environment
+- Installs all required dependencies
+- Properly initializes the database with dedicated scripts
+- Automatically creates sample personas if none exist
+- Starts the Persona Service with health checking
 - Runs the A-Proxy application
+- Provides detailed status information
 - Automatically cleans up when stopped with Ctrl+C
+
+The script is designed to be robust across different development environments and will work even on fresh installations.
+
+#### Legacy Development Scripts
+
+For backward compatibility, older scripts are still available:
+
+```bash
+# Alternative development script
+./run_dev_stack.sh
+```
 
 #### Other Startup Options
 

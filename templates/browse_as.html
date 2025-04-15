@@ -422,31 +422,32 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            {% endfor %}
-                                            {% else %}
-                                            <div class="col-12 text-center py-4">
-                                                <p class="mb-0">No journeys available. Create one now.</p>
-                                            </div>
-                                            {% endif %}
                                         </div>
+                                        {% endfor %}
+                                        {% else %}
+                                        <div class="col-12 text-center py-4">
+                                            <p class="mb-0">No journeys available. Create one now.</p>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-                                <button id="start-journey-btn" type="submit" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-play-fill"></i> Start Journey
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </main>
         </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+                    <button id="start-journey-btn" type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-fill"></i> Start Journey
+                    </button>
+                </div>
+            </div>
+        </div>
+        </form>
+        </main>
+    </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>

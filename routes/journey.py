@@ -327,7 +327,7 @@ def complete_journey(journey_id):
 
 @journey_bp.route("/direct-browse/<int:persona_id>")
 def direct_browse(persona_id):
-    """Start a direct browsing session with a persona without creating a journey."""
+    """Start a lightweight browsing session with a persona."""
     # Import inside function to avoid circular imports
     from utils.persona_client import get_client
     
@@ -344,17 +344,106 @@ def direct_browse(persona_id):
         flash(f"Error loading persona: {str(e)}", "danger")
         return redirect(url_for('journey.browse_as'))
     
-    # Pass to the journey_browse template but mark as not part of a journey
-    # We'll create a dummy journey object with minimal data
-    dummy_journey = {
-        'id': None,
-        'name': f"Browsing as {persona['name']}",
-        'journey_type': 'direct_browse',
-        'status': 'active',
-        'persona_id': persona_id
-    }
-    
-    return render_template("journey_browse.html", journey=dummy_journey, persona=persona, waypoints=[], is_direct_browse=True)
+    # Get existing journeys for this persona to show in the waypoint form
+    try:
+        existing_journeys = [j for j in database.get_all_journeys() if j['persona_id'] == persona_id]
+    except Exception as e:
+        logging.error(f"Error getting journeys for persona {persona_id}: {e}")
+        existing_journeys = []
+
+    # Render the simple browsing template
+    return render_template("simple_browse.html", persona=persona, existing_journeys=existing_journeys)
+
+@journey_bp.route("/save-waypoint/<int:persona_id>", methods=["POST"])
+def save_page_as_waypoint(persona_id):
+    """Save a page as a waypoint from a direct browsing session."""
+    try:
+        # Get form data
+        url = request.form.get("url")
+        title = request.form.get("title")
+        notes = request.form.get("notes", "")
+        journey_option = request.form.get("journey_option")
+        
+        # Get or create journey
+        journey_id = None
+        
+        if journey_option == "existing":
+            # Use existing journey
+            journey_id = request.form.get("journey_id")
+            if not journey_id:
+                flash("Please select a journey", "danger")
+                return redirect(url_for('journey.direct_browse', persona_id=persona_id))
+        else:
+            # Create new journey
+            journey_name = request.form.get("journey_name")
+            journey_description = request.form.get("journey_description", "")
+            journey_type = request.form.get("journey_type", "research")
+            
+            if not journey_name:
+                flash("Please enter a journey name", "danger")
+                return redirect(url_for('journey.direct_browse', persona_id=persona_id))
+            
+            # Create the journey
+            journey_id = database.create_journey(
+                name=journey_name,
+                description=journey_description,
+                persona_id=persona_id,
+                journey_type=journey_type
+            )
+            
+            flash(f"Journey '{journey_name}' created successfully!", "success")
+        
+        # Handle screenshot if provided
+        screenshot_path = None
+        if 'screenshot' in request.form and request.form.get('screenshot'):
+            # Decode base64 screenshot
+            screenshot_data = request.form.get('screenshot').split(',')[1]
+            screenshot_bytes = base64.b64decode(screenshot_data)
+            
+            # Create screenshots directory if it doesn't exist
+            screenshots_dir = os.path.join(os.getcwd(), 'screenshots')
+            if not os.path.exists(screenshots_dir):
+                os.makedirs(screenshots_dir)
+            
+            # Generate filename based on timestamp
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            screenshot_path = os.path.join('screenshots', f'journey-{journey_id}-waypoint-{timestamp}.png')
+            
+            # Save the screenshot
+            with open(screenshot_path, 'wb') as f:
+                f.write(screenshot_bytes)
+        
+        # Collect additional metadata
+        metadata = {
+            "browser_timestamp": datetime.now().isoformat(),
+            "user_agent": request.headers.get('User-Agent'),
+            "source": "direct_browse"
+        }
+        
+        # Add the waypoint
+        waypoint_id = database.add_waypoint(
+            journey_id=journey_id,
+            url=url,
+            title=title,
+            notes=notes,
+            screenshot_path=screenshot_path,
+            metadata=metadata
+        )
+        
+        flash("Waypoint added successfully!", "success")
+        
+        # Redirect based on user choice
+        if journey_option == "existing" or request.form.get("go_to_journey", "0") == "1":
+            # Go to the journey page
+            return redirect(url_for('journey.browse_journey', journey_id=journey_id))
+        else:
+            # Continue browsing
+            return redirect(url_for('journey.direct_browse', persona_id=persona_id))
+        
+    except Exception as e:
+        logging.error(f"Error saving waypoint: {e}")
+        flash(f"Error saving waypoint: {str(e)}", "danger")
+        return redirect(url_for('journey.direct_browse', persona_id=persona_id))
 
 @journey_bp.route("/create-journey-from-browse/<int:persona_id>", methods=["POST"])
 def create_journey_from_browse(persona_id):

@@ -8,6 +8,7 @@ import os
 sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 
 from agent_module import create_proethica_agent_blueprint
+from agent_module.adapters.a_proxy_claude import AProxyClaudeAdapter
 
 class AgentService:
     """Service to handle interactions with the agent module."""
@@ -21,12 +22,15 @@ class AgentService:
     def create_agent_blueprint(self, url_prefix='/agent'):
         """Create a Flask blueprint for the agent routes."""
         try:
-            # Create the agent blueprint
+            # Create the agent blueprint with Claude configuration
             agent_bp = create_proethica_agent_blueprint(
                 config={
                     'require_auth': self.config.get('require_auth', False),
                     'api_key': self.config.get('api_key', ''),
-                    'use_claude': self.config.get('use_claude', True)
+                    'use_claude': self.config.get('use_claude', True),
+                    'adapter_type': 'a_proxy_claude',
+                    'anthropic_api_key': self.config.get('anthropic_api_key', ''),
+                    'claude_model': self.config.get('claude_model', 'claude-3-sonnet-20240229')
                 },
                 url_prefix=url_prefix
             )
@@ -85,8 +89,12 @@ def get_agent_service():
         config = {
             'require_auth': current_app.config.get('AGENT_REQUIRE_AUTH', False),
             'api_key': current_app.config.get('AGENT_API_KEY', ''),
-            'use_claude': current_app.config.get('AGENT_USE_CLAUDE', True)
+            'use_claude': current_app.config.get('AGENT_USE_CLAUDE', True),
+            'anthropic_api_key': current_app.config.get('ANTHROPIC_API_KEY', ''),
+            'claude_model': current_app.config.get('CLAUDE_MODEL', 'claude-3-sonnet-20240229'),
+            'adapter_type': 'a_proxy_claude'
         }
+        logging.info(f"Initializing AgentService with Claude API settings")
         current_app.agent_service = AgentService(config)
     
     return current_app.agent_service

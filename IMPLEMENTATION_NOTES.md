@@ -119,9 +119,39 @@ Templates dynamically render forms based on the field configuration:
 - Field labels and descriptions come from configuration
 - Complex fields use special input components
 
+## Default Personas
+
+The system now includes default personas to provide immediate examples upon initialization. These personas represent diverse users from different global regions with varied attributes:
+
+- **Alex Johnson** (North America): Software Engineer with tech interests
+- **Isabela Santos** (South America): Marketing Specialist with social media focus
+- **Lukas Schmidt** (Europe): Research Scientist with environmental concerns
+- **Yuki Tanaka** (Asia): UX Designer with design and anime interests
+- **Thabo Ndlovu** (Africa): Entrepreneur with business and community focus
+
+### Using Default Personas
+
+Default personas are automatically added to a new database when it's empty. This happens through the `add_default_personas.py` script in the persona-service directory. To manually add these personas:
+
+```bash
+cd _src/persona-service
+python add_default_personas.py
+```
+
+The script checks if personas already exist before adding defaults, so it's safe to run multiple times.
+
+### Customizing Default Personas
+
+To modify or add new default personas:
+
+1. Edit the `add_default_personas.py` script
+2. Modify the `personas` list with your custom persona definitions
+3. Run the script to apply changes to an empty database
+
 ## Future Considerations
 
 1. **API Versioning**: Consider implementing API versioning for better compatibility.
 2. **Caching**: Add caching for field configurations to improve performance.
 3. **Validation Extensions**: Extend validation to support more complex field types and rules.
 4. **UI Improvements**: Add more sophisticated field editors for complex data types.
+5. **Persona Templates**: Add ability to create new personas from templates or existing personas.

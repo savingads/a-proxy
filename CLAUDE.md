@@ -491,3 +491,61 @@ The services will communicate with each other automatically.
 - "Save as Waypoint" button
 - Recently visited URLs list (discardable)
 - Journey selection/creation modal
+
+## 2025-04-15: Switch from Git Submodules to Local Packages
+
+### Issues Fixed:
+- Resolved issues with detached HEAD states in submodules
+- Fixed synchronization problems between repositories
+- Eliminated complex git submodule management
+- Simplified the development workflow
+
+### Changes Made:
+- **Removed Git Submodules**:
+  - Completely removed the git submodule structure for agent_module and persona-service
+  - Eliminated .gitmodules file and submodule references in git
+
+- **Implemented Local Package Approach**:
+  - Created a new `_src` directory structure for source repositories
+  - Cloned fresh copies of repositories into `_src` directory:
+    - `_src/agent_module` (using 'personas' branch)
+    - `_src/persona-service` (using 'develop' branch)
+  - Installed agent_module as a local Python package with `pip install -e`
+  - Updated import statements in `utils/agent.py` and `routes/agent.py`
+
+- **Created New Scripts**:
+  - `switch-to-local-packages.sh`: Script to switch from submodules to local packages
+  - `start-with-packages.sh`: New startup script for the package approach
+  - `remove-submodules.sh`: Utility to properly remove git submodules
+  - `commit-final-changes.sh`: Helper script to commit all the changes
+
+### Benefits:
+- **Simpler Development Workflow**:
+  - Make changes directly in the source code directories (`_src/*`)
+  - Changes in agent_module code are immediately available without git operations
+  - No more detached HEAD issues or complex commit procedures
+  - Cleaner repository management
+
+- **Better Dependency Management**:
+  - Uses standard Python package management practices
+  - Dependencies managed through pip and package setup
+  - Code changes visible immediately without need to commit
+
+- **Future-proof Structure**:
+  - Easier to add new repositories as dependencies
+  - Better organization with clear separation of source code
+  - More maintainable approach for long-term development
+
+### Setup Instructions:
+Run these scripts in order:
+1. **For new installations**:
+   ```bash
+   ./switch-to-local-packages.sh  # Sets up the local package structure
+   ```
+
+2. **To start the application**:
+   ```bash
+   ./start-with-packages.sh  # Runs the application with the new structure
+   ```
+
+This approach is the recommended way forward, as it eliminates the git submodule complexity while maintaining proper version control capability for each component.

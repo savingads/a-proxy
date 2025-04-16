@@ -191,6 +191,9 @@ a-proxy/
 ├── routes/
 │   ├── persona.py            # Original implementation (direct DB access)
 │   └── persona_api.py        # New implementation using API client
+├── _src/                     # NEW: Source code for dependencies (post-submodule approach)
+│   ├── persona-service/      # Fresh clone of persona-service repository (develop branch)
+│   └── agent_module/         # Fresh clone of agent_module repository (personas branch)
 ├── persona-service/          # Standalone Persona API service
 │   ├── app/
 │   │   ├── __init__.py       # Flask application setup
@@ -229,7 +232,7 @@ a-proxy/
 Use the new simplified development script to start all components without Docker:
 
 ```bash
-./start-dev.sh
+./start-with-packages.sh      # NEW: Recommended method with local packages
 ```
 
 This will:
@@ -518,6 +521,7 @@ The services will communicate with each other automatically.
   - `start-with-packages.sh`: New startup script for the package approach
   - `remove-submodules.sh`: Utility to properly remove git submodules
   - `commit-final-changes.sh`: Helper script to commit all the changes
+  - `fix-persona-service-dependencies.sh`: Script to fix dependencies for persona-service
 
 ### Benefits:
 - **Simpler Development Workflow**:
@@ -540,7 +544,8 @@ The services will communicate with each other automatically.
 Run these scripts in order:
 1. **For new installations**:
    ```bash
-   ./switch-to-local-packages.sh  # Sets up the local package structure
+   ./switch-to-local-packages.sh    # Sets up the local package structure
+   ./fix-persona-service-dependencies.sh  # Fixes persona-service dependencies
    ```
 
 2. **To start the application**:
@@ -549,3 +554,8 @@ Run these scripts in order:
    ```
 
 This approach is the recommended way forward, as it eliminates the git submodule complexity while maintaining proper version control capability for each component.
+
+### Important Note on Startup Scripts:
+- `start-dev.sh` is no longer the recommended way to start the development environment
+- Use `start-with-packages.sh` instead, which is specifically designed for the local packages approach
+- The new script includes proper PYTHONPATH setup and dependency management for the new structure

@@ -26,7 +26,10 @@ def standalone_agent_message():
         # Get request data
         data = request.get_json()
         if not data:
+            logger.error("No JSON data provided in request")
             return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        logger.info(f"Received agent message request: {json.dumps(data)[:200]}...")
         
         message = data.get('message')
         conversation_id = data.get('conversation_id')
@@ -34,32 +37,57 @@ def standalone_agent_message():
         system_prompt = data.get('system_prompt', 'You are a helpful assistant. Answer questions concisely and accurately.')
         
         if not message:
+            logger.error("No message provided in request data")
             return jsonify({"success": False, "error": "No message provided"}), 400
         
-        # Get agent service
-        from utils.agent import get_agent_service
-        agent_service = get_agent_service()
+        # Check for API key
+        from config import ANTHROPIC_API_KEY
+        if not ANTHROPIC_API_KEY:
+            logger.error("ANTHROPIC_API_KEY is not set. Please set it in the environment or config.py")
+            return jsonify({
+                "success": False, 
+                "error": "Claude API key is not configured. Please set ANTHROPIC_API_KEY in your environment or config.py."
+            }), 500
         
-        # Prepare context with any provided parameters
-        context = {
-            'model': model,
-            'system_prompt': system_prompt
-        }
-        
-        # Send message to Claude
-        claude_response = agent_service.send_message(message, context)
-        
-        # Extract content from response
-        response_content = claude_response.get('content', 'I apologize, but I wasn\'t able to process your request.')
-        
-        return jsonify({
-            "success": True,
-            "response": response_content,
-            "conversation_id": conversation_id
-        })
+        # DIRECT IMPLEMENTATION: Use Anthropic client directly instead of agent_module
+        try:
+            import anthropic
+            
+            # Create Anthropic client
+            logger.info(f"Creating Anthropic client with API key: {'*' * len(ANTHROPIC_API_KEY)}")
+            client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+            
+            # Send message to Claude
+            logger.info(f"Sending message to Claude with model: {model}")
+            response = client.messages.create(
+                model=model,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": message}
+                ],
+                max_tokens=4096
+            )
+            
+            # Extract content from response
+            logger.info(f"Received response from Claude")
+            response_content = response.content[0].text
+            
+            logger.info(f"Response content: {response_content[:200]}...")
+            
+            return jsonify({
+                "success": True,
+                "response": response_content,
+                "conversation_id": conversation_id
+            })
+        except Exception as e:
+            logger.error(f"Error calling Claude API directly: {e}", exc_info=True)
+            raise
     
     except Exception as e:
-        logger.error(f"Error processing agent message: {e}")
+        logger.error(f"Error processing agent message: {e}", exc_info=True)
+        import traceback
+        trace = traceback.format_exc()
+        logger.error(f"Traceback: {trace}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @agent_bp.route("/direct-chat/<int:persona_id>")

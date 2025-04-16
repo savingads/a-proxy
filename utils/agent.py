@@ -25,14 +25,23 @@ class AgentService:
         """Get or initialize the Claude adapter."""
         if self._claude_adapter is None:
             try:
+                from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
+                # Check for API key before initializing
+                if not ANTHROPIC_API_KEY:
+                    self.logger.error("ANTHROPIC_API_KEY is not set in the environment or config")
+                    raise ValueError("ANTHROPIC_API_KEY is required to initialize Claude adapter")
+                
                 # Initialize Claude adapter directly
                 self.logger.info("Initializing Claude adapter")
                 self._claude_adapter = AProxyClaudeAdapter(
                     adapter_type='claude'
                 )
-                self.logger.info(f"Claude adapter initialized with model: {self._claude_adapter.model}")
+                self.logger.info(f"Claude adapter initialized successfully with model: {self._claude_adapter.model}")
             except Exception as e:
-                self.logger.error(f"Error initializing Claude adapter: {e}")
+                self.logger.error(f"Error initializing Claude adapter: {e}", exc_info=True)
+                import traceback
+                trace = traceback.format_exc()
+                self.logger.error(f"Traceback: {trace}")
                 raise
         return self._claude_adapter
     
@@ -81,14 +90,36 @@ class AgentService:
                 if 'waypoints' in context:
                     formatted_context['waypoints'] = context['waypoints']
             
-            # Get response from Claude
-            response = self.claude_adapter.send_message(message, formatted_context)
-            
-            # Log and return the response
-            self.logger.info(f"Received response from Claude: {response.get('content', '')[:50]}...")
-            return response
+            try:
+                # Make sure Claude adapter is initialized
+                adapter = self.claude_adapter
+                
+                # Get response from Claude
+                self.logger.info("Calling adapter.send_message()")
+                response = adapter.send_message(message, formatted_context)
+                
+                # Validate response format
+                if not isinstance(response, dict):
+                    self.logger.error(f"Unexpected response type from Claude adapter: {type(response)}")
+                    return {
+                        "role": "assistant",
+                        "content": "I'm sorry, but the service returned an invalid response format."
+                    }
+                
+                # Log and return the response
+                content = response.get('content', '')
+                self.logger.info(f"Received response from Claude: {content[:50]}...")
+                return response
+                
+            except Exception as e:
+                self.logger.error(f"Error while calling Claude adapter: {e}", exc_info=True)
+                raise
+                
         except Exception as e:
-            self.logger.error(f"Error sending message to Claude: {e}")
+            self.logger.error(f"Error sending message to Claude: {e}", exc_info=True)
+            import traceback
+            trace = traceback.format_exc()
+            self.logger.error(f"Traceback: {trace}")
             return {
                 "role": "assistant",
                 "content": f"I'm sorry, but I encountered an error: {str(e)}"
@@ -166,10 +197,18 @@ def get_agent_service():
             'api_key': current_app.config.get('AGENT_API_KEY', ''),
             'use_claude': current_app.config.get('AGENT_USE_CLAUDE', True),
             'anthropic_api_key': current_app.config.get('ANTHROPIC_API_KEY', ''),
-            'claude_model': current_app.config.get('CLAUDE_MODEL', 'claude-3-sonnet-20240229'),
+            'claude_model': current_app.config.get('CLAUDE_MODEL', 'claude-3-opus-20240229'),
             'adapter_type': 'a_proxy_claude'
         }
-        logging.info(f"Initializing AgentService with Claude API settings")
+        
+        # Log configuration (without API key)
+        safe_config = config.copy()
+        if 'anthropic_api_key' in safe_config:
+            safe_config['anthropic_api_key'] = 'REDACTED' if safe_config['anthropic_api_key'] else 'NOT SET'
+        if 'api_key' in safe_config:
+            safe_config['api_key'] = 'REDACTED' if safe_config['api_key'] else 'NOT SET'
+        
+        logging.info(f"Initializing AgentService with config: {safe_config}")
         current_app.agent_service = AgentService(config)
     
     return current_app.agent_service

@@ -49,3 +49,5 @@ Thumbs.db
 
 # Local development configuration
 local_settings.py
+# Data directories and files
+data/*.db

@@ -26,7 +26,7 @@ ensure_sample_personas() {
     
     # Run the create-personas.py script to add sample personas
     echo -e "${YELLOW}Passing count=5 to create all 5 sample personas${NC}"
-    python create-personas.py --api-url http://localhost:5050 --count 5
+    python scripts/utilities/python/create-personas.py --api-url http://localhost:5050 --count 5
     
     # Check the result
     if [ $? -eq 0 ]; then
@@ -48,8 +48,8 @@ source venv/bin/activate
 # Ensure necessary files are available in the persona-service directory
 if [ ! -f "_src/persona-service/persona_field_config.py" ]; then
     echo -e "${YELLOW}First-time setup: copying necessary files...${NC}"
-    if [ -f "fix-persona-service-dependencies.sh" ]; then
-        ./fix-persona-service-dependencies.sh
+    if [ -f "scripts/utilities/fix-persona-service-dependencies.sh" ]; then
+        ./scripts/utilities/fix-persona-service-dependencies.sh
     else
         echo -e "${RED}fix-persona-service-dependencies.sh not found!${NC}"
         echo -e "${RED}Please run switch-to-local-packages.sh first.${NC}"

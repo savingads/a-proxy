@@ -31,11 +31,11 @@ The source code for these packages is stored in the `_src` directory:
 Several utility scripts are available in the `scripts/utilities/` directory:
 
 ### Package Management
-- `switch-to-local-packages.sh`: Converts from submodules to local packages (run once on setup)
-- `fix-persona-service-dependencies.sh`: Fixes persona-service dependencies if needed
+- `scripts/utilities/switch-to-local-packages.sh`: Converts from submodules to local packages (run once on setup)
+- `scripts/utilities/fix-persona-service-dependencies.sh`: Fixes persona-service dependencies if needed
 
 ### Data Tools
-- `fix-create-personas.sh`: Forces creation of sample personas if they're missing
+- `scripts/utilities/fix-create-personas.sh`: Forces creation of sample personas if they're missing
 
 ## Development Notes
 

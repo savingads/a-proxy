@@ -89,21 +89,24 @@ setup_python_env() {
 init_persona_db() {
   echo -e "${YELLOW}Ensuring Persona Service database is properly initialized...${NC}"
   . venv/bin/activate
-  
+
+  # Restore the init_db.py script if it's missing (e.g., after git operations)
+  ./restore-persona-init.sh
+
   # Make the init_db.py script executable
   chmod +x "${PERSONA_SERVICE_DIR}/init_db.py"
-  
+
   # Run the dedicated initialization script
   cd $PERSONA_SERVICE_DIR
   python init_db.py
   DB_INIT_STATUS=$?
   cd $ROOT_DIR
-  
+
   if [ $DB_INIT_STATUS -ne 0 ]; then
     echo -e "${RED}Failed to initialize Persona Service database${NC}"
     exit 1
   fi
-  
+
   echo -e "${GREEN}Persona Service database initialized successfully${NC}"
 }
 

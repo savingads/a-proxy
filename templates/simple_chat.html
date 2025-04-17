@@ -23,6 +23,73 @@
             overflow: hidden;
         }
 
+        /* Collapsible sidebar */
+        .context-sidebar {
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        .context-sidebar.collapsed {
+            width: 50px !important;
+            min-width: 50px !important;
+        }
+
+        .context-sidebar .sidebar-content {
+            width: 100%;
+            transition: opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .context-sidebar.collapsed .sidebar-content {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .context-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #343a40;
+            border-radius: 50%;
+            color: white;
+            border: 1px solid #495057;
+        }
+
+        .sidebar-header {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-top: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .sidebar-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .context-sidebar.collapsed .sidebar-icon {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .context-sidebar.collapsed .sidebar-header h5 {
+            opacity: 0;
+        }
+
         /* Minimal header */
         .minimal-header {
             background-color: #343a40;
@@ -189,43 +256,58 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Persona Context Sidebar -->
-            <div class="col-md-4 order-md-1 mb-3">
+            <div class="col-md-4 order-md-1 mb-3 context-sidebar" id="contextSidebar">
                 <div class="custom-card">
-                    <h5 class="mb-3">Persona Context</h5>
-                    {% if persona_context %}
-                    <div class="accordion" id="personaContextAccordion">
-                        {% for section, fields in persona_context.items() %}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading-{{ loop.index }}">
-                                <button class="accordion-button{% if section != 'Demographic' %} collapsed{% endif %}"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}"
-                                    aria-expanded="{% if section == 'Demographic' %}true{% else %}false{% endif %}"
-                                    aria-controls="collapse-{{ loop.index }}">
-                                    {{ section }}
-                                </button>
-                            </h2>
-                            <div id="collapse-{{ loop.index }}"
-                                class="accordion-collapse collapse{% if section == 'Demographic' %} show{% endif %}"
-                                aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#personaContextAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-group list-group-flush">
-                                        {% for key, value in fields.items() %}
-                                        {% if key != 'id' and key != 'persona_id' %}
-                                        <li class="list-group-item"><strong>{{ key|replace('_', ' ')|title }}:</strong>
-                                            {{ value }}</li>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </ul>
+                    <div class="sidebar-header">
+                        <h5 class="mb-3 mt-2 ps-2">Persona Context</h5>
+                        <div class="sidebar-icon">
+                            <i class="bi bi-person-badge fs-3"></i>
+                        </div>
+                        <button type="button" class="context-toggle" id="contextToggle">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar-content">
+                        {% if persona_context %}
+                        <div class="accordion" id="personaContextAccordion">
+                            {% for section, fields in persona_context.items() %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                                    <button
+                                        class="accordion-button{% if section != 'Demographic' %} collapsed{% endif %}"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-{{ loop.index }}"
+                                        aria-expanded="{% if section == 'Demographic' %}true{% else %}false{% endif %}"
+                                        aria-controls="collapse-{{ loop.index }}">
+                                        {{ section }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ loop.index }}"
+                                    class="accordion-collapse collapse{% if section == 'Demographic' %} show{% endif %}"
+                                    aria-labelledby="heading-{{ loop.index }}"
+                                    data-bs-parent="#personaContextAccordion">
+                                    <div class="accordion-body">
+                                        <ul class="list-group list-group-flush">
+                                            {% for key, value in fields.items() %}
+                                            {% if key != 'id' and key != 'persona_id' %}
+                                            <li class="list-group-item"><strong>{{ key|replace('_', ' ')|title
+                                                    }}:</strong>
+                                                {{ value }}</li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        {% else %}
+                        <div class="text-muted">No persona context available.</div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="text-muted">No persona context available.</div>
-                    {% endif %}
                 </div>
             </div>
+
             <!-- Chat Section -->
             <div class="col-md-8 order-md-2">
                 <!-- Chat container -->
@@ -850,6 +932,33 @@
 
                 // Send the request
                 xhr.send(formData);
+            });
+
+            // Handle context sidebar collapse/expand
+            const contextSidebar = document.getElementById('contextSidebar');
+            const contextToggle = document.getElementById('contextToggle');
+
+            contextToggle.addEventListener('click', function () {
+                contextSidebar.classList.toggle('collapsed');
+
+                // Toggle the icon between chevron-left and chevron-right
+                const icon = contextToggle.querySelector('i');
+                if (contextSidebar.classList.contains('collapsed')) {
+                    icon.classList.remove('bi-chevron-left');
+                    icon.classList.add('bi-chevron-right');
+                } else {
+                    icon.classList.remove('bi-chevron-right');
+                    icon.classList.add('bi-chevron-left');
+                }
+
+                // If sidebar is expanded, wait a little bit for the animation to complete before making content visible again
+                if (!contextSidebar.classList.contains('collapsed')) {
+                    setTimeout(() => {
+                        const sidebarContent = contextSidebar.querySelector('.sidebar-content');
+                        sidebarContent.style.opacity = '1';
+                        sidebarContent.style.pointerEvents = 'auto';
+                    }, 300);
+                }
             });
 
             // Initialize UI on page load

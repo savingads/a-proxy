@@ -488,8 +488,9 @@
                     ? 'Type your message...'
                     : `Type as ${personaName}...`;
 
-                // Show/hide target persona selector
-                targetPersonaSelector.style.display = newMode === 'as' ? 'block' : 'none';
+                // Always keep the target persona selector hidden - we don't need it
+                // since we're always chatting with/as the same persona
+                targetPersonaSelector.style.display = 'none';
 
                 // Initialize chat history if needed
                 if (newMode === 'as' && chatAsHistory.length === 0) {

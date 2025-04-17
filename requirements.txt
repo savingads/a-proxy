@@ -18,3 +18,4 @@ personaclient==0.1.0
 
 # Claude API Integration
 anthropic==0.49.0
+pillow

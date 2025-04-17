@@ -594,208 +594,209 @@
                 const payload = {
                     message: message,
                     conversation_id: conversationId,
-                    persona_id: {{ persona.id }},
-                    chat_mode: currentMode
+                    persona_id: {{ persona.id }
+            },
+                chat_mode: currentMode
                 };
 
-                try {
-                    const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await response.json();
-                    removeTypingIndicator();
-                    if (data.success && data.response) {
-                        addMessage(data.response, 'agent');
-                    } else {
-                        addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
-                    }
-                } catch (err) {
-                    removeTypingIndicator();
-                    addMessage('[Error: Could not reach Claude API]', 'agent');
-                }
+        try {
+            const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-
-            // Handle mode toggle
-            chatModeToggle.addEventListener('change', function () {
-                confirmModeSwitch();
-            });
-
-            // Target persona change handler
-            targetPersonaSelect.addEventListener('change', function () {
-                targetPersonaType = this.value;
-            });
-
-            // Handle mode switch without saving
-            switchWithoutSavingBtn.addEventListener('click', function () {
-                const newMode = currentMode === 'with' ? 'as' : 'with';
-                bootstrap.Modal.getInstance(modeConfirmModal).hide();
-                switchMode(newMode);
-            });
-
-            // Handle save and switch
-            saveAndSwitchBtn.addEventListener('click', function () {
-                bootstrap.Modal.getInstance(modeConfirmModal).hide();
-
-                // Set modal title based on current mode
-                document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
-                    : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
-
-                // Show save modal then switch on save
-                const saveModalInstance = new bootstrap.Modal(saveChatModal);
-                saveModalInstance.show();
-
-                // Add a one-time event listener to switch mode after saving
-                const originalSubmitHandler = document.getElementById('save-chat-form').onsubmit;
-                document.getElementById('save-chat-form').onsubmit = function (event) {
-                    event.preventDefault();
-
-                    // Call the original handler
-                    if (originalSubmitHandler) originalSubmitHandler(event);
-
-                    // After saving, switch mode
-                    const newMode = currentMode === 'with' ? 'as' : 'with';
-                    switchMode(newMode);
-
-                    // Remove this one-time handler
-                    document.getElementById('save-chat-form').onsubmit = originalSubmitHandler;
-
-                    // Hide the modal
-                    bootstrap.Modal.getInstance(saveChatModal).hide();
-                };
-            });
-
-            // Setup the save chat modal
-            saveChatModal.addEventListener('show.bs.modal', function () {
-                // Update title based on current mode
-                document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
-                    : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
-            });
-
-            // Setup journey option radio buttons
-            document.querySelectorAll('input[name="journey_option"]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    const isExisting = this.value === 'existing';
-                    document.getElementById('existing-journey-select').style.display = isExisting ? 'block' : 'none';
-                    document.getElementById('new-journey-form').style.display = isExisting ? 'none' : 'block';
-                });
-            });
-
-            // Load existing journeys for this persona
-            function loadExistingJourneys() {
-                // In a real implementation, we would fetch journeys from the server
-                // For now, we'll add a few placeholders
-                const journeySelect = document.getElementById('journey-id');
-                journeySelect.innerHTML = '<option value="">Select a journey...</option>';
-
-                // Add some dummy journeys
-                const dummyJourneys = [
-                    { id: 1, name: `${persona.name}'s Shopping Journey` },
-                    { id: 2, name: `${persona.name}'s Research Project` },
-                    { id: 3, name: 'Product Exploration' }
-                ];
-
-                dummyJourneys.forEach(journey => {
-                    const option = document.createElement('option');
-                    option.value = journey.id;
-                    option.textContent = journey.name;
-                    journeySelect.appendChild(option);
-                });
+            const data = await response.json();
+            removeTypingIndicator();
+            if (data.success && data.response) {
+                addMessage(data.response, 'agent');
+            } else {
+                addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
             }
-
-            // Call this when the save modal is shown
-            saveChatModal.addEventListener('show.bs.modal', function () {
-                loadExistingJourneys();
+        } catch (err) {
+            removeTypingIndicator();
+            addMessage('[Error: Could not reach Claude API]', 'agent');
+        }
             });
 
-            // Handle save chat form submission
-            document.getElementById('save-chat-form').addEventListener('submit', function (event) {
+        // Handle mode toggle
+        chatModeToggle.addEventListener('change', function () {
+            confirmModeSwitch();
+        });
+
+        // Target persona change handler
+        targetPersonaSelect.addEventListener('change', function () {
+            targetPersonaType = this.value;
+        });
+
+        // Handle mode switch without saving
+        switchWithoutSavingBtn.addEventListener('click', function () {
+            const newMode = currentMode === 'with' ? 'as' : 'with';
+            bootstrap.Modal.getInstance(modeConfirmModal).hide();
+            switchMode(newMode);
+        });
+
+        // Handle save and switch
+        saveAndSwitchBtn.addEventListener('click', function () {
+            bootstrap.Modal.getInstance(modeConfirmModal).hide();
+
+            // Set modal title based on current mode
+            document.getElementById('chat-title').value = currentMode === 'with'
+                ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
+                : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
+
+            // Show save modal then switch on save
+            const saveModalInstance = new bootstrap.Modal(saveChatModal);
+            saveModalInstance.show();
+
+            // Add a one-time event listener to switch mode after saving
+            const originalSubmitHandler = document.getElementById('save-chat-form').onsubmit;
+            document.getElementById('save-chat-form').onsubmit = function (event) {
                 event.preventDefault();
 
-                // Get form values
-                const title = document.getElementById('chat-title').value;
-                const notes = document.getElementById('chat-notes').value;
-                const chatMode = currentMode;
-                const journeyOption = document.querySelector('input[name="journey_option"]:checked').value;
+                // Call the original handler
+                if (originalSubmitHandler) originalSubmitHandler(event);
 
-                // Get journey details based on the selected option
-                let journeyData = {};
-                if (journeyOption === 'existing') {
-                    journeyData.journey_id = document.getElementById('journey-id').value;
-                    if (!journeyData.journey_id) {
-                        alert('Please select a journey');
-                        return;
-                    }
-                } else {
-                    journeyData.journey_name = document.getElementById('journey-name').value;
-                    journeyData.journey_description = document.getElementById('journey-description').value;
-                    journeyData.journey_type = document.getElementById('journey-type').value;
+                // After saving, switch mode
+                const newMode = currentMode === 'with' ? 'as' : 'with';
+                switchMode(newMode);
 
-                    if (!journeyData.journey_name) {
-                        alert('Please enter a journey name');
-                        return;
-                    }
-                }
+                // Remove this one-time handler
+                document.getElementById('save-chat-form').onsubmit = originalSubmitHandler;
 
-                // Get the appropriate chat history
-                const history = currentMode === 'with' ? chatWithHistory : chatAsHistory;
+                // Hide the modal
+                bootstrap.Modal.getInstance(saveChatModal).hide();
+            };
+        });
 
-                // Create form data
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('notes', notes);
-                formData.append('chat_mode', chatMode);
-                formData.append('journey_option', journeyOption);
-                formData.append('chat_history', JSON.stringify(history));
+        // Setup the save chat modal
+        saveChatModal.addEventListener('show.bs.modal', function () {
+            // Update title based on current mode
+            document.getElementById('chat-title').value = currentMode === 'with'
+                ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
+                : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
+        });
 
-                // Add journey details
-                if (journeyOption === 'existing') {
-                    formData.append('journey_id', journeyData.journey_id);
-                } else {
-                    formData.append('journey_name', journeyData.journey_name);
-                    formData.append('journey_description', journeyData.journey_description);
-                    formData.append('journey_type', journeyData.journey_type);
-                }
-
-                // Show a loading indicator
-                const saveButton = document.querySelector('#save-chat-form button[type="submit"]');
-                const originalText = saveButton.innerHTML;
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-
-                // Send the data to the server
-                fetch('{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Chat saved successfully as "${title}"!`);
-                            bootstrap.Modal.getInstance(saveChatModal).hide();
-                        } else {
-                            alert(`Error saving chat: ${data.error}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error saving chat:', error);
-                        alert('Error saving chat. Please try again.');
-                    })
-                    .finally(() => {
-                        // Restore save button
-                        saveButton.disabled = false;
-                        saveButton.innerHTML = originalText;
-                    });
+        // Setup journey option radio buttons
+        document.querySelectorAll('input[name="journey_option"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const isExisting = this.value === 'existing';
+                document.getElementById('existing-journey-select').style.display = isExisting ? 'block' : 'none';
+                document.getElementById('new-journey-form').style.display = isExisting ? 'none' : 'block';
             });
+        });
 
-            // Initialize the UI
-            switchMode('with');
+        // Load existing journeys for this persona
+        function loadExistingJourneys() {
+            // In a real implementation, we would fetch journeys from the server
+            // For now, we'll add a few placeholders
+            const journeySelect = document.getElementById('journey-id');
+            journeySelect.innerHTML = '<option value="">Select a journey...</option>';
 
-            // Focus on the message input
-            messageInput.focus();
+            // Add some dummy journeys
+            const dummyJourneys = [
+                { id: 1, name: `${persona.name}'s Shopping Journey` },
+                { id: 2, name: `${persona.name}'s Research Project` },
+                { id: 3, name: 'Product Exploration' }
+            ];
+
+            dummyJourneys.forEach(journey => {
+                const option = document.createElement('option');
+                option.value = journey.id;
+                option.textContent = journey.name;
+                journeySelect.appendChild(option);
+            });
+        }
+
+        // Call this when the save modal is shown
+        saveChatModal.addEventListener('show.bs.modal', function () {
+            loadExistingJourneys();
+        });
+
+        // Handle save chat form submission
+        document.getElementById('save-chat-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get form values
+            const title = document.getElementById('chat-title').value;
+            const notes = document.getElementById('chat-notes').value;
+            const chatMode = currentMode;
+            const journeyOption = document.querySelector('input[name="journey_option"]:checked').value;
+
+            // Get journey details based on the selected option
+            let journeyData = {};
+            if (journeyOption === 'existing') {
+                journeyData.journey_id = document.getElementById('journey-id').value;
+                if (!journeyData.journey_id) {
+                    alert('Please select a journey');
+                    return;
+                }
+            } else {
+                journeyData.journey_name = document.getElementById('journey-name').value;
+                journeyData.journey_description = document.getElementById('journey-description').value;
+                journeyData.journey_type = document.getElementById('journey-type').value;
+
+                if (!journeyData.journey_name) {
+                    alert('Please enter a journey name');
+                    return;
+                }
+            }
+
+            // Get the appropriate chat history
+            const history = currentMode === 'with' ? chatWithHistory : chatAsHistory;
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('notes', notes);
+            formData.append('chat_mode', chatMode);
+            formData.append('journey_option', journeyOption);
+            formData.append('chat_history', JSON.stringify(history));
+
+            // Add journey details
+            if (journeyOption === 'existing') {
+                formData.append('journey_id', journeyData.journey_id);
+            } else {
+                formData.append('journey_name', journeyData.journey_name);
+                formData.append('journey_description', journeyData.journey_description);
+                formData.append('journey_type', journeyData.journey_type);
+            }
+
+            // Show a loading indicator
+            const saveButton = document.querySelector('#save-chat-form button[type="submit"]');
+            const originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+            // Send the data to the server
+            fetch('{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Chat saved successfully as "${title}"!`);
+                        bootstrap.Modal.getInstance(saveChatModal).hide();
+                    } else {
+                        alert(`Error saving chat: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving chat:', error);
+                    alert('Error saving chat. Please try again.');
+                })
+                .finally(() => {
+                    // Restore save button
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+                });
+        });
+
+        // Initialize the UI
+        switchMode('with');
+
+        // Focus on the message input
+        messageInput.focus();
         });
     </script>
 </body>

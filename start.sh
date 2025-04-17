@@ -115,6 +115,36 @@ if [ ! -f "_src/persona-service/persona_field_config.py" ]; then
     fi
 fi
 
+# Ensure persona-service dependencies are installed
+if [ -d "_src/persona-service" ]; then
+    if [ -f "_src/persona-service/requirements.txt" ]; then
+        echo -e "${YELLOW}Installing persona-service Python dependencies...${NC}"
+        pip install -r _src/persona-service/requirements.txt
+    else
+        echo -e "${YELLOW}No requirements.txt found in _src/persona-service. Using root requirements.txt if available...${NC}"
+        if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+        fi
+    fi
+else
+    echo -e "${RED}_src/persona-service directory not found!${NC}"
+    exit 1
+fi
+
+# Ensure persona_field_config.py exists in persona-service
+if [ ! -f "_src/persona-service/persona_field_config.py" ]; then
+    if [ -f "persona_field_config.py" ]; then
+        echo -e "${YELLOW}Copying persona_field_config.py to _src/persona-service...${NC}"
+        cp persona_field_config.py _src/persona-service/
+    elif [ -f "sample_custom_field_config.json" ]; then
+        echo -e "${YELLOW}Creating persona_field_config.py from sample_custom_field_config.json...${NC}"
+        cp sample_custom_field_config.json _src/persona-service/persona_field_config.py
+    else
+        echo -e "${RED}No persona_field_config.py or sample_custom_field_config.json found!${NC}"
+        exit 1
+    fi
+fi
+
 # Ensure persona-service database is initialized
 echo -e "${YELLOW}Initializing persona-service database...${NC}"
 

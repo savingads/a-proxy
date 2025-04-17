@@ -90,6 +90,29 @@ def standalone_agent_message():
         logger.error(f"Traceback: {trace}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+from services import fetch_persona_context
+
+def flatten_persona_context(raw_context):
+    """
+    Flatten all persona fields for sidebar/system prompt display.
+    Returns a dict with Demographic, Psychographic, Behavioral, Contextual as sub-dicts.
+    """
+    if not raw_context:
+        return {}
+    demographic = raw_context.get("demographic", {})
+    psychographic = raw_context.get("psychographic", {})
+    behavioral = raw_context.get("behavioral", {})
+    contextual = raw_context.get("contextual", {})
+    # Convert lists to comma-separated strings for compactness
+    def compact(d):
+        return {k: ", ".join(v) if isinstance(v, list) else v for k, v in d.items()}
+    return {
+        "Demographic": compact(demographic),
+        "Psychographic": compact(psychographic),
+        "Behavioral": compact(behavioral),
+        "Contextual": compact(contextual)
+    }
+
 @agent_bp.route("/direct-chat/<int:persona_id>")
 def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
@@ -133,13 +156,22 @@ def direct_chat(persona_id):
         logging.error(f"Error getting personas: {e}")
         # Continue with empty list if this fails
     
+    # Fetch persona context for sidebar display
+    persona_context = None
+    try:
+        raw_context = fetch_persona_context(persona_id)
+        persona_context = flatten_persona_context(raw_context)
+    except Exception as e:
+        logging.error(f"Error fetching persona context for sidebar: {e}")
+    
     # Render the simple chat template
     return render_template(
         "simple_chat.html", 
         persona=persona, 
         target_persona=target_persona,
         available_personas=available_personas,
-        chat_mode=chat_mode
+        chat_mode=chat_mode,
+        persona_context=persona_context
     )
 
 @agent_bp.route("/direct-chat/<int:persona_id>/save", methods=["POST"])

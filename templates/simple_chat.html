@@ -186,30 +186,72 @@
         </div>
     </div>
 
-    <!-- Chat container -->
-    <div class="chat-container">
-        <div class="chat-messages" id="chat-messages">
-            <!-- Welcome message from the agent -->
-            <div class="message agent-message">
-                <div class="message-bubble">
-                    <div class="message-content">
-                        Hello, I'm {{ persona.name }}. How can I help you today?
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Persona Context Sidebar -->
+            <div class="col-md-4 order-md-1 mb-3">
+                <div class="custom-card">
+                    <h5 class="mb-3">Persona Context</h5>
+                    {% if persona_context %}
+                    <div class="accordion" id="personaContextAccordion">
+                        {% for section, fields in persona_context.items() %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-{{ loop.index }}" aria-expanded="false"
+                                    aria-controls="collapse-{{ loop.index }}">
+                                    {{ section }}
+                                </button>
+                            </h2>
+                            <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse"
+                                aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#personaContextAccordion">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+                                        {% for key, value in fields.items() %}
+                                        <li class="list-group-item"><strong>{{ key|replace('_', ' ')|title }}:</strong>
+                                            {{ value }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="message-meta">
-                        <i class="bi bi-clock me-1"></i> Just now
+                    {% else %}
+                    <div class="text-muted">No persona context available.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Chat Section -->
+            <div class="col-md-8 order-md-2">
+                <!-- Chat container -->
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Welcome message from the agent -->
+                        <div class="message agent-message">
+                            <div class="message-bubble">
+                                <div class="message-content">
+                                    Hello, I'm {{ persona.name }}. How can I help you today?
+                                </div>
+                                <div class="message-meta">
+                                    <i class="bi bi-clock me-1"></i> Just now
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Messages will be dynamically added here -->
+                    </div>
+
+                    <div class="chat-input-area">
+                        <form id="chat-form" class="d-flex">
+                            <input type="text" id="message-input" class="form-control me-2"
+                                placeholder="Type your message...">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-            <!-- Messages will be dynamically added here -->
-        </div>
-
-        <div class="chat-input-area">
-            <form id="chat-form" class="d-flex">
-                <input type="text" id="message-input" class="form-control me-2" placeholder="Type your message...">
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-send"></i>
-                </button>
-            </form>
         </div>
     </div>
 

@@ -616,3 +616,52 @@ This approach is the recommended way forward, as it eliminates the git submodule
 - `start-dev.sh` is no longer the recommended way to start the development environment
 - Use `start-with-packages.sh` instead, which is specifically designed for the local packages approach
 - The new script includes proper PYTHONPATH setup and dependency management for the new structure
+
+# Claude Persona Context Integration Plan (In Progress)
+
+## Objective
+Integrate persona context from the persona-service into the direct-chat route, so that Claude receives relevant persona details as a system prompt at the start of each chat session or when toggling between "Chat with" and "Chat as". The persona context should also be displayed in a read-only panel in the chat UI.
+
+## Plan
+
+1. **Persona Context Fetching**
+   - Use the REST endpoint `/api/v1/personas/<persona_id>` from the Flask persona-service to fetch persona details as JSON.
+   - Fetch persona context only at the start of a chat session or when toggling between chat modes.
+
+2. **System Prompt Construction**
+   - Format persona context as a clear, structured English description for Claude (bullet points or short paragraphs).
+   - Example:
+     ```
+     System prompt:
+     You are [Persona Name]. Here are your details:
+     - Age: ...
+     - Occupation: ...
+     - Psychographics: ...
+     - Behavioral traits: ...
+     - Contextual info: ...
+     Respond as this persona in all interactions.
+     ```
+   - When toggling between modes, update the system prompt and reset the chat window.
+
+3. **Backend Changes (direct-chat route)**
+   - On chat start or mode toggle:
+     1. Fetch persona details from `/api/v1/personas/<persona_id>`.
+     2. Build the system prompt.
+     3. Send the system prompt as the first message to Claude (or as the system prompt in the Claude API, depending on integration).
+   - Store the current mode and persona_id in the session or client state.
+
+4. **Frontend Changes**
+   - Display persona context in a read-only panel in the direct-chat window.
+   - When toggling between modes:
+     - Prompt user to save the current chat if there is unsaved history.
+     - Clear the chat window and re-fetch persona context for the new mode.
+     - Send the new system prompt to Claude.
+
+5. **Chat Mode Toggle**
+   - Toggling between "Chat with" and "Chat as" should:
+     - Offer to save the current chat.
+     - Clear the chat window.
+     - Re-initialize the session with the correct persona context and system prompt.
+
+## Status
+- This plan is in progress. Implementation steps will be tracked here.

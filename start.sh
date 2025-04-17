@@ -85,6 +85,17 @@ if [ "$has_changes" = "true" ] || [ "$has_unpushed" = "true" ]; then
     fi
 fi
 
+# Check if _src repos exist, if not, run switch-to-local-packages.sh automatically
+if [ ! -d "_src/persona-service" ] || [ ! -d "_src/agent_module" ]; then
+    echo -e "${YELLOW}Required source repos not found. Running switch-to-local-packages.sh...${NC}"
+    if [ -f "switch-to-local-packages.sh" ]; then
+        bash switch-to-local-packages.sh
+    else
+        echo -e "${RED}switch-to-local-packages.sh not found!${NC}"
+        exit 1
+    fi
+fi
+
 # Activate virtual environment
 if [ -d "venv" ]; then
     source venv/bin/activate

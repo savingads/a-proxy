@@ -19,6 +19,8 @@ def agent_chat():
     """Show the standalone Claude agent interface."""
     return render_template("agent_chat.html")
 
+from services import fetch_persona_context, flatten_persona_context, persona_context_to_system_prompt
+
 @agent_bp.route("/agent/message", methods=["POST"])
 def standalone_agent_message():
     """Process a message to the standalone Claude agent."""
@@ -34,7 +36,7 @@ def standalone_agent_message():
         message = data.get('message')
         conversation_id = data.get('conversation_id')
         model = data.get('model', 'claude-3-opus-20240229')
-        system_prompt = data.get('system_prompt', 'You are a helpful assistant. Answer questions concisely and accurately.')
+        system_prompt = data.get('system_prompt')
         
         if not message:
             logger.error("No message provided in request data")
@@ -48,6 +50,20 @@ def standalone_agent_message():
                 "success": False, 
                 "error": "Claude API key is not configured. Please set ANTHROPIC_API_KEY in your environment or config.py."
             }), 500
+        
+        # Get persona_id and chat_mode if provided (for direct chat)
+        persona_id = data.get('persona_id')
+        chat_mode = data.get('chat_mode', 'with')
+        
+        # If persona_id is provided, generate system prompt from persona context
+        if persona_id and not system_prompt:
+            raw_context = fetch_persona_context(persona_id)
+            persona_context = flatten_persona_context(raw_context)
+            system_prompt = persona_context_to_system_prompt(persona_context, mode=chat_mode)
+        
+        # Fallback if still not set
+        if not system_prompt:
+            system_prompt = 'You are a helpful assistant. Answer questions concisely and accurately.'
         
         # DIRECT IMPLEMENTATION: Use Anthropic client directly instead of agent_module
         try:

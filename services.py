@@ -73,6 +73,26 @@ def format_persona_system_prompt(persona_data, mode="with"):
     else:
         return "You are a helpful assistant."
 
+def persona_context_to_system_prompt(persona_context, mode="with"):
+    """
+    Convert the full persona_context dict (with Demographic, Psychographic, Behavioral, Contextual)
+    into a compact, readable system prompt for Claude.
+    """
+    if not persona_context:
+        return "You are a helpful assistant."
+    lines = ["Persona Context:"]
+    for section, fields in persona_context.items():
+        if fields:
+            lines.append(f"{section}:")
+            for key, value in fields.items():
+                if value:
+                    lines.append(f"- {key.replace('_', ' ').title()}: {value}")
+    if mode == "with":
+        lines.append("Respond as this persona in all interactions.")
+    elif mode == "as":
+        lines.append("You are assisting a user who is roleplaying as this persona. Respond accordingly.")
+    return "\n".join(lines)
+
 if __name__ == "__main__":
     start_vpn("de1088")
 

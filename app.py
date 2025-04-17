@@ -32,6 +32,19 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
+    # Custom unauthorized handler for AJAX requests
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import request, jsonify, redirect, url_for
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Return JSON response for AJAX requests
+            return jsonify({
+                'success': False,
+                'error': 'Session expired. Please refresh the page and log in again.'
+            }), 401
+        # For regular requests, redirect to login page
+        return redirect(url_for('auth.login'))
+
     @login_manager.user_loader
     def load_user(user_id):
         # Only one user in demo, but could be extended

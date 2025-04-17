@@ -796,36 +796,63 @@
                 saveButton.disabled = true;
                 saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
 
-                // Send the data to the server
-                fetch('{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Chat saved successfully as "${title}"!`);
-                            bootstrap.Modal.getInstance(saveChatModal).hide();
-                        } else {
-                            alert(`Error saving chat: ${data.error}`);
+                // Use XMLHttpRequest instead of fetch for better error handling
+                const xhr = new XMLHttpRequest();
+                const url = '{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}';
+
+                xhr.open('POST', url, true);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                // Define what happens on successful data submission
+                xhr.onload = function () {
+                    // Restore save button regardless of outcome
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+
+                    // Check if we've been redirected to the login page
+                    if (xhr.responseText.includes('<!doctype') && xhr.responseText.includes('login')) {
+                        console.error('Session expired, redirected to login page');
+                        alert('Your session has expired. Please refresh the page and log in again to save the chat.');
+                        return;
+                    }
+
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            if (result.success) {
+                                alert(`Chat saved successfully as "${title}"!`);
+                                bootstrap.Modal.getInstance(saveChatModal).hide();
+                            } else {
+                                alert(`Error saving chat: ${result.error || 'Unknown error'}`);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON response:', e);
+                            console.error('Raw response:', xhr.responseText.substring(0, 500));
+                            alert('Error: Could not parse server response. You may need to log in again.');
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error saving chat:', error);
-                        alert('Error saving chat. Please try again.');
-                    })
-                    .finally(() => {
-                        // Restore save button
-                        saveButton.disabled = false;
-                        saveButton.innerHTML = originalText;
-                    });
+                    } else {
+                        // Non-2xx status code
+                        console.error('Server returned status:', xhr.status);
+                        console.error('Response text:', xhr.responseText.substring(0, 500));
+                        alert(`Error saving chat: Server returned status ${xhr.status}`);
+                    }
+                };
+
+                // Define what happens in case of error
+                xhr.onerror = function () {
+                    console.error('Request failed');
+                    alert('Error saving chat. Please check your network connection and try again.');
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+                };
+
+                // Send the request
+                xhr.send(formData);
             });
 
-            // Initialize the UI
+            // Initialize UI on page load
             switchMode('with');
-
-            // Focus on the message input
-            messageInput.focus();
         });
     </script>
 </body>

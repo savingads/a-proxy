@@ -42,7 +42,7 @@ A Python package to interact with the Persona API:
 - **Migration utility** for transferring data from SQLite to the API
 - **Startup script** for the complete stack
 
-## MCP Integration (NEW)
+## MCP Integration
 
 We have now implemented a Model Context Protocol (MCP) server to expose the Persona API to language models and other MCP clients:
 

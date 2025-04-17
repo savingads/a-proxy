@@ -580,77 +580,40 @@
             }
 
             // Handle form submission - Different behavior based on mode
-            chatForm.addEventListener('submit', function (event) {
+            chatForm.addEventListener('submit', async function (event) {
                 event.preventDefault();
-
                 const message = messageInput.value.trim();
                 if (!message) return;
 
-                if (currentMode === 'with') {
-                    // "Chat with" mode - User sends, persona responds
-                    // Add user message to chat
-                    addMessage(message, 'user');
-                    messageInput.value = '';
+                // Add user message to chat immediately
+                addMessage(message, 'user');
+                messageInput.value = '';
+                showTypingIndicator();
 
-                    // Show typing indicator
-                    showTypingIndicator();
+                // Prepare payload for backend
+                const payload = {
+                    message: message,
+                    conversation_id: conversationId,
+                    persona_id: {{ persona.id }},
+                    chat_mode: currentMode
+                };
 
-                    // Simulate API call to get agent response
-                    setTimeout(() => {
-                        // Remove typing indicator
-                        removeTypingIndicator();
-
-                        // Generate a simulated response based on persona attributes
-                        let response;
-
-                        if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
-                            response = `Hello there! I'm {{ persona.name }} from {{ persona.demographic.city or 'somewhere' }}. How are you today?`;
-                        } else if (message.toLowerCase().includes('who are you')) {
-                            response = `I'm {{ persona.name }}, a {{ persona.demographic.occupation or 'person' }} from {{ persona.demographic.city or '' }}, {{ persona.demographic.country or '' }}. I speak {{ persona.demographic.language or 'multiple languages' }}.`;
-                        } else if (message.toLowerCase().includes('location') || message.toLowerCase().includes('where')) {
-                            response = `I'm currently in {{ persona.demographic.city or '' }}, {{ persona.demographic.country or '' }}. It's a really interesting place!`;
-                        } else if (message.toLowerCase().includes('language') || message.toLowerCase().includes('speak')) {
-                            response = `I'm fluent in {{ persona.demographic.language or 'multiple languages' }}. It's my primary language.`;
-                        } else if (message.toLowerCase().includes('hobby') || message.toLowerCase().includes('interest')) {
-                            response = `I enjoy various activities in my free time. What about you?`;
-                        } else {
-                            response = `That's an interesting point. As someone from {{ persona.demographic.country or 'my country' }}, I have a unique perspective on that. Would you like to hear more?`;
-                        }
-
-                        // Add agent response to chat
-                        addMessage(response, 'agent');
-                    }, 1500);
-                } else {
-                    // "Chat as" mode - Persona (user) sends, target responds
-                    // Add persona (user) message
-                    addMessage(message, 'user');
-                    messageInput.value = '';
-
-                    // Show typing indicator
-                    showTypingIndicator();
-
-                    // Simulate response from the target person
-                    setTimeout(() => {
-                        // Remove typing indicator
-                        removeTypingIndicator();
-
-                        // Generate response based on target persona and message
-                        let response;
-                        const targetType = targetPersonaSelect.value;
-
-                        if (targetType === 'customer') {
-                            response = `Thank you for your assistance. Can you help me with something else?`;
-                        } else if (targetType === 'friend') {
-                            response = `That's interesting! Thanks for sharing that with me. How's everything else going?`;
-                        } else if (targetType === 'colleague') {
-                            response = `I appreciate your input on this matter. Let's discuss further in our next meeting.`;
-                        } else {
-                            response = `I understand. Thanks for the information.`;
-                        }
-
-                        // Add target response
-                        addMessage(response, 'agent');
-                    }, 1500);
+                try {
+                    const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    removeTypingIndicator();
+                    if (data.success && data.response) {
+                        addMessage(data.response, 'agent');
+                    } else {
+                        addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
+                    }
+                } catch (err) {
+                    removeTypingIndicator();
+                    addMessage('[Error: Could not reach Claude API]', 'agent');
                 }
             });
 

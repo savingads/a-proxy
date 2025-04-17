@@ -93,6 +93,27 @@ def persona_context_to_system_prompt(persona_context, mode="with"):
         lines.append("You are assisting a user who is roleplaying as this persona. Respond accordingly.")
     return "\n".join(lines)
 
+def flatten_persona_context(raw_context):
+    """
+    Flatten all persona fields for sidebar/system prompt display.
+    Returns a dict with Demographic, Psychographic, Behavioral, Contextual as sub-dicts.
+    """
+    if not raw_context:
+        return {}
+    demographic = raw_context.get("demographic", {})
+    psychographic = raw_context.get("psychographic", {})
+    behavioral = raw_context.get("behavioral", {})
+    contextual = raw_context.get("contextual", {})
+    # Convert lists to comma-separated strings for compactness
+    def compact(d):
+        return {k: ", ".join(v) if isinstance(v, list) else v for k, v in d.items()}
+    return {
+        "Demographic": compact(demographic),
+        "Psychographic": compact(psychographic),
+        "Behavioral": compact(behavioral),
+        "Contextual": compact(contextual)
+    }
+
 if __name__ == "__main__":
     start_vpn("de1088")
 

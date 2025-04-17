@@ -665,3 +665,66 @@ Integrate persona context from the persona-service into the direct-chat route, s
 
 ## Status
 - This plan is in progress. Implementation steps will be tracked here.
+
+---
+
+## 2025-04-17: Production Environment Setup Notes
+
+### Key Steps and Lessons Learned
+
+1. **Systemd Services for Gunicorn**
+   - Both the main app (A-Proxy) and persona-service are run with Gunicorn, managed by systemd for auto-start and reliability.
+   - Example systemd unit for persona-service:
+     ```ini
+     [Unit]
+     Description=Persona Service Gunicorn API
+     After=network.target
+
+     [Service]
+     User=chris
+     Group=www-data
+     WorkingDirectory=/home/chris/a-proxy/_src/persona-service
+     EnvironmentFile=/home/chris/a-proxy/.env
+     Environment="PATH=/home/chris/a-proxy/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+     ExecStart=/home/chris/a-proxy/venv/bin/gunicorn -w 2 -b 127.0.0.1:5050 'run:create_app()'
+     Restart=always
+
+     [Install]
+     WantedBy=multi-user.target
+     ```
+   - After editing, always run:
+     ```bash
+     sudo systemctl daemon-reload
+     sudo systemctl enable persona-service
+     sudo systemctl start persona-service
+     sudo systemctl status persona-service
+     ```
+
+2. **Environment Variables and .env**
+   - Use `EnvironmentFile=/home/chris/a-proxy/.env` in systemd unit files to load environment variables for each app.
+   - Do not use `load_dotenv()` in config.py for production; rely on systemd for env loading.
+   - Each app can have its own ANTHROPIC_API_KEY and SECRET_KEY in its .env file.
+
+3. **Debugging Internal Server Errors**
+   - Set `DEBUG=True` in .env for diagnosis, then set back to `False` for production.
+   - Always check logs with `sudo journalctl -u <service> -n 50 --no-pager` for real error messages.
+   - Common issues: missing dependencies, port conflicts, missing environment variables, or session/cookie issues after changing SECRET_KEY.
+
+4. **Disabling Features for Production Stability**
+   - Temporarily disabled VPN checks in `utils/vpn.py` by making `is_vpn_running()` always return `False` to avoid startup errors if OpenVPN/pgrep are not present.
+
+5. **Nginx Reverse Proxy**
+   - Nginx is used to proxy requests to Gunicorn for both a-proxy.org and proethica.org, each on its own port.
+   - SSL certificates are managed with Certbot and manually configured in the Nginx site config.
+
+6. **General Best Practices**
+   - Always restart services after changing .env or systemd unit files.
+   - Clear browser cookies after changing SECRET_KEY to avoid session errors.
+   - Use separate Gunicorn/systemd services for each app; Emperor mode is not needed for a small number of apps.
+
+---
+
+Refer to this section for a summary of production setup, troubleshooting, and lessons learned. Update as needed for
+future deployments.
+
+- [2025-04-17] VPN functionality is currently disabled on the production server. The is_vpn_running() function in utils/vpn.py always returns False to avoid startup errors. Re-enable and test VPN features before using them in production.

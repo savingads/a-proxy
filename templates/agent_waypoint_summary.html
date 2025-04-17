@@ -13,7 +13,7 @@
     </div>
     <div class="waypoint-body">
         {% if waypoint.agent_data %}
-            {% set agent_data = waypoint.agent_data|fromjson %}
+            {% set agent_data = waypoint.agent_data|tojson|safe|fromjson %}
             <div class="mb-3">
                 <div class="conversation-summary p-2 mb-2 rounded bg-dark">
                     {% for message in agent_data.history[:3] %}

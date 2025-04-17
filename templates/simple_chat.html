@@ -415,9 +415,12 @@
             // Add initial welcome message for "Chat as" mode
             function initChatAsHistory() {
                 if (chatAsHistory.length === 0) {
+                    // Get the persona name from the DOM to avoid template variable scope issues
+                    const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                     chatAsHistory.push({
                         role: 'target',
-                        content: `Hello ${persona.name}, how can I help you today?`,
+                        content: `Hello ${personaName}, how can I help you today?`,
                         timestamp: new Date().toISOString()
                     });
                 }
@@ -477,9 +480,13 @@
                 // Update UI
                 chatModeToggle.checked = (newMode === 'as');
                 chatModeHeader.textContent = newMode === 'with' ? 'Chatting with:' : 'Chatting as:';
+
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                 messageInput.placeholder = newMode === 'with'
                     ? 'Type your message...'
-                    : `Type as ${persona.name}...`;
+                    : `Type as ${personaName}...`;
 
                 // Show/hide target persona selector
                 targetPersonaSelector.style.display = newMode === 'as' ? 'block' : 'none';
@@ -511,9 +518,12 @@
             // Open the save modal
             function openSaveModal() {
                 // Update title based on mode
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                 document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
-                    : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
+                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
 
                 // Show the modal
                 const modalInstance = new bootstrap.Modal(saveChatModal);
@@ -643,9 +653,12 @@
                 bootstrap.Modal.getInstance(modeConfirmModal).hide();
 
                 // Set modal title based on current mode
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                 document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
-                    : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
+                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
 
                 // Show save modal then switch on save
                 const saveModalInstance = new bootstrap.Modal(saveChatModal);
@@ -674,9 +687,12 @@
             // Setup the save chat modal
             saveChatModal.addEventListener('show.bs.modal', function () {
                 // Update title based on current mode
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                 document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with {{ persona.name }} - ${new Date().toLocaleDateString()}`
-                    : `Chat as {{ persona.name }} - ${new Date().toLocaleDateString()}`;
+                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
             });
 
             // Setup journey option radio buttons
@@ -695,10 +711,13 @@
                 const journeySelect = document.getElementById('journey-id');
                 journeySelect.innerHTML = '<option value="">Select a journey...</option>';
 
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
                 // Add some dummy journeys
                 const dummyJourneys = [
-                    { id: 1, name: `${persona.name}'s Shopping Journey` },
-                    { id: 2, name: `${persona.name}'s Research Project` },
+                    { id: 1, name: `${personaName}'s Shopping Journey` },
+                    { id: 2, name: `${personaName}'s Research Project` },
                     { id: 3, name: 'Product Exploration' }
                 ];
 
@@ -712,6 +731,13 @@
 
             // Call this when the save modal is shown
             saveChatModal.addEventListener('show.bs.modal', function () {
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
+                // Update the journey name default value
+                document.getElementById('journey-name').value = `${personaName}'s Conversation Journey`;
+
+                // Load existing journeys
                 loadExistingJourneys();
             });
 

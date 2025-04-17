@@ -209,7 +209,16 @@ def save_direct_chat(persona_id):
         # Parse chat history
         try:
             chat_history = json.loads(chat_history)
-        except:
+        except Exception as parse_error:
+            logger.error(f"Error parsing chat history JSON: {parse_error}")
+            logger.error(f"Raw chat_history: {chat_history[:200]}...")
+            # For AJAX requests, return a proper JSON error
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': False,
+                    'error': f"Invalid chat history format: {str(parse_error)}"
+                }), 400
+            # Otherwise set empty chat history and continue
             chat_history = []
         
         # Get or create journey
@@ -219,7 +228,10 @@ def save_direct_chat(persona_id):
             # Use existing journey
             journey_id = request.form.get("journey_id")
             if not journey_id:
-                flash("Please select a journey", "danger")
+                error_msg = "Please select a journey"
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': False, 'error': error_msg}), 400
+                flash(error_msg, "danger")
                 return redirect(url_for('agent.direct_chat', persona_id=persona_id))
         else:
             # Create new journey
@@ -228,18 +240,30 @@ def save_direct_chat(persona_id):
             journey_type = request.form.get("journey_type", "research")
             
             if not journey_name:
-                flash("Please enter a journey name", "danger")
+                error_msg = "Please enter a journey name"
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': False, 'error': error_msg}), 400
+                flash(error_msg, "danger")
                 return redirect(url_for('agent.direct_chat', persona_id=persona_id))
             
             # Create the journey
-            journey_id = database.create_journey(
-                name=journey_name,
-                description=journey_description,
-                persona_id=persona_id,
-                journey_type=journey_type
-            )
-            
-            flash(f"Journey '{journey_name}' created successfully!", "success")
+            try:
+                journey_id = database.create_journey(
+                    name=journey_name,
+                    description=journey_description,
+                    persona_id=persona_id,
+                    journey_type=journey_type
+                )
+                success_msg = f"Journey '{journey_name}' created successfully!"
+                if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    flash(success_msg, "success")
+            except Exception as journey_error:
+                logger.error(f"Error creating journey: {journey_error}")
+                error_msg = f"Error creating journey: {str(journey_error)}"
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': False, 'error': error_msg}), 500
+                flash(error_msg, "danger")
+                return redirect(url_for('agent.direct_chat', persona_id=persona_id))
         
         # Format chat history into agent data format
         agent_data = {
@@ -257,32 +281,40 @@ def save_direct_chat(persona_id):
         # Create URL representation
         url = "agent://conversation/" + (chat_mode or 'with')
         
-        waypoint_id = database.add_waypoint(
-            journey_id=journey_id,
-            url=url,
-            title=title,
-            notes=notes,
-            type=waypoint_type,
-            agent_data=json.dumps(agent_data)
-        )
-        
-        flash("Chat saved successfully!", "success")
-        
-        # JSON response for AJAX
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({
-                'success': True,
-                'waypoint_id': waypoint_id,
-                'journey_id': journey_id
-            })
-        
-        # Normal redirect response
-        return redirect(url_for('agent.direct_chat', persona_id=persona_id))
+        try:
+            waypoint_id = database.add_waypoint(
+                journey_id=journey_id,
+                url=url,
+                title=title,
+                notes=notes,
+                type=waypoint_type,
+                agent_data=json.dumps(agent_data)
+            )
+            
+            # Success response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True,
+                    'waypoint_id': waypoint_id,
+                    'journey_id': journey_id
+                })
+            
+            flash("Chat saved successfully!", "success")
+            return redirect(url_for('agent.direct_chat', persona_id=persona_id))
+            
+        except Exception as waypoint_error:
+            logger.error(f"Error adding waypoint: {waypoint_error}")
+            error_msg = f"Error saving chat waypoint: {str(waypoint_error)}"
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'error': error_msg}), 500
+            flash(error_msg, "danger")
+            return redirect(url_for('agent.direct_chat', persona_id=persona_id))
     
     except Exception as e:
-        logging.error(f"Error saving chat: {e}")
+        logger.error(f"Error saving chat: {e}")
+        logger.error(f"Request form data: {request.form}")
         
-        # JSON response for AJAX
+        # Always return JSON for AJAX requests
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({
                 'success': False,

@@ -5,9 +5,11 @@
 {% block extra_style %}
 <style>
     .chat-container {
-        height: 70vh;
+        height: 65vh; /* Reduced height to prevent the message bar from being pushed off the screen */
         display: flex;
         flex-direction: column;
+        margin-bottom: 1rem;
+        /* Added margin to prevent message bar cutoff */
     }
 
     .message-container {

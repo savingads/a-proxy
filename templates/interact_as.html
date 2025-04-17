@@ -387,7 +387,7 @@
                 });
             });
 
-            // Handle form submission for creation journey
+            // Handle form submission for creating journey
             document.getElementById('create-journey-form').addEventListener('submit', function (event) {
                 // Validate the form
                 const journeyName = document.getElementById('journey-name').value;
@@ -404,31 +404,62 @@
                 const form = this;
                 event.preventDefault();
 
+                // Show a loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
                 // Submit the form using fetch
                 fetch(form.action, {
                     method: form.method,
                     body: new FormData(form),
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'same-origin' // Include cookies for authentication
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        // Check for HTML response which might indicate a session timeout
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('text/html')) {
+                            // This is likely a redirect to the login page
+                            throw new Error('Session expired. Please log in again.');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             // Redirect based on interaction type
                             const journeyId = data.journey_id;
+                            const personaId = document.getElementById('journey-persona-id').value;
+
                             if (interactionType === 'browse') {
                                 window.location.href = "{{ url_for('journey.browse_journey', journey_id=0) }}".replace('0', journeyId);
                             } else {
-                                window.location.href = "{{ url_for('agent.journey_agent', journey_id=0) }}".replace('0', journeyId);
+                                // Redirect to direct-chat page with journey_id parameter instead of agent.journey_agent
+                                window.location.href = "{{ url_for('agent.direct_chat', persona_id=0) }}".replace('0', personaId) + "?journey_id=" + journeyId;
                             }
                         } else {
+                            // Restore button
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
                             alert('Error creating journey: ' + data.error);
                         }
                     })
                     .catch(error => {
+                        // Restore button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+
                         console.error('Error:', error);
-                        alert('Error creating journey. Please try again.');
+                        if (error.message.includes('Session expired')) {
+                            alert('Your session has expired. Please refresh the page and log in again.');
+                            // Optionally redirect to login page
+                            window.location.href = "{{ url_for('auth.login') }}";
+                        } else {
+                            alert('Error creating journey. Please try again.');
+                        }
                     });
 
                 return false;

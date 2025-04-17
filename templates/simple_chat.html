@@ -242,6 +242,13 @@
             <div class="persona-badge ms-2">
                 <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
             </div>
+            {% if journey %}
+            <div class="journey-badge ms-2 bg-info text-white rounded px-2 py-1 small">
+                <i class="bi bi-map me-1"></i> Journey: <a
+                    href="{{ url_for('journey.view_journey', journey_id=journey.id) }}"
+                    class="text-white text-decoration-underline">{{ journey.name }}</a>
+            </div>
+            {% endif %}
             <div class="chat-mode-toggle ms-3 d-flex align-items-center">
                 <span class="mode-label small text-light">Chat with</span>
                 <div class="form-check form-switch mx-2">

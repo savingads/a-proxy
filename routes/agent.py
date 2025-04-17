@@ -138,10 +138,12 @@ def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
     # Import inside function to avoid circular imports
     from utils.persona_client import get_client
+    import database
     
     # Get URL parameters
     chat_mode = request.args.get('mode', 'with')  # 'with' or 'as'
     target_persona_id = request.args.get('target_persona_id')
+    journey_id = request.args.get('journey_id')  # Get journey_id from query parameters
     
     # Get persona data
     persona = None
@@ -184,6 +186,15 @@ def direct_chat(persona_id):
     except Exception as e:
         logging.error(f"Error fetching persona context for sidebar: {e}")
     
+    # Get journey info if a journey ID was provided
+    journey = None
+    if journey_id:
+        try:
+            journey = database.get_journey(journey_id)
+        except Exception as e:
+            logging.error(f"Error getting journey {journey_id}: {e}")
+            # Continue without journey if this fails
+    
     # Render the simple chat template
     return render_template(
         "simple_chat.html", 
@@ -191,7 +202,8 @@ def direct_chat(persona_id):
         target_persona=target_persona,
         available_personas=available_personas,
         chat_mode=chat_mode,
-        persona_context=persona_context
+        persona_context=persona_context,
+        journey=journey  # Pass journey to the template
     )
 
 @agent_bp.route("/direct-chat/<int:persona_id>/save", methods=["POST"])

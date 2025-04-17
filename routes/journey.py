@@ -25,6 +25,9 @@ def list_journeys():
 @journey_bp.route("/journey/create", methods=["GET", "POST"])
 def create_journey():
     """Create a new journey."""
+    # Check if this is an AJAX request
+    is_ajax_request = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     if request.method == "POST":
         try:
             # Get form data
@@ -45,11 +48,29 @@ def create_journey():
                 journey_type=journey_type
             )
             
+            # Handle AJAX request
+            if is_ajax_request:
+                return jsonify({
+                    'success': True,
+                    'journey_id': journey_id,
+                    'message': f"Journey '{name}' created successfully!"
+                })
+            
+            # Handle regular form submission
             flash(f"Journey '{name}' created successfully!", "success")
             return redirect(url_for('journey.view_journey', journey_id=journey_id))
         
         except Exception as e:
             logging.error(f"Error creating journey: {e}")
+            
+            # Handle AJAX request error
+            if is_ajax_request:
+                return jsonify({
+                    'success': False,
+                    'error': str(e)
+                }), 500
+            
+            # Handle regular form submission error
             flash(f"Error creating journey: {str(e)}", "danger")
     
     # Import inside function to avoid circular imports

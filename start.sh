@@ -106,11 +106,14 @@ fi
 # Ensure necessary files are available in the persona-service directory
 if [ ! -f "_src/persona-service/persona_field_config.py" ]; then
     echo -e "${YELLOW}First-time setup: copying necessary files...${NC}"
-    if [ -f "fix-persona-service-dependencies.sh" ]; then
-        ./fix-persona-service-dependencies.sh
+    if [ -f "persona_field_config.py" ]; then
+        cp persona_field_config.py _src/persona-service/
+        echo -e "${GREEN}Copied persona_field_config.py to _src/persona-service${NC}"
+    elif [ -f "sample_custom_field_config.json" ]; then
+        cp sample_custom_field_config.json _src/persona-service/persona_field_config.py
+        echo -e "${GREEN}Created persona_field_config.py from sample_custom_field_config.json in _src/persona-service${NC}"
     else
-        echo -e "${RED}fix-persona-service-dependencies.sh not found!${NC}"
-        echo -e "${RED}Please run switch-to-local-packages.sh first.${NC}"
+        echo -e "${RED}No persona_field_config.py or sample_custom_field_config.json found!${NC}"
         exit 1
     fi
 fi

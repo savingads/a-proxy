@@ -4,6 +4,8 @@ import argparse
 from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
 from flask_login import LoginManager
 from utils.user import get_user, User
+import json
+from flask import Markup
 
 # Import blueprints
 from routes.home import home_bp
@@ -16,6 +18,12 @@ from routes.journey import journey_bp
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
+
+def fromjson_filter(value):
+    try:
+        return json.loads(value)
+    except Exception:
+        return None
 
 def create_app():
     """Create and configure the Flask application."""
@@ -68,6 +76,9 @@ def create_app():
     
     from routes.auth import auth_bp
     app.register_blueprint(auth_bp)
+    
+    # Register custom Jinja filter for fromjson
+    app.jinja_env.filters['fromjson'] = fromjson_filter
     
     return app
 

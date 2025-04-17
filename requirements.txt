@@ -1,5 +1,6 @@
 Flask==2.3.2
 Flask-WTF==1.1.1
+Flask-Login==0.6.3
 Werkzeug==2.3.6
 SQLAlchemy==2.0.20
 cryptography==41.0.3

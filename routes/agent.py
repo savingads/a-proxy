@@ -6,6 +6,7 @@ import sys
 import os
 import time
 from datetime import datetime
+from flask_login import login_required
 
 # Add agent_module to the path
 sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
@@ -15,6 +16,7 @@ agent_bp = Blueprint('agent', __name__)
 logger = logging.getLogger(__name__)
 
 @agent_bp.route("/agent")
+@login_required
 def agent_chat():
     """Show the standalone Claude agent interface."""
     return render_template("agent_chat.html")
@@ -22,6 +24,7 @@ def agent_chat():
 from services import fetch_persona_context, flatten_persona_context, persona_context_to_system_prompt
 
 @agent_bp.route("/agent/message", methods=["POST"])
+@login_required
 def standalone_agent_message():
     """Process a message to the standalone Claude agent."""
     try:
@@ -130,6 +133,7 @@ def flatten_persona_context(raw_context):
     }
 
 @agent_bp.route("/direct-chat/<int:persona_id>")
+@login_required
 def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
     # Import inside function to avoid circular imports
@@ -191,6 +195,7 @@ def direct_chat(persona_id):
     )
 
 @agent_bp.route("/direct-chat/<int:persona_id>/save", methods=["POST"])
+@login_required
 def save_direct_chat(persona_id):
     """Save a direct chat as a waypoint, optionally creating a journey."""
     try:
@@ -288,6 +293,7 @@ def save_direct_chat(persona_id):
         return redirect(url_for('agent.direct_chat', persona_id=persona_id))
 
 @agent_bp.route("/journey/<int:journey_id>/agent")
+@login_required
 def journey_agent(journey_id):
     """Show the agent interface for a journey."""
     journey = database.get_journey(journey_id)
@@ -310,6 +316,7 @@ def journey_agent(journey_id):
     return render_template("agent_waypoint.html", journey=journey, persona=persona)
 
 @agent_bp.route("/journey/<int:journey_id>/agent/message", methods=["POST"])
+@login_required
 def agent_message(journey_id):
     """Process a message to the agent."""
     try:
@@ -371,6 +378,7 @@ def agent_message(journey_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 @agent_bp.route("/journey/<int:journey_id>/agent/save", methods=["POST"])
+@login_required
 def save_agent_conversation(journey_id):
     """Save an agent conversation as a waypoint."""
     try:

@@ -13,18 +13,6 @@ ROOT_DIR=$(pwd)
 # Activate virtual environment
 source venv/bin/activate
 
-# Ensure necessary files are available in the persona-service directory
-if [ ! -f "_src/persona-service/persona_field_config.py" ]; then
-    echo -e "${YELLOW}First-time setup: copying necessary files...${NC}"
-    if [ -f "fix-persona-service-dependencies.sh" ]; then
-        ./fix-persona-service-dependencies.sh
-    else
-        echo -e "${RED}fix-persona-service-dependencies.sh not found!${NC}"
-        echo -e "${RED}Please run switch-to-local-packages.sh first.${NC}"
-        exit 1
-    fi
-fi
-
 # Ensure persona-service database is initialized
 echo -e "${YELLOW}Initializing persona-service database...${NC}"
 
@@ -32,9 +20,7 @@ echo -e "${YELLOW}Initializing persona-service database...${NC}"
 if [ -d "_src/persona-service" ]; then
     cd _src/persona-service
 else
-    echo -e "${RED}_src/persona-service directory not found!${NC}"
-    echo -e "${RED}Please run switch-to-local-packages.sh first.${NC}"
-    exit 1
+    cd persona-service
 fi
 
 # Create data directory if it doesn't exist
@@ -43,15 +29,9 @@ chmod 755 data
 
 # Run database initialization
 if [ -f "init_db.py" ]; then
-    PYTHONPATH=$ROOT_DIR/_src python init_db.py
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Database initialization failed!${NC}"
-        cd $ROOT_DIR
-        exit 1
-    fi
+    python init_db.py
 else
     echo -e "${RED}init_db.py not found!${NC}"
-    cd $ROOT_DIR
     exit 1
 fi
 
@@ -65,17 +45,9 @@ else
     cd persona-service
 fi
 
-# Export PYTHONPATH to include the root directory
-export PYTHONPATH=$ROOT_DIR:$PYTHONPATH
-
 python run.py --debug &
 PERSONA_PID=$!
 cd $ROOT_DIR
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to start persona-service!${NC}"
-    exit 1
-fi
 
 echo -e "${GREEN}Persona Service running with PID: ${PERSONA_PID}${NC}"
 echo -e "${YELLOW}Waiting for service to initialize...${NC}"
@@ -85,12 +57,6 @@ sleep 5
 echo -e "${YELLOW}Starting A-Proxy application on port 5002...${NC}"
 python app.py --port 5002 --host 127.0.0.1 &
 APROXY_PID=$!
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to start A-Proxy!${NC}"
-    kill $PERSONA_PID 2>/dev/null || true
-    exit 1
-fi
 
 echo -e "${GREEN}A-Proxy running with PID: ${APROXY_PID}${NC}"
 

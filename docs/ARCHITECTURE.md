@@ -101,6 +101,6 @@ client = get_mock_persona_client()
 ---
 
 ## 9. Further Reading
-- See [PERSONA_API.md](PERSONA_API.md) for API details and endpoints.
+- See [PERSONA_API.md](./PERSONA_API.md) for API details and endpoints.
 - See [persona-client/README.md](../persona-client/README.md) for client usage.
-- See [persona_field_config.py](persona_field_config.py) for field customization.
+- See [../persona_field_config.py](../persona_field_config.py) for field customization.

@@ -156,4 +156,4 @@ python app.py --port 5003
 
 ---
 
-For WSL-specific or advanced environment management, see [docs/WSL_SETUP.md](docs/WSL_SETUP.md) and [docs/MULTIPLE_ENVIRONMENTS.md](docs/MULTIPLE_ENVIRONMENTS.md).
+For WSL-specific or advanced environment management, see [WSL_SETUP.md](./WSL_SETUP.md) and [MULTIPLE_ENVIRONMENTS.md](./MULTIPLE_ENVIRONMENTS.md).

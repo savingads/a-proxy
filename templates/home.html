@@ -2,9 +2,7 @@
 
 {% block title %}A-Proxy - Home{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block extra_style %}
 <style>
@@ -22,28 +20,10 @@
     .feature-card:hover {
         transform: translateY(-5px);
     }
-
-    .info-card {
-        margin-bottom: 20px;
-    }
-
-    #map {
-        height: 400px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
 </style>
 {% endblock %}
 
 {% block header_content %}
-<form action="{{ url_for('browsing.visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
-    id="preview-form">
-    <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
-    <input type="hidden" name="language" value="{{ language }}">
-    <input type="hidden" name="geolocation" id="form-geolocation" value="">
-    <button type="submit" class="btn btn-primary me-2">Preview</button>
-    <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
-</form>
 <ul class="navbar-nav flex-row d-md-none">
     <li class="nav-item text-nowrap">
         <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
@@ -57,35 +37,47 @@
 {% block content %}
 <div class="pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Welcome to A-Proxy</h1>
-    <p class="lead">Web Testing with Geolocation and Language Simulation</p>
+    <p class="lead">Personalized Web Experience Testing and Archiving</p>
+
+    <!-- Version display in top right -->
+    <div class="version-info text-end">
+        {% if version is defined %}
+        Version {{ version }}
+        {% else %}
+        Version Unknown
+        {% endif %}
+    </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h2 class="card-title h4">About A-Proxy</h2>
                 <p class="card-text">
-                    A-Proxy is a tool that allows you to test websites with different geolocation and
-                    language settings by using VPN connections and a customized browser setup. This is
-                    useful for testing how websites behave for users in different countries and with
-                    different language preferences.
+                    A-Proxy is a tool that allows you to test websites with different user contexts and
+                    perspectives.
+                    This helps you compare how websites appear and behave for different types of users.
+                </p>
+                <p class="card-text">
+                    The application enables capturing web pages and chats from particular perspectives to help
+                    understand and archive personalized web and chat experiences.
                 </p>
                 <p class="card-text">
                     With A-Proxy, you can:
                 </p>
                 <ul>
-                    <li>Connect to VPN servers in different countries</li>
                     <li>Simulate different browser language settings</li>
                     <li>Override geolocation data in the browser</li>
                     <li>Create and manage user personas with demographic, psychographic, behavioral, and
                         contextual data</li>
-                    <li>Take screenshots of websites with the simulated settings</li>
+                    <li>Capture and archive personalized website experiences</li>
+                    <li>Track user journeys through websites</li>
+                    <li>Test how websites adapt to different contexts</li>
                 </ul>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                        <a href="{{ url_for('persona.create_persona') }}" class="btn btn-primary">Go to
-                            Dashboard</a>
+                        <a href="{{ url_for('home.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
                         <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-secondary">Manage
                             Personas</a>
                     </div>
@@ -93,271 +85,63 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4">VPN Status</h2>
+                <h2 class="card-title h4"><i class="bi bi-people me-2"></i>Personas</h2>
                 <p class="card-text">
-                    <strong>VPN Running:</strong> <span id="vpn-status">{{ vpn_running }}</span>
+                    Create detailed user personas with demographic, psychographic, behavioral, and contextual
+                    information to simulate how different users would experience the web.
                 </p>
-                {% if vpn_running %}
-                <div>
-                    <p><strong>IP:</strong> {{ ip_info.ip }}</p>
-                    <p><strong>Location:</strong> {{ ip_info.city }}, {{ ip_info.region }}, {{
-                        ip_info.country }}</p>
-                    <p><strong>Coordinates:</strong> {{ ip_info.loc }}</p>
-                </div>
-                <a href="{{ url_for('persona.create_persona') }}" class="btn btn-sm btn-outline-primary">Change VPN
-                    Region</a>
-                {% else %}
-                <p>VPN is not currently running. Start it from the dashboard to simulate different
-                    locations.</p>
-                <a href="{{ url_for('persona.create_persona') }}" class="btn btn-sm btn-outline-primary">Start VPN</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<h2 class="mb-4">Your Browser Information</h2>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <h3 class="card-title h5"><i class="bi bi-globe me-2"></i>Location & Language</h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Geolocation
-                        <span id="browser-geolocation" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Language
-                        <span id="browser-language" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Time Zone
-                        <span id="browser-timezone" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <h3 class="card-title h5"><i class="bi bi-laptop me-2"></i>Device Information</h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Platform
-                        <span id="browser-platform" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Screen Resolution
-                        <span id="browser-screen" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Device Pixel Ratio
-                        <span id="browser-pixel-ratio" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Touch Support
-                        <span id="browser-touch" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                </ul>
+                <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-primary">Manage Personas</a>
             </div>
         </div>
     </div>
 
     <div class="col-md-6">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <h3 class="card-title h5"><i class="bi bi-browser-chrome me-2"></i>Browser Details</h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        User Agent
-                        <span id="browser-user-agent" class="badge bg-primary rounded-pill text-truncate"
-                            style="max-width: 250px;">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Browser Name
-                        <span id="browser-name" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Cookies Enabled
-                        <span id="browser-cookies" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Do Not Track
-                        <span id="browser-dnt" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <h3 class="card-title h5"><i class="bi bi-wifi me-2"></i>Connection Information</h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Online Status
-                        <span id="browser-online" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Connection Type
-                        <span id="browser-connection-type" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Effective Connection Type
-                        <span id="browser-effective-type" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Downlink Speed
-                        <span id="browser-downlink" class="badge bg-primary rounded-pill">Loading...</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h3 class="card-title h5"><i class="bi bi-geo-alt me-2"></i>Your Location</h3>
-                <div id="map"></div>
-                <p class="text-muted small">Note: This map shows your browser's reported location, which
-                    may differ from your actual location if you're using a VPN.</p>
+                <h2 class="card-title h4"><i class="bi bi-archive me-2"></i>Archives</h2>
+                <p class="card-text">
+                    Capture and store snapshots of web pages as they appear to different personas, building
+                    an archive of personalized web experiences.
+                </p>
+                <a href="{{ url_for('archives.list_archives') }}" class="btn btn-outline-primary">View Archives</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-map me-2"></i>Journeys</h2>
+                <p class="card-text">
+                    Track and analyze how different personas navigate through websites, recording their
+                    journey to better understand the user experience.
+                </p>
+                <a href="{{ url_for('journey.list_journeys') }}" class="btn btn-outline-primary">View Journeys</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-person-gear me-2"></i>Interact As</h2>
+                <p class="card-text">
+                    Browse the web or chat with AI as if you were your defined persona, experiencing
+                    content through their simulated perspective.
+                </p>
+                <a href="{{ url_for('journey.interact_as') }}" class="btn btn-outline-primary">Interact As Persona</a>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Initialize map with a default view
-        var map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        // Browser Language
-        document.getElementById('browser-language').textContent = navigator.language || navigator.userLanguage || 'Not available';
-
-        // User Agent
-        document.getElementById('browser-user-agent').textContent = navigator.userAgent || 'Not available';
-
-        // Platform
-        document.getElementById('browser-platform').textContent = navigator.platform || 'Not available';
-
-        // Time Zone
-        document.getElementById('browser-timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Not available';
-
-        // Screen Resolution
-        document.getElementById('browser-screen').textContent = `${window.screen.width} x ${window.screen.height}`;
-
-        // Device Pixel Ratio
-        document.getElementById('browser-pixel-ratio').textContent = window.devicePixelRatio || 'Not available';
-
-        // Touch Support
-        document.getElementById('browser-touch').textContent = ('ontouchstart' in window) ? 'Yes' : 'No';
-
-        // Browser Name (simple detection)
-        let browserName = 'Unknown';
-        const userAgent = navigator.userAgent;
-        if (userAgent.indexOf("Firefox") > -1) {
-            browserName = "Firefox";
-        } else if (userAgent.indexOf("SamsungBrowser") > -1) {
-            browserName = "Samsung Browser";
-        } else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
-            browserName = "Opera";
-        } else if (userAgent.indexOf("Trident") > -1) {
-            browserName = "Internet Explorer";
-        } else if (userAgent.indexOf("Edge") > -1) {
-            browserName = "Edge";
-        } else if (userAgent.indexOf("Chrome") > -1) {
-            browserName = "Chrome";
-        } else if (userAgent.indexOf("Safari") > -1) {
-            browserName = "Safari";
-        }
-        document.getElementById('browser-name').textContent = browserName;
-
-        // Cookies Enabled
-        document.getElementById('browser-cookies').textContent = navigator.cookieEnabled ? 'Yes' : 'No';
-
-        // Do Not Track
-        document.getElementById('browser-dnt').textContent =
-            (navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' ||
-                navigator.msDoNotTrack === '1' || window.doNotTrack === '1') ? 'Yes' : 'No';
-
-        // Online Status
-        document.getElementById('browser-online').textContent = navigator.onLine ? 'Online' : 'Offline';
-
-        // Connection Information
-        if ('connection' in navigator) {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            if (connection) {
-                document.getElementById('browser-connection-type').textContent = connection.type || 'Unknown';
-                document.getElementById('browser-effective-type').textContent = connection.effectiveType || 'Unknown';
-                document.getElementById('browser-downlink').textContent = connection.downlink ? `${connection.downlink} Mbps` : 'Unknown';
-            }
-        } else {
-            document.getElementById('browser-connection-type').textContent = 'Not available';
-            document.getElementById('browser-effective-type').textContent = 'Not available';
-            document.getElementById('browser-downlink').textContent = 'Not available';
-        }
-
-        // Geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    document.getElementById('browser-geolocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-                    // Update map with the location
-                    map.setView([lat, lng], 13);
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('Your browser location')
-                        .openPopup();
-
-                    // Update hidden geolocation field in the form
-                    document.getElementById('form-geolocation').value = `${lat},${lng}`;
-                },
-                function (error) {
-                    console.error("Error getting geolocation:", error);
-                    document.getElementById('browser-geolocation').textContent = 'Not available';
-
-                    {% if vpn_running %}
-                    // If VPN is running, use the VPN location for the map
-                    const vpnLat = {{ ip_info.loc.split(',')[0]
-                }};
-        const vpnLng = {{ ip_info.loc.split(',')[1]
-    }};
-    map.setView([vpnLat, vpnLng], 13);
-    L.marker([vpnLat, vpnLng]).addTo(map)
-        .bindPopup('Your VPN location')
-        .openPopup();
-    {% endif %}
-                }
-            );
-        } else {
-        document.getElementById('browser-geolocation').textContent = 'Not supported';
-
-        {% if vpn_running %}
-        // If VPN is running, use the VPN location for the map
-        const vpnLat = {{ ip_info.loc.split(',')[0]
-    }};
-    const vpnLng = {{ ip_info.loc.split(',')[1] }};
-    map.setView([vpnLat, vpnLng], 13);
-    L.marker([vpnLat, vpnLng]).addTo(map)
-        .bindPopup('Your VPN location')
-        .openPopup();
-    {% endif %}
-        }
-    });
-</script>
-{% endblock %}
+{% block scripts %}{% endblock %}

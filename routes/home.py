@@ -12,7 +12,37 @@ def index():
     ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
     country = ip_info.get("country", "")
     language = REGION_LANGUAGE_MAP.get(country, {}).get("language", "en-US") if vpn_running else "en-US"
-    return render_template("home.html", vpn_running=vpn_running, ip_info=ip_info, language=language)
+    
+    # Get the version from VERSION.txt
+    try:
+        with open('VERSION.txt', 'r') as f:
+            version = f.read().strip()
+    except:
+        version = "Unknown"
+        
+    return render_template("home.html", 
+                          vpn_running=vpn_running, 
+                          ip_info=ip_info, 
+                          language=language,
+                          version=version)
+
+@home_bp.route("/dashboard")
+def dashboard():
+    """Render the dashboard page."""
+    vpn_running = is_vpn_running()
+    ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+    
+    # Get the version from VERSION.txt
+    try:
+        with open('VERSION.txt', 'r') as f:
+            version = f.read().strip()
+    except:
+        version = "Unknown"
+        
+    return render_template("dashboard.html", 
+                          vpn_running=vpn_running, 
+                          ip_info=ip_info,
+                          version=version)
 
 @home_bp.route("/geolocation-test")
 def geolocation_test():

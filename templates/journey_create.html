@@ -129,6 +129,10 @@
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
             <i class="bi bi-house-door me-2"></i>A-Proxy
         </a>
+
+        <!-- Include header status area -->
+        {% include 'partials/_header_status.html' %}
+
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
                 <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
@@ -323,14 +327,13 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="persona_id" class="form-label">Associated Persona</label>
-                                        <select class="form-select" id="persona_id" name="persona_id">
-                                            <option value="">None (Generic Journey)</option>
+                                        <label for="persona_id" class="form-label">Associated Persona *</label>
+                                        <select class="form-select" id="persona_id" name="persona_id" required>
                                             {% for persona in personas %}
                                             <option value="{{ persona.id }}">{{ persona.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <div class="form-text">Optionally link this journey to a specific persona.</div>
+                                        <div class="form-text">Select a persona for this journey.</div>
                                     </div>
 
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">

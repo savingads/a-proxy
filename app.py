@@ -2,6 +2,8 @@ from flask import Flask
 import logging
 import argparse
 from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
+from flask_login import LoginManager
+from utils.user import get_user, User
 
 # Import blueprints
 from routes.home import home_bp
@@ -25,6 +27,43 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = SESSION_COOKIE_HTTPONLY
     app.config['SESSION_COOKIE_SAMESITE'] = SESSION_COOKIE_SAMESITE
     
+    # Add custom Jinja2 filters
+    import json
+    @app.template_filter('fromjson')
+    def fromjson_filter(value):
+        """Convert a JSON string to a Python object"""
+        try:
+            return json.loads(value)
+        except:
+            return {}
+    
+    # --- Flask-Login setup ---
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    # Custom unauthorized handler for AJAX requests
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import request, jsonify, redirect, url_for
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Return JSON response for AJAX requests
+            return jsonify({
+                'success': False,
+                'error': 'Session expired. Please refresh the page and log in again.'
+            }), 401
+        # For regular requests, redirect to login page
+        return redirect(url_for('auth.login'))
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        # Only one user in demo, but could be extended
+        for user in [get_user('admin')]:
+            if user and user.get_id() == user_id:
+                return user
+        return None
+    # --- End Flask-Login setup ---
+    
     # Register blueprints
     app.register_blueprint(home_bp)
     app.register_blueprint(vpn_bp)
@@ -36,6 +75,9 @@ def create_app():
     # Import agent_bp here to prevent circular imports
     from routes.agent import agent_bp
     app.register_blueprint(agent_bp)
+    
+    from routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
     
     return app
 

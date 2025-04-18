@@ -1,5 +1,5 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
+Byte-compiled / optimized / DLL files
+pycache__/
 *.py[cod]
 *$py.class
 
@@ -54,3 +54,4 @@ data/*.db
 
 # Config files
 config.py
+references/

@@ -149,6 +149,10 @@
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
             <i class="bi bi-house-door me-2"></i>A-Proxy
         </a>
+
+        <!-- Include header status area -->
+        {% include 'partials/_header_status.html' %}
+
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
                 <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
@@ -172,116 +176,7 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-3 col-lg-2 p-0 bg-body-tertiary sidebar">
-                <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
-                    <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
-                        aria-labelledby="sidebarMenuLabel">
-                        <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="sidebarMenuLabel">A-Proxy</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
-                                data-bs-target="#sidebarMenu" aria-label="Close"></button>
-                        </div>
-                        <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
-                            <ul class="nav flex-column">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('home.index') }}">
-                                        <i class="bi bi-house-fill"></i>
-                                        Home
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('persona.create_persona') }}">
-                                        <i class="bi bi-speedometer2"></i>
-                                        Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('persona.list_personas') }}">
-                                        <i class="bi bi-people"></i>
-                                        Personas
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Persona Interaction</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page"
-                                        href="{{ url_for('journey.interact_as') }}">
-                                        <i class="bi bi-person-gear"></i>
-                                        Interact As
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('archives.list_archives') }}">
-                                        <i class="bi bi-archive"></i>
-                                        Archived Pages
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Journey Tracking</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('journey.list_journeys') }}">
-                                        <i class="bi bi-map"></i>
-                                        Journeys
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ url_for('journey.create_journey') }}">
-                                        <i class="bi bi-plus-circle"></i>
-                                        Create Journey
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <hr class="my-3">
-
-                            <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                                <span>Analysis</span>
-                            </h6>
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-graph-up"></i>
-                                        Reports
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-puzzle"></i>
-                                        Integrations
-                                    </a>
-                                </li>
-                            </ul>
-
-                            <hr class="my-3">
-                            <ul class="nav flex-column mb-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                        <i class="bi bi-gear-wide-connected"></i>
-                                        Settings
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include 'partials/_sidebar.html' %}
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -389,7 +284,7 @@
 
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h5 class="mb-0">Interaction Options</h5>
+                                <h5 class="mb-0">Journey Information</h5>
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
@@ -399,8 +294,33 @@
                                     </button>
                                 </div>
                                 <hr>
-                                <h6 class="fw-bold">Interaction Types:</h6>
-                                <ul class="list-unstyled">
+                                <h6 class="fw-bold">What is a Journey?</h6>
+                                <p class="small">Journeys track a persona's experience across multiple websites
+                                    and interactions, creating a coherent narrative that reflects how they navigate
+                                    the web based on their unique characteristics.</p>
+
+                                <h6 class="fw-bold">Journey Types:</h6>
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">
+                                        <i class="bi bi-cart text-primary me-2"></i>
+                                        <strong>Shopping:</strong> Product discovery to purchase
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-search text-info me-2"></i>
+                                        <strong>Research:</strong> Information gathering processes
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-bar-chart text-success me-2"></i>
+                                        <strong>Marketing:</strong> Ad campaigns and conversions
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-mortarboard text-warning me-2"></i>
+                                        <strong>Educational:</strong> Learning paths and resources
+                                    </li>
+                                </ul>
+
+                                <h6 class="fw-bold mt-3">Interaction Methods:</h6>
+                                <ul class="list-unstyled small">
                                     <li class="mb-2">
                                         <i class="bi bi-globe text-primary me-2"></i>
                                         <strong>Browse:</strong> Navigate the web as this persona
@@ -429,9 +349,20 @@
                 </div>
                 <form id="create-journey-form" method="POST" action="{{ url_for('journey.create_journey') }}">
                     <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="modal-persona-select" class="form-label">Select Persona *</label>
+                            <select class="form-select" id="modal-persona-select" required>
+                                <option value="">-- Select a Persona --</option>
+                                {% for persona in personas %}
+                                <option value="{{ persona.id }}" data-persona-name="{{ persona.name }}">{{ persona.name
+                                    }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">A persona is required to create a journey.</div>
+                        </div>
                         <input type="hidden" id="journey-persona-id" name="persona_id" value="">
                         <div class="mb-3">
-                            <label for="journey-name" class="form-label">Journey Name</label>
+                            <label for="journey-name" class="form-label">Journey Name *</label>
                             <input type="text" class="form-control" id="journey-name" name="name"
                                 placeholder="E.g., Product Research Journey" required>
                         </div>
@@ -481,30 +412,65 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Set persona ID in modal when clicked
+            // Handle modal persona selection
+            const personaSelect = document.getElementById('modal-persona-select');
+            const journeyNameInput = document.getElementById('journey-name');
+            const personaIdInput = document.getElementById('journey-persona-id');
+
+            // When persona is selected from dropdown, update journey name and hidden persona ID field
+            personaSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const personaId = this.value;
+                const personaName = selectedOption.getAttribute('data-persona-name');
+
+                // Set the hidden persona ID field
+                personaIdInput.value = personaId;
+
+                // Update journey name to match persona's name
+                if (personaId) {
+                    journeyNameInput.value = personaName + "'s Journey";
+                }
+            });
+
+            // Set persona ID in modal when clicked from a persona card
             document.querySelectorAll('[data-bs-target="#createJourneyModal"]').forEach(button => {
                 button.addEventListener('click', function () {
                     const personaId = this.getAttribute('data-persona-id');
                     const personaName = this.getAttribute('data-persona-name');
-                    document.getElementById('journey-persona-id').value = personaId;
 
-                    // Set a default journey name based on the persona
-                    const journeyNameInput = document.getElementById('journey-name');
-                    if (!journeyNameInput.value) {
+                    if (personaId) {
+                        // Set the dropdown selection
+                        personaSelect.value = personaId;
+
+                        // Set the hidden persona ID field
+                        personaIdInput.value = personaId;
+
+                        // Set a default journey name based on the persona
                         journeyNameInput.value = personaName + "'s Journey";
                     }
                 });
             });
 
-            // Handle form submission for creation journey
+            // Handle form submission for creating journey
             document.getElementById('create-journey-form').addEventListener('submit', function (event) {
                 // Validate the form
+                const personaId = document.getElementById('modal-persona-select').value;
                 const journeyName = document.getElementById('journey-name').value;
+
+                if (!personaId) {
+                    alert('Please select a persona');
+                    event.preventDefault();
+                    return false;
+                }
+
                 if (!journeyName) {
                     alert('Please enter a journey name');
                     event.preventDefault();
                     return false;
                 }
+
+                // Ensure the hidden persona ID field is set
+                document.getElementById('journey-persona-id').value = personaId;
 
                 // Get the selected interaction type
                 const interactionType = document.querySelector('input[name="interaction_type"]:checked').value;
@@ -513,31 +479,62 @@
                 const form = this;
                 event.preventDefault();
 
+                // Show a loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
                 // Submit the form using fetch
                 fetch(form.action, {
                     method: form.method,
                     body: new FormData(form),
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'same-origin' // Include cookies for authentication
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        // Check for HTML response which might indicate a session timeout
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('text/html')) {
+                            // This is likely a redirect to the login page
+                            throw new Error('Session expired. Please log in again.');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             // Redirect based on interaction type
                             const journeyId = data.journey_id;
+                            const personaId = document.getElementById('journey-persona-id').value;
+
                             if (interactionType === 'browse') {
                                 window.location.href = "{{ url_for('journey.browse_journey', journey_id=0) }}".replace('0', journeyId);
                             } else {
-                                window.location.href = "{{ url_for('agent.journey_agent', journey_id=0) }}".replace('0', journeyId);
+                                // Redirect to direct-chat page with journey_id parameter instead of agent.journey_agent
+                                window.location.href = "{{ url_for('agent.direct_chat', persona_id=0) }}".replace('0', personaId) + "?journey_id=" + journeyId;
                             }
                         } else {
+                            // Restore button
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
                             alert('Error creating journey: ' + data.error);
                         }
                     })
                     .catch(error => {
+                        // Restore button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+
                         console.error('Error:', error);
-                        alert('Error creating journey. Please try again.');
+                        if (error.message.includes('Session expired')) {
+                            alert('Your session has expired. Please refresh the page and log in again.');
+                            // Optionally redirect to login page
+                            window.location.href = "{{ url_for('auth.login') }}";
+                        } else {
+                            alert('Error creating journey. Please try again.');
+                        }
                     });
 
                 return false;

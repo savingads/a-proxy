@@ -2,8 +2,143 @@ import subprocess
 import logging
 import os
 import requests
+import json
+from abc import ABC, abstractmethod
+import tiktoken  # For token counting
 
 logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Context management system
+class ContextProvider(ABC):
+    """Base interface for context providers"""
+    
+    @abstractmethod
+    def get_context(self, **kwargs):
+        """Return context as formatted text"""
+        pass
+        
+    def get_token_estimate(self, text):
+        """Estimate tokens used by text"""
+        try:
+            # Use cl100k_base encoding which is close to what Claude uses
+            encoding = tiktoken.get_encoding("cl100k_base")
+            tokens = len(encoding.encode(text))
+            return tokens
+        except Exception as e:
+            logger.warning(f"Error estimating tokens: {e}")
+            # Fallback: rough estimate based on whitespace-split words × 1.3
+            return int(len(text.split()) * 1.3)
+
+class PersonaContextProvider(ContextProvider):
+    """Provides persona context"""
+    
+    def get_context(self, persona_id=None, mode="with", **kwargs):
+        """Get formatted persona context"""
+        if not persona_id:
+            return "You are a helpful assistant."
+            
+        try:
+            raw_context = fetch_persona_context(persona_id)
+            if not raw_context:
+                return "You are a helpful assistant."
+                
+            persona_context = flatten_persona_context(raw_context)
+            return persona_context_to_system_prompt(persona_context, mode)
+        except Exception as e:
+            logger.error(f"Error in PersonaContextProvider: {e}")
+            return "You are a helpful assistant."
+            
+class JourneyContextProvider(ContextProvider):
+    """Provides journey context"""
+    
+    def get_context(self, journey_id=None, **kwargs):
+        """Get formatted journey context"""
+        if not journey_id:
+            return ""
+            
+        try:
+            import database
+            journey = database.get_journey(journey_id)
+            if not journey:
+                return ""
+                
+            # Format journey info
+            context_lines = [
+                "## Journey Context",
+                f"Journey: {journey.get('name', 'Unnamed Journey')}",
+            ]
+            
+            if journey.get('description'):
+                context_lines.append(f"Description: {journey['description']}")
+                
+            if journey.get('journey_type'):
+                context_lines.append(f"Type: {journey['journey_type']}")
+                
+            # Add waypoints summary (limited to avoid token overload)
+            try:
+                waypoints = database.get_waypoints(journey_id)
+                if waypoints:
+                    context_lines.append(f"\nThis journey contains {len(waypoints)} waypoints:")
+                    # Include just the most recent 3 waypoints
+                    for wp in waypoints[-3:]:
+                        title = wp.get('title', 'Untitled waypoint')
+                        context_lines.append(f"- {title}")
+                        if wp.get('notes'):
+                            # Truncate notes if too long
+                            notes = wp['notes']
+                            if len(notes) > 100:
+                                notes = notes[:97] + "..."
+                            context_lines.append(f"  Note: {notes}")
+            except Exception as wp_error:
+                logger.error(f"Error getting waypoints: {wp_error}")
+            
+            return "\n".join(context_lines)
+        except Exception as e:
+            logger.error(f"Error in JourneyContextProvider: {e}")
+            return ""
+
+class ContextManager:
+    """Manages multiple context providers and handles token limits"""
+    
+    def __init__(self, max_tokens=8000):
+        self.providers = []
+        self.max_tokens = max_tokens
+        
+    def add_provider(self, provider):
+        self.providers.append(provider)
+        
+    def get_combined_context(self, **kwargs):
+        """Get combined context from all providers, respecting token limits"""
+        contexts = []
+        total_tokens = 0
+        
+        for provider in self.providers:
+            context = provider.get_context(**kwargs)
+            if not context:
+                continue
+                
+            token_estimate = provider.get_token_estimate(context)
+            
+            # If adding this context would exceed our limit, skip it
+            if total_tokens + token_estimate > self.max_tokens:
+                logger.warning(f"Skipping context from {provider.__class__.__name__} due to token limits")
+                continue
+                
+            contexts.append(context)
+            total_tokens += token_estimate
+            
+        # Combine all contexts
+        combined = "\n\n".join(contexts)
+        
+        # If we have a conversation mode specified, add a clear instruction at the end
+        mode = kwargs.get("mode")
+        if mode == "with":
+            combined += "\n\nYou are the persona described above. Respond to the user's messages accordingly."
+        elif mode == "as":
+            combined += "\n\nThe user is roleplaying as the persona described above. You are responding to them, not as the persona."
+        
+        return combined
 
 def start_vpn(region):
     vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
@@ -116,6 +251,3 @@ def flatten_persona_context(raw_context):
 
 if __name__ == "__main__":
     start_vpn("de1088")
-
-
-

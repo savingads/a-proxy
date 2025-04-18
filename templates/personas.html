@@ -15,14 +15,6 @@
 {% endblock %}
 
 {% block header_content %}
-<form action="{{ url_for('browsing.visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
-    id="preview-form">
-    <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
-    <input type="hidden" name="language" value="{{ language }}">
-    <input type="hidden" name="geolocation" id="form-geolocation" value="">
-    <button type="submit" class="btn btn-primary me-2">Preview</button>
-    <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
-</form>
 <ul class="navbar-nav flex-row d-md-none">
     <li class="nav-item text-nowrap">
         <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSearch"
@@ -84,7 +76,7 @@
             {% for persona in personas %}
             <tr>
                 <td>{{ persona.id }}</td>
-                <td>{{ persona.name }}</td>
+                <td><i class="bi bi-person"></i> {{ persona.name }}</td>
                 <td>{{ persona.demographic.latitude if persona.demographic else '' }}</td>
                 <td>{{ persona.demographic.longitude if persona.demographic else '' }}</td>
                 <td>{{ persona.demographic.language if persona.demographic else '' }}</td>
@@ -92,7 +84,8 @@
                 <td>{{ persona.demographic.city if persona.demographic else '' }}</td>
                 <td>{{ persona.created_at }}</td>
                 <td>
-                    <a href="{{ url_for('persona.view_persona', persona_id=persona.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('persona.view_persona', persona_id=persona.id) }}"
+                        class="btn btn-sm btn-outline-primary">View</a>
                     <a href="{{ url_for('journey.browse_as') }}?persona_id={{ persona.id }}"
                         class="btn btn-sm btn-outline-secondary">Use</a>
                     <form action="{{ url_for('persona.delete_persona', persona_id=persona.id) }}" method="post"

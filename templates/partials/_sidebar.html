@@ -18,9 +18,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center gap-2 {{ 'active' if request.endpoint == 'persona.create_persona' else '' }}"
-                            {{ 'aria-current="page"' if request.endpoint=='persona.create_persona' else '' }}
-                            href="{{ url_for('persona.create_persona') }}">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ 'active' if request.endpoint == 'home.dashboard' else '' }}"
+                            {{ 'aria-current="page"' if request.endpoint=='home.dashboard' else '' }}
+                            href="{{ url_for('home.dashboard') }}">
                             <i class="bi bi-speedometer2"></i>
                             Dashboard
                         </a>

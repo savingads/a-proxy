@@ -503,8 +503,8 @@
             // Create a unique conversation ID for this chat session
             const conversationId = Date.now().toString();
 
-            // Keep track of conversation histories for both modes
-            const chatWithHistory = [
+            // Initialize chat histories with preloaded data if available
+            let chatWithHistory = [
                 {
                     role: 'agent',
                     content: `Hello, I'm {{ persona.name }}. How can I help you today?`,
@@ -512,54 +512,83 @@
                 }
             ];
 
-            const chatAsHistory = [];
+            let chatAsHistory = [];
 
-            // Current mode state
-            let currentMode = 'with'; // 'with' or 'as'
-            let targetPersonaType = targetPersonaSelect.value; // Default target persona
+            // Server may provide preloaded chat histories from a waypoint
+            {% if preloaded_chat_with_history %}
+            try {
+                // Parse the preloaded chat history
+                const preloadedWithHistory = {{ preloaded_chat_with_history| tojson | safe
+            }};
+        if (preloadedWithHistory && Array.isArray(preloadedWithHistory) && preloadedWithHistory.length > 0) {
+            chatWithHistory = preloadedWithHistory;
+            console.log("Loaded preexisting 'chat with' history:", chatWithHistory.length, "messages");
+        }
+            } catch (e) {
+            console.error("Error loading preloaded chat with history:", e);
+        }
+        {% endif %}
 
-            // Add initial welcome message for "Chat as" mode
-            function initChatAsHistory() {
-                if (chatAsHistory.length === 0) {
-                    // Get the persona name from the DOM to avoid template variable scope issues
-                    const personaName = document.querySelector('.persona-badge').textContent.trim();
+        {% if preloaded_chat_as_history %}
+        try {
+            // Parse the preloaded chat history
+            const preloadedAsHistory = {{ preloaded_chat_as_history| tojson | safe
+        }};
+        if (preloadedAsHistory && Array.isArray(preloadedAsHistory) && preloadedAsHistory.length > 0) {
+            chatAsHistory = preloadedAsHistory;
+            console.log("Loaded preexisting 'chat as' history:", chatAsHistory.length, "messages");
+        }
+            } catch (e) {
+            console.error("Error loading preloaded chat as history:", e);
+        }
+        {% endif %}
 
-                    chatAsHistory.push({
-                        role: 'target',
-                        content: `Hello ${personaName}, how can I help you today?`,
-                        timestamp: new Date().toISOString()
-                    });
-                }
+        // Current mode state
+        let currentMode = 'with'; // 'with' or 'as'
+        let targetPersonaType = targetPersonaSelect.value; // Default target persona
+
+        // Add initial welcome message for "Chat as" mode
+        function initChatAsHistory() {
+            if (chatAsHistory.length === 0) {
+                // Get the persona name from the DOM to avoid template variable scope issues
+                const personaName = document.querySelector('.persona-badge').textContent.trim();
+
+                chatAsHistory.push({
+                    role: 'target',
+                    content: `Hello ${personaName}, how can I help you today?`,
+                    timestamp: new Date().toISOString()
+                });
             }
+        }
 
-            // Get the current active history based on mode
-            function getCurrentHistory() {
-                return currentMode === 'with' ? chatWithHistory : chatAsHistory;
-            }
+        // Get the current active history based on mode
+        function getCurrentHistory() {
+            return currentMode === 'with' ? chatWithHistory : chatAsHistory;
+        }
 
-            // Clear the chat messages and display the appropriate history
-            function displayCurrentModeHistory() {
-                // Clear the chat window
-                chatMessages.innerHTML = '';
+        // Clear the chat messages and display the appropriate history
+        function displayCurrentModeHistory() {
+            // Clear the chat window
+            chatMessages.innerHTML = '';
 
-                // Get the appropriate history
-                const history = getCurrentHistory();
+            // Get the appropriate history
+            const history = getCurrentHistory();
 
-                // Display each message
-                history.forEach(msg => {
-                    const messageElement = document.createElement('div');
-                    const role = currentMode === 'with'
-                        ? msg.role
-                        : (msg.role === 'persona' ? 'user' : 'agent');
+            // Display each message
+            history.forEach(msg => {
+                const messageElement = document.createElement('div');
+                const role = currentMode === 'with'
+                    ? msg.role
+                    : (msg.role === 'persona' ? 'user' : 'agent');
 
-                    messageElement.className = `message ${role}-message`;
+                messageElement.className = `message ${role}-message`;
 
-                    const formattedTime = new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
+                const formattedTime = new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
 
-                    messageElement.innerHTML = `
+                messageElement.innerHTML = `
                         <div class="message-bubble">
                             <div class="message-content">${msg.content}</div>
                             <div class="message-meta">
@@ -568,90 +597,90 @@
                         </div>
                     `;
 
-                    chatMessages.appendChild(messageElement);
-                });
+                chatMessages.appendChild(messageElement);
+            });
 
-                // Scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Switch between chat modes
+        function switchMode(newMode, saveFirst = false) {
+            if (saveFirst) {
+                openSaveModal();
             }
 
-            // Switch between chat modes
-            function switchMode(newMode, saveFirst = false) {
-                if (saveFirst) {
-                    openSaveModal();
-                }
+            currentMode = newMode;
 
-                currentMode = newMode;
+            // Update UI
+            chatModeToggle.checked = (newMode === 'as');
+            chatModeHeader.textContent = newMode === 'with' ? 'Chatting with:' : 'Chatting as:';
 
-                // Update UI
-                chatModeToggle.checked = (newMode === 'as');
-                chatModeHeader.textContent = newMode === 'with' ? 'Chatting with:' : 'Chatting as:';
+            // Get the persona name from the DOM to avoid template variable scope issues
+            const personaName = document.querySelector('.persona-badge').textContent.trim();
 
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
+            messageInput.placeholder = newMode === 'with'
+                ? 'Type your message...'
+                : `Type as ${personaName}...`;
 
-                messageInput.placeholder = newMode === 'with'
-                    ? 'Type your message...'
-                    : `Type as ${personaName}...`;
+            // Always keep the target persona selector hidden - we don't need it
+            // since we're always chatting with/as the same persona
+            targetPersonaSelector.style.display = 'none';
 
-                // Always keep the target persona selector hidden - we don't need it
-                // since we're always chatting with/as the same persona
-                targetPersonaSelector.style.display = 'none';
-
-                // Initialize chat history if needed
-                if (newMode === 'as' && chatAsHistory.length === 0) {
-                    initChatAsHistory();
-                }
-
-                // Update the chat display
-                displayCurrentModeHistory();
-
-                // Focus on the input
-                messageInput.focus();
+            // Initialize chat history if needed
+            if (newMode === 'as' && chatAsHistory.length === 0) {
+                initChatAsHistory();
             }
 
-            // Show the confirmation modal if there's chat history
-            function confirmModeSwitch() {
-                const history = getCurrentHistory();
-                if (history.length > 1) { // More than just the welcome message
-                    const modalInstance = new bootstrap.Modal(modeConfirmModal);
-                    modalInstance.show();
-                } else {
-                    // No significant history, just switch
-                    switchMode(currentMode === 'with' ? 'as' : 'with');
-                }
-            }
+            // Update the chat display
+            displayCurrentModeHistory();
 
-            // Open the save modal
-            function openSaveModal() {
-                // Update title based on mode
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
+            // Focus on the input
+            messageInput.focus();
+        }
 
-                document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
-                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
-
-                // Show the modal
-                const modalInstance = new bootstrap.Modal(saveChatModal);
+        // Show the confirmation modal if there's chat history
+        function confirmModeSwitch() {
+            const history = getCurrentHistory();
+            if (history.length > 1) { // More than just the welcome message
+                const modalInstance = new bootstrap.Modal(modeConfirmModal);
                 modalInstance.show();
+            } else {
+                // No significant history, just switch
+                switchMode(currentMode === 'with' ? 'as' : 'with');
             }
+        }
 
-            // Function to add a message to the chat
-            function addMessage(message, role) {
-                const messageElement = document.createElement('div');
+        // Open the save modal
+        function openSaveModal() {
+            // Update title based on mode
+            // Get the persona name from the DOM to avoid template variable scope issues
+            const personaName = document.querySelector('.persona-badge').textContent.trim();
 
-                // Adjust role display based on current mode
-                const displayRole = currentMode === 'with'
-                    ? role
-                    : (role === 'user' ? 'persona' : 'target');
+            document.getElementById('chat-title').value = currentMode === 'with'
+                ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
 
-                messageElement.className = `message ${role}-message`;
+            // Show the modal
+            const modalInstance = new bootstrap.Modal(saveChatModal);
+            modalInstance.show();
+        }
 
-                const timestamp = new Date().toISOString();
-                const formattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Function to add a message to the chat
+        function addMessage(message, role) {
+            const messageElement = document.createElement('div');
 
-                messageElement.innerHTML = `
+            // Adjust role display based on current mode
+            const displayRole = currentMode === 'with'
+                ? role
+                : (role === 'user' ? 'persona' : 'target');
+
+            messageElement.className = `message ${role}-message`;
+
+            const timestamp = new Date().toISOString();
+            const formattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageElement.innerHTML = `
                     <div class="message-bubble">
                         <div class="message-content">${message}</div>
                         <div class="message-meta">
@@ -660,382 +689,392 @@
                     </div>
                 `;
 
-                chatMessages.appendChild(messageElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                // Add message to the appropriate conversation history
-                if (currentMode === 'with') {
-                    chatWithHistory.push({
-                        role: role,
-                        content: message,
-                        timestamp: timestamp
-                    });
-                } else {
-                    chatAsHistory.push({
-                        role: role === 'user' ? 'persona' : 'target',
-                        content: message,
-                        timestamp: timestamp
-                    });
-                }
+            // Add message to the appropriate conversation history
+            if (currentMode === 'with') {
+                chatWithHistory.push({
+                    role: role,
+                    content: message,
+                    timestamp: timestamp
+                });
+            } else {
+                chatAsHistory.push({
+                    role: role === 'user' ? 'persona' : 'target',
+                    content: message,
+                    timestamp: timestamp
+                });
             }
+        }
 
-            // Function to add a typing indicator
-            function showTypingIndicator() {
-                const typingElement = document.createElement('div');
-                typingElement.className = 'typing-indicator';
-                typingElement.id = 'typing-indicator';
-                typingElement.innerHTML = `
+        // Function to add a typing indicator
+        function showTypingIndicator() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'typing-indicator';
+            typingElement.id = 'typing-indicator';
+            typingElement.innerHTML = `
                     <span></span>
                     <span></span>
                     <span></span>
                 `;
-                chatMessages.appendChild(typingElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            chatMessages.appendChild(typingElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingElement = document.getElementById('typing-indicator');
+            if (typingElement) {
+                typingElement.remove();
             }
+        }
 
-            function removeTypingIndicator() {
-                const typingElement = document.getElementById('typing-indicator');
-                if (typingElement) {
-                    typingElement.remove();
-                }
-            }
+        // Handle form submission - Different behavior based on mode
+        chatForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
 
-            // Handle form submission - Different behavior based on mode
-            chatForm.addEventListener('submit', async function (event) {
-                event.preventDefault();
-                const message = messageInput.value.trim();
-                if (!message) return;
+            // Add user message to chat immediately
+            addMessage(message, 'user');
+            messageInput.value = '';
+            showTypingIndicator();
 
-                // Add user message to chat immediately
-                addMessage(message, 'user');
-                messageInput.value = '';
-                showTypingIndicator();
+            // Prepare payload for backend
+            const payload = {
+                message: message,
+                conversation_id: conversationId,
+                persona_id: "{{ persona.id }}",
+                chat_mode: currentMode
+            };
 
-                // Prepare payload for backend
-                const payload = {
-                    message: message,
-                    conversation_id: conversationId,
-                    persona_id: "{{ persona.id }}",
-                    chat_mode: currentMode
-                };
-
-                try {
-                    const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await response.json();
-                    removeTypingIndicator();
-                    if (data.success && data.response) {
-                        addMessage(data.response, 'agent');
-                    } else {
-                        addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
-                    }
-                } catch (err) {
-                    removeTypingIndicator();
-                    addMessage('[Error: Could not reach Claude API]', 'agent');
-                }
-            });
-
-            // Handle mode toggle
-            chatModeToggle.addEventListener('change', function () {
-                confirmModeSwitch();
-            });
-
-            // Target persona change handler
-            targetPersonaSelect.addEventListener('change', function () {
-                targetPersonaType = this.value;
-            });
-
-            // Handle mode switch without saving
-            switchWithoutSavingBtn.addEventListener('click', function () {
-                const newMode = currentMode === 'with' ? 'as' : 'with';
-                bootstrap.Modal.getInstance(modeConfirmModal).hide();
-                switchMode(newMode);
-            });
-
-            // Handle save and switch
-            saveAndSwitchBtn.addEventListener('click', function () {
-                bootstrap.Modal.getInstance(modeConfirmModal).hide();
-
-                // Set modal title based on current mode
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
-
-                document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
-                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
-
-                // Show save modal then switch on save
-                const saveModalInstance = new bootstrap.Modal(saveChatModal);
-                saveModalInstance.show();
-
-                // Add a one-time event listener to switch mode after saving
-                const originalSubmitHandler = document.getElementById('save-chat-form').onsubmit;
-                document.getElementById('save-chat-form').onsubmit = function (event) {
-                    event.preventDefault();
-
-                    // Call the original handler
-                    if (originalSubmitHandler) originalSubmitHandler(event);
-
-                    // After saving, switch mode
-                    const newMode = currentMode === 'with' ? 'as' : 'with';
-                    switchMode(newMode);
-
-                    // Remove this one-time handler
-                    document.getElementById('save-chat-form').onsubmit = originalSubmitHandler;
-
-                    // Hide the modal
-                    bootstrap.Modal.getInstance(saveChatModal).hide();
-                };
-            });
-
-            // Check if we're in a journey context
-            function isInJourney() {
-                // Check for journey badge in the DOM
-                return document.querySelector('.journey-badge') !== null;
-            }
-
-            // Get current journey ID if available
-            function getCurrentJourneyId() {
-                const journeyBadge = document.querySelector('.journey-badge a');
-                if (journeyBadge) {
-                    // Extract journey ID from the URL
-                    const journeyUrl = journeyBadge.getAttribute('href');
-                    const journeyId = journeyUrl.match(/journey_id=(\d+)/) ||
-                        journeyUrl.match(/journey\/(\d+)/);
-                    return journeyId ? journeyId[1] : null;
-                }
-                return null;
-            }
-
-            // Get current journey name if available
-            function getCurrentJourneyName() {
-                const journeyBadge = document.querySelector('.journey-badge a');
-                return journeyBadge ? journeyBadge.textContent.trim() : null;
-            }
-
-            // Setup the save chat modal
-            saveChatModal.addEventListener('show.bs.modal', function () {
-                // Update title based on current mode
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
-
-                document.getElementById('chat-title').value = currentMode === 'with'
-                    ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
-                    : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
-
-                // Set up journey options based on current context
-                if (isInJourney()) {
-                    // We're in a journey, select "Save to Existing Journey" by default
-                    document.getElementById('journey-existing').checked = true;
-
-                    // Show the journey dropdown
-                    document.getElementById('existing-journey-select').style.display = 'block';
-                    document.getElementById('new-journey-form').style.display = 'none';
-                } else {
-                    // Not in a journey, select "Create New Journey" by default
-                    document.getElementById('journey-new').checked = true;
-
-                    // Show the new journey form
-                    document.getElementById('existing-journey-select').style.display = 'none';
-                    document.getElementById('new-journey-form').style.display = 'block';
-                }
-
-                // Load existing journeys into the dropdown
-                loadExistingJourneys();
-            });
-
-            // Setup journey option radio buttons
-            document.querySelectorAll('input[name="journey_option"]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    const isExisting = this.value === 'existing';
-                    document.getElementById('existing-journey-select').style.display = isExisting ? 'block' : 'none';
-                    document.getElementById('new-journey-form').style.display = isExisting ? 'none' : 'block';
+            try {
+                const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-            });
-
-            // Load existing journeys for this persona
-            function loadExistingJourneys() {
-                // In a real implementation, we would fetch journeys from the server
-                // For now, we'll add a few placeholders
-                const journeySelect = document.getElementById('journey-id');
-                journeySelect.innerHTML = '<option value="">Select a journey...</option>';
-
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
-
-                // Check if we're in a journey first
-                const currentJourneyId = getCurrentJourneyId();
-                const currentJourneyName = getCurrentJourneyName();
-
-                if (currentJourneyId && currentJourneyName) {
-                    // We have a current journey, add it first and select it
-                    const option = document.createElement('option');
-                    option.value = currentJourneyId;
-                    option.textContent = currentJourneyName;
-                    option.selected = true;
-                    journeySelect.appendChild(option);
+                const data = await response.json();
+                removeTypingIndicator();
+                if (data.success && data.response) {
+                    addMessage(data.response, 'agent');
+                } else {
+                    addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
                 }
+            } catch (err) {
+                removeTypingIndicator();
+                addMessage('[Error: Could not reach Claude API]', 'agent');
+            }
+        });
 
-                // Add other journeys - in a real implementation, we would fetch from server
-                // For demo purposes, add dummy journeys if not in a journey
-                if (!currentJourneyId) {
-                    const dummyJourneys = [
-                        { id: 1, name: `${personaName}'s Shopping Journey` },
-                        { id: 2, name: `${personaName}'s Research Project` },
-                        { id: 3, name: 'Product Exploration' }
-                    ];
+        // Handle mode toggle
+        chatModeToggle.addEventListener('change', function () {
+            confirmModeSwitch();
+        });
 
-                    dummyJourneys.forEach(journey => {
-                        const option = document.createElement('option');
-                        option.value = journey.id;
-                        option.textContent = journey.name;
-                        journeySelect.appendChild(option);
-                    });
+        // Target persona change handler
+        targetPersonaSelect.addEventListener('change', function () {
+            targetPersonaType = this.value;
+        });
+
+        // Handle mode switch without saving
+        switchWithoutSavingBtn.addEventListener('click', function () {
+            const newMode = currentMode === 'with' ? 'as' : 'with';
+            bootstrap.Modal.getInstance(modeConfirmModal).hide();
+            switchMode(newMode);
+        });
+
+        // Handle save and switch
+        saveAndSwitchBtn.addEventListener('click', function () {
+            bootstrap.Modal.getInstance(modeConfirmModal).hide();
+
+            // Set modal title based on current mode
+            // Get the persona name from the DOM to avoid template variable scope issues
+            const personaName = document.querySelector('.persona-badge').textContent.trim();
+
+            document.getElementById('chat-title').value = currentMode === 'with'
+                ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
+
+            // Show save modal then switch on save
+            const saveModalInstance = new bootstrap.Modal(saveChatModal);
+            saveModalInstance.show();
+
+            // Add a one-time event listener to switch mode after saving
+            const originalSubmitHandler = document.getElementById('save-chat-form').onsubmit;
+            document.getElementById('save-chat-form').onsubmit = function (event) {
+                event.preventDefault();
+
+                // Call the original handler
+                if (originalSubmitHandler) originalSubmitHandler(event);
+
+                // After saving, switch mode
+                const newMode = currentMode === 'with' ? 'as' : 'with';
+                switchMode(newMode);
+
+                // Remove this one-time handler
+                document.getElementById('save-chat-form').onsubmit = originalSubmitHandler;
+
+                // Hide the modal
+                bootstrap.Modal.getInstance(saveChatModal).hide();
+            };
+        });
+
+        // Check if we're in a journey context
+        function isInJourney() {
+            // Check for journey badge in the DOM
+            return document.querySelector('.journey-badge') !== null;
+        }
+
+        // Get current journey ID if available
+        function getCurrentJourneyId() {
+            const journeyBadge = document.querySelector('.journey-badge a');
+            if (journeyBadge) {
+                // Extract journey ID from the URL
+                const journeyUrl = journeyBadge.getAttribute('href');
+                const journeyId = journeyUrl.match(/journey_id=(\d+)/) ||
+                    journeyUrl.match(/journey\/(\d+)/);
+                return journeyId ? journeyId[1] : null;
+            }
+            return null;
+        }
+
+        // Get current journey name if available
+        function getCurrentJourneyName() {
+            const journeyBadge = document.querySelector('.journey-badge a');
+            return journeyBadge ? journeyBadge.textContent.trim() : null;
+        }
+
+        // Setup the save chat modal
+        saveChatModal.addEventListener('show.bs.modal', function () {
+            // Update title based on current mode
+            // Get the persona name from the DOM to avoid template variable scope issues
+            const personaName = document.querySelector('.persona-badge').textContent.trim();
+
+            document.getElementById('chat-title').value = currentMode === 'with'
+                ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
+                : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
+
+            // Set up journey options based on current context
+            if (isInJourney()) {
+                // We're in a journey, select "Save to Existing Journey" by default
+                document.getElementById('journey-existing').checked = true;
+
+                // Show the journey dropdown
+                document.getElementById('existing-journey-select').style.display = 'block';
+                document.getElementById('new-journey-form').style.display = 'none';
+            } else {
+                // Not in a journey, select "Create New Journey" by default
+                document.getElementById('journey-new').checked = true;
+
+                // Show the new journey form
+                document.getElementById('existing-journey-select').style.display = 'none';
+                document.getElementById('new-journey-form').style.display = 'block';
+            }
+
+            // Load existing journeys into the dropdown
+            loadExistingJourneys();
+        });
+
+        // Setup journey option radio buttons
+        document.querySelectorAll('input[name="journey_option"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const isExisting = this.value === 'existing';
+                document.getElementById('existing-journey-select').style.display = isExisting ? 'block' : 'none';
+                document.getElementById('new-journey-form').style.display = isExisting ? 'none' : 'block';
+            });
+        });
+
+        // Load existing journeys for this persona
+        function loadExistingJourneys() {
+            // In a real implementation, we would fetch journeys from the server
+            // For now, we'll add a few placeholders
+            const journeySelect = document.getElementById('journey-id');
+            journeySelect.innerHTML = '<option value="">Select a journey...</option>';
+
+            // Get the persona name from the DOM to avoid template variable scope issues
+            const personaName = document.querySelector('.persona-badge').textContent.trim();
+
+            // Check if we're in a journey first
+            const currentJourneyId = getCurrentJourneyId();
+            const currentJourneyName = getCurrentJourneyName();
+
+            if (currentJourneyId && currentJourneyName) {
+                // We have a current journey, add it first and select it
+                const option = document.createElement('option');
+                option.value = currentJourneyId;
+                option.textContent = currentJourneyName;
+                option.selected = true;
+                journeySelect.appendChild(option);
+            }
+
+            // Add other journeys - in a real implementation, we would fetch from server
+            // For demo purposes, add dummy journeys if not in a journey
+            if (!currentJourneyId) {
+                const dummyJourneys = [
+                    { id: 1, name: `${personaName}'s Shopping Journey` },
+                    { id: 2, name: `${personaName}'s Research Project` },
+                    { id: 3, name: 'Product Exploration' }
+                ];
+
+                dummyJourneys.forEach(journey => {
+                    const option = document.createElement('option');
+                    option.value = journey.id;
+                    option.textContent = journey.name;
+                    journeySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Handle save chat form submission
+        document.getElementById('save-chat-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get form values
+            const title = document.getElementById('chat-title').value;
+            const notes = document.getElementById('chat-notes').value;
+            const chatMode = currentMode;
+            const journeyOption = document.querySelector('input[name="journey_option"]:checked').value;
+
+            // Get journey details based on the selected option
+            let journeyData = {};
+            if (journeyOption === 'existing') {
+                journeyData.journey_id = document.getElementById('journey-id').value;
+                if (!journeyData.journey_id) {
+                    alert('Please select a journey');
+                    return;
+                }
+            } else {
+                journeyData.journey_name = document.getElementById('journey-name').value;
+                journeyData.journey_description = document.getElementById('journey-description').value;
+                journeyData.journey_type = document.getElementById('journey-type').value;
+
+                if (!journeyData.journey_name) {
+                    alert('Please enter a journey name');
+                    return;
                 }
             }
 
-            // Handle save chat form submission
-            document.getElementById('save-chat-form').addEventListener('submit', function (event) {
-                event.preventDefault();
+            // Get the appropriate chat history
+            const history = currentMode === 'with' ? chatWithHistory : chatAsHistory;
 
-                // Get form values
-                const title = document.getElementById('chat-title').value;
-                const notes = document.getElementById('chat-notes').value;
-                const chatMode = currentMode;
-                const journeyOption = document.querySelector('input[name="journey_option"]:checked').value;
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('notes', notes);
+            formData.append('chat_mode', chatMode);
+            formData.append('journey_option', journeyOption);
+            formData.append('chat_history', JSON.stringify(history));
 
-                // Get journey details based on the selected option
-                let journeyData = {};
-                if (journeyOption === 'existing') {
-                    journeyData.journey_id = document.getElementById('journey-id').value;
-                    if (!journeyData.journey_id) {
-                        alert('Please select a journey');
-                        return;
-                    }
-                } else {
-                    journeyData.journey_name = document.getElementById('journey-name').value;
-                    journeyData.journey_description = document.getElementById('journey-description').value;
-                    journeyData.journey_type = document.getElementById('journey-type').value;
+            // Add journey details
+            if (journeyOption === 'existing') {
+                formData.append('journey_id', journeyData.journey_id);
+            } else {
+                formData.append('journey_name', journeyData.journey_name);
+                formData.append('journey_description', journeyData.journey_description);
+                formData.append('journey_type', journeyData.journey_type);
+            }
 
-                    if (!journeyData.journey_name) {
-                        alert('Please enter a journey name');
-                        return;
-                    }
+            // Show a loading indicator
+            const saveButton = document.querySelector('#save-chat-form button[type="submit"]');
+            const originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+            // Use XMLHttpRequest instead of fetch for better error handling
+            const xhr = new XMLHttpRequest();
+            const url = '{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}';
+
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Accept', 'application/json');
+
+            // Define what happens on successful data submission
+            xhr.onload = function () {
+                // Restore save button regardless of outcome
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalText;
+
+                // Check if we've been redirected to the login page
+                if (xhr.responseText.includes('<!doctype') && xhr.responseText.includes('login')) {
+                    console.error('Session expired, redirected to login page');
+                    alert('Your session has expired. Please refresh the page and log in again to save the chat.');
+                    return;
                 }
 
-                // Get the appropriate chat history
-                const history = currentMode === 'with' ? chatWithHistory : chatAsHistory;
-
-                // Create form data
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('notes', notes);
-                formData.append('chat_mode', chatMode);
-                formData.append('journey_option', journeyOption);
-                formData.append('chat_history', JSON.stringify(history));
-
-                // Add journey details
-                if (journeyOption === 'existing') {
-                    formData.append('journey_id', journeyData.journey_id);
-                } else {
-                    formData.append('journey_name', journeyData.journey_name);
-                    formData.append('journey_description', journeyData.journey_description);
-                    formData.append('journey_type', journeyData.journey_type);
-                }
-
-                // Show a loading indicator
-                const saveButton = document.querySelector('#save-chat-form button[type="submit"]');
-                const originalText = saveButton.innerHTML;
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-
-                // Use XMLHttpRequest instead of fetch for better error handling
-                const xhr = new XMLHttpRequest();
-                const url = '{{ url_for("agent.save_direct_chat", persona_id=persona.id) }}';
-
-                xhr.open('POST', url, true);
-                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                xhr.setRequestHeader('Accept', 'application/json');
-
-                // Define what happens on successful data submission
-                xhr.onload = function () {
-                    // Restore save button regardless of outcome
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = originalText;
-
-                    // Check if we've been redirected to the login page
-                    if (xhr.responseText.includes('<!doctype') && xhr.responseText.includes('login')) {
-                        console.error('Session expired, redirected to login page');
-                        alert('Your session has expired. Please refresh the page and log in again to save the chat.');
-                        return;
-                    }
-
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const result = JSON.parse(xhr.responseText);
-                            if (result.success) {
-                                alert(`Chat saved successfully as "${title}"!`);
-                                bootstrap.Modal.getInstance(saveChatModal).hide();
-                            } else {
-                                alert(`Error saving chat: ${result.error || 'Unknown error'}`);
-                            }
-                        } catch (e) {
-                            console.error('Error parsing JSON response:', e);
-                            console.error('Raw response:', xhr.responseText.substring(0, 500));
-                            alert('Error: Could not parse server response. You may need to log in again.');
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        if (result.success) {
+                            alert(`Chat saved successfully as "${title}"!`);
+                            bootstrap.Modal.getInstance(saveChatModal).hide();
+                        } else {
+                            alert(`Error saving chat: ${result.error || 'Unknown error'}`);
                         }
-                    } else {
-                        // Non-2xx status code
-                        console.error('Server returned status:', xhr.status);
-                        console.error('Response text:', xhr.responseText.substring(0, 500));
-                        alert(`Error saving chat: Server returned status ${xhr.status}`);
+                    } catch (e) {
+                        console.error('Error parsing JSON response:', e);
+                        console.error('Raw response:', xhr.responseText.substring(0, 500));
+                        alert('Error: Could not parse server response. You may need to log in again.');
                     }
-                };
-
-                // Define what happens in case of error
-                xhr.onerror = function () {
-                    console.error('Request failed');
-                    alert('Error saving chat. Please check your network connection and try again.');
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = originalText;
-                };
-
-                // Send the request
-                xhr.send(formData);
-            });
-
-            // Handle context sidebar collapse/expand
-            const contextSidebar = document.getElementById('contextSidebar');
-            const contextToggle = document.getElementById('contextToggle');
-
-            contextToggle.addEventListener('click', function () {
-                contextSidebar.classList.toggle('collapsed');
-
-                // Toggle the icon between chevron-left and chevron-right
-                const icon = contextToggle.querySelector('i');
-                if (contextSidebar.classList.contains('collapsed')) {
-                    icon.classList.remove('bi-chevron-left');
-                    icon.classList.add('bi-chevron-right');
                 } else {
-                    icon.classList.remove('bi-chevron-right');
-                    icon.classList.add('bi-chevron-left');
+                    // Non-2xx status code
+                    console.error('Server returned status:', xhr.status);
+                    console.error('Response text:', xhr.responseText.substring(0, 500));
+                    alert(`Error saving chat: Server returned status ${xhr.status}`);
                 }
+            };
 
-                // If sidebar is expanded, wait a little bit for the animation to complete before making content visible again
-                if (!contextSidebar.classList.contains('collapsed')) {
-                    setTimeout(() => {
-                        const sidebarContent = contextSidebar.querySelector('.sidebar-content');
-                        sidebarContent.style.opacity = '1';
-                        sidebarContent.style.pointerEvents = 'auto';
-                    }, 300);
-                }
-            });
+            // Define what happens in case of error
+            xhr.onerror = function () {
+                console.error('Request failed');
+                alert('Error saving chat. Please check your network connection and try again.');
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalText;
+            };
 
-            // Initialize UI on page load
-            switchMode('with');
+            // Send the request
+            xhr.send(formData);
+        });
+
+        // Handle context sidebar collapse/expand
+        const contextSidebar = document.getElementById('contextSidebar');
+        const contextToggle = document.getElementById('contextToggle');
+
+        contextToggle.addEventListener('click', function () {
+            contextSidebar.classList.toggle('collapsed');
+
+            // Toggle the icon between chevron-left and chevron-right
+            const icon = contextToggle.querySelector('i');
+            if (contextSidebar.classList.contains('collapsed')) {
+                icon.classList.remove('bi-chevron-left');
+                icon.classList.add('bi-chevron-right');
+            } else {
+                icon.classList.remove('bi-chevron-right');
+                icon.classList.add('bi-chevron-left');
+            }
+
+            // If sidebar is expanded, wait a little bit for the animation to complete before making content visible again
+            if (!contextSidebar.classList.contains('collapsed')) {
+                setTimeout(() => {
+                    const sidebarContent = contextSidebar.querySelector('.sidebar-content');
+                    sidebarContent.style.opacity = '1';
+                    sidebarContent.style.pointerEvents = 'auto';
+                }, 300);
+            }
+        });
+
+        // Initialize UI on page load with the right mode
+        // If we have preloaded history, display it
+        const initialMode = '{{ chat_mode }}';  // Get the initial mode from the server
+        switchMode(initialMode);
+
+        // Log some helpful debug info about loaded histories
+        console.log("Chat initialized with mode:", initialMode);
+        console.log("With history length:", chatWithHistory ? chatWithHistory.length : 0);
+        console.log("As history length:", chatAsHistory ? chatAsHistory.length : 0);
+        {% if waypoint_id %}
+        console.log("Continuing conversation from waypoint ID: {{ waypoint_id }}");
+        {% endif %}
         });
     </script>
 </body>

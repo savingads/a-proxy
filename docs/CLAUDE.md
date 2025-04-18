@@ -56,7 +56,14 @@ Updates completed:
    - Ensured Chat option correctly passes the journey_id parameter to maintain journey context
    - Improved UI consistency across journey interaction points
 
-These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page now clearly offers both browse and chat options as ways to continue or start a journey.
+3. **Conversation Continuity**:
+   - Implemented ability to continue conversations directly from waypoints with all chat history
+   - Updated "Continue Conversation" buttons to pass waypoint_id to the chat interface
+   - Modified the direct_chat route to load and display previous chat history
+   - Added smart detection to determine which chat mode to start with based on available history
+   - Ensured that both "chat with" and "chat as" histories are properly loaded and displayed
+
+These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page now clearly offers both browse and chat options as ways to continue or start a journey. Users can also pick up conversations exactly where they left off when returning to a journey.
 
 ## Known Issues (2025-04-18)
 

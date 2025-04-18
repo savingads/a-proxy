@@ -139,11 +139,42 @@ def direct_chat(persona_id):
     # Import inside function to avoid circular imports
     from utils.persona_client import get_client
     import database
+    import json
     
     # Get URL parameters
     chat_mode = request.args.get('mode', 'with')  # 'with' or 'as'
     target_persona_id = request.args.get('target_persona_id')
     journey_id = request.args.get('journey_id')  # Get journey_id from query parameters
+    waypoint_id = request.args.get('waypoint_id')  # Get waypoint_id from query parameters
+    
+    # Initialize chat history variables
+    preloaded_chat_with_history = None
+    preloaded_chat_as_history = None
+    
+    # If waypoint_id is provided, get the chat history from the waypoint
+    if waypoint_id:
+        try:
+            waypoint = database.get_waypoint(waypoint_id)
+            if waypoint and waypoint.get('agent_data'):
+                agent_data = json.loads(waypoint.get('agent_data'))
+                
+                # Check if it has both modes
+                if agent_data.get('has_both_modes'):
+                    # Get both histories
+                    preloaded_chat_with_history = agent_data.get('with_history', [])
+                    preloaded_chat_as_history = agent_data.get('as_history', [])
+                else:
+                    # Get the history from the single mode
+                    mode = agent_data.get('mode')
+                    history = agent_data.get('history', [])
+                    
+                    if mode == 'with':
+                        preloaded_chat_with_history = history
+                    else:
+                        preloaded_chat_as_history = history
+        except Exception as e:
+            logging.error(f"Error loading waypoint chat history: {e}")
+            # Continue without history if there's an error
     
     # Get persona data
     persona = None
@@ -195,15 +226,26 @@ def direct_chat(persona_id):
             logging.error(f"Error getting journey {journey_id}: {e}")
             # Continue without journey if this fails
     
+    # Determine the initial chat mode based on available history
+    initial_mode = chat_mode  # Use the URL parameter as default
+    if preloaded_chat_with_history and not preloaded_chat_as_history:
+        initial_mode = 'with'
+    elif preloaded_chat_as_history and not preloaded_chat_with_history:
+        initial_mode = 'as'
+    # If both are present, use the URL parameter, or default to 'with'
+    
     # Render the simple chat template
     return render_template(
         "simple_chat.html", 
         persona=persona, 
         target_persona=target_persona,
         available_personas=available_personas,
-        chat_mode=chat_mode,
+        chat_mode=initial_mode,  # Use determined initial mode
         persona_context=persona_context,
-        journey=journey  # Pass journey to the template
+        journey=journey,  # Pass journey to the template
+        preloaded_chat_with_history=preloaded_chat_with_history,
+        preloaded_chat_as_history=preloaded_chat_as_history,
+        waypoint_id=waypoint_id  # Pass the waypoint_id for reference
     )
 
 @agent_bp.route("/direct-chat/<int:persona_id>/save", methods=["POST"])

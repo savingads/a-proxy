@@ -98,7 +98,7 @@
     </div>
     <div class="waypoint-footer">
         <div class="d-flex justify-content-between">
-            <a href="{{ url_for('agent.journey_agent', journey_id=journey.id) }}"
+            <a href="{{ url_for('agent.direct_chat', persona_id=journey.persona_id, journey_id=journey.id, waypoint_id=waypoint.id) }}"
                 class="btn btn-sm btn-outline-primary">
                 <i class="bi bi-chat-dots"></i> Continue Conversation
             </a>

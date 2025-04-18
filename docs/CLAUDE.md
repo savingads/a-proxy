@@ -37,3 +37,17 @@ Updates completed:
    - Added specific information about capturing personalized web and chat experiences
    - Removed all VPN references and related UI elements
    - Created feature cards for main application functions
+
+## Known Issues (2025-04-18)
+
+1. **User email not displaying in header**: 
+   - Despite implementing `{{ current_user.email }}` in the header status bar, the user's email is not being displayed when logged in
+   - The template file (_header_status.html) has been updated to show the email, but it's not appearing in the rendered page
+   - Potential causes may include:
+     - FlaskLogin user object not properly passing the email attribute
+     - Template variables not being correctly populated
+     - CSS styling issues hiding the email text
+   - Next steps:
+     - Create a test account with a known email for explicit testing
+     - Add debugging output to verify user object properties
+     - Check auth.py route handlers to ensure user properties are correctly set

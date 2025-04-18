@@ -136,6 +136,38 @@ fi
 
 cd $ROOT_DIR
 
+# Function to check and kill processes using specific ports
+kill_port_processes() {
+    local port=$1
+    local service_name=$2
+    
+    # Check if the port is in use
+    if command -v lsof >/dev/null 2>&1; then
+        local pid=$(lsof -ti:$port)
+        if [ ! -z "$pid" ]; then
+            echo -e "${YELLOW}Found $service_name already running on port $port (PID: $pid)${NC}"
+            echo -e "${YELLOW}Killing existing process...${NC}"
+            kill -9 $pid 2>/dev/null
+            sleep 1
+            echo -e "${GREEN}Process terminated${NC}"
+        fi
+    else
+        # Alternative method if lsof is not available
+        local pid=$(netstat -tulpn 2>/dev/null | grep ":$port " | awk '{print $7}' | cut -d'/' -f1)
+        if [ ! -z "$pid" ]; then
+            echo -e "${YELLOW}Found $service_name already running on port $port (PID: $pid)${NC}"
+            echo -e "${YELLOW}Killing existing process...${NC}"
+            kill -9 $pid 2>/dev/null
+            sleep 1
+            echo -e "${GREEN}Process terminated${NC}"
+        fi
+    fi
+}
+
+# Kill any existing services on the required ports
+kill_port_processes 5050 "Persona Service"
+kill_port_processes 5002 "A-Proxy"
+
 # Start persona-service API
 echo -e "${YELLOW}Starting persona-service API on port 5050...${NC}"
 if [ -d "_src/persona-service" ]; then

@@ -18,8 +18,8 @@ def visit_page():
     if not geolocation:
         geolocation = request.form.get("geolocation", None)
     
-    # Build the command with proper argument formatting
-    command = f"python3 /home/chris/a-proxy/visit_page.py '{url}' --language '{language}'"
+    # Build the command with proper argument formatting using relative path
+    command = f"python3 visit_page.py '{url}' --language '{language}'"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
     if take_screenshot:
@@ -48,8 +48,8 @@ def archive_page():
         except ValueError:
             persona_id = None
     
-    # Build the command with proper argument formatting
-    command = f"python3 /home/chris/a-proxy/archive_page.py '{url}' --language '{language}'"
+    # Build the command with proper argument formatting using relative path
+    command = f"python3 archive_page.py '{url}' --language '{language}'"
     if geolocation:
         command += f" --geolocation '{geolocation}'"
     if persona_id:

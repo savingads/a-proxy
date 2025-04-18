@@ -372,8 +372,8 @@ def direct_browse(persona_id):
         logging.error(f"Error getting journeys for persona {persona_id}: {e}")
         existing_journeys = []
 
-    # Render the simple browsing template
-    return render_template("simple_browse.html", persona=persona, existing_journeys=existing_journeys)
+    # Render the direct browsing template
+    return render_template("direct_browse.html", persona=persona, existing_journeys=existing_journeys)
 
 @journey_bp.route("/save-waypoint/<int:persona_id>", methods=["POST"])
 def save_page_as_waypoint(persona_id):

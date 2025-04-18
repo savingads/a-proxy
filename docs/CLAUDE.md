@@ -16,6 +16,8 @@ The command to run the application is `start.sh`, NOT `python app.py`. Always us
 - **docs/PERSONA_API.md**: API documentation
 - **docs/DOCKER.md**: Docker setup and configuration
 - **docs/IMPLEMENTATION_NOTES.md**: Implementation details
+- **docs/ARCHITECTURE.md**: System architecture and components
+- **docs/README-DEV.md**: Comprehensive developer guide
 
 ## Historical Note: 2025-04-08 Initial WSL Development Environment Setup
 

@@ -76,7 +76,7 @@
             {% for persona in personas %}
             <tr>
                 <td>{{ persona.id }}</td>
-                <td>{{ persona.name }}</td>
+                <td><i class="bi bi-person"></i> {{ persona.name }}</td>
                 <td>{{ persona.demographic.latitude if persona.demographic else '' }}</td>
                 <td>{{ persona.demographic.longitude if persona.demographic else '' }}</td>
                 <td>{{ persona.demographic.language if persona.demographic else '' }}</td>

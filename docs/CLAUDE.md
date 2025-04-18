@@ -1,6 +1,10 @@
-# A-Proxy Development Setup Progress
+# A-Proxy Development Setup and Information
 
-This file contains older development setup information. For current documentation, please refer to the main CLAUDE.md file in the root directory and other documentation files in the docs directory.
+This file contains development information, progress, and important notes for the A-Proxy project.
+
+## Application Startup Command
+
+The command to run the application is `start.sh`, NOT `python app.py`. Always use `start.sh` to run the application.
 
 ## Organization of Documentation
 
@@ -16,3 +20,20 @@ This file contains older development setup information. For current documentatio
 ## Historical Note: 2025-04-08 Initial WSL Development Environment Setup
 
 This content has been integrated into the current documentation. Please see the docs directory for up-to-date information.
+
+## Home Page and Dashboard Updates (2025-04-18)
+
+Updates completed:
+1. Created a new dashboard page that:
+   - Displays browser and device information (moved from the home page)
+   - Shows integration status for Claude and Internet Archive
+   - Includes the location map visualization
+   - Displays the application version number from VERSION.txt
+   - Has a clean, organized layout with information cards
+
+2. Updated the home page:
+   - Removed the URL entry/Preview/Archive form from the header
+   - Updated the content to focus on the application's core features
+   - Added specific information about capturing personalized web and chat experiences
+   - Removed all VPN references and related UI elements
+   - Created feature cards for main application functions

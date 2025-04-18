@@ -38,6 +38,15 @@
 <div class="pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Welcome to A-Proxy</h1>
     <p class="lead">Personalized Web Experience Testing and Archiving</p>
+
+    <!-- Version display in top right -->
+    <div class="version-info text-end">
+        {% if version is defined %}
+        Version {{ version }}
+        {% else %}
+        Version Unknown
+        {% endif %}
+    </div>
 </div>
 
 <div class="row mb-4">

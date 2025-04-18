@@ -2,44 +2,12 @@
     <!-- Authentication status -->
     <div class="auth-status me-3">
         {% if current_user.is_authenticated %}
-        <div class="dropdown">
-            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                {{ current_user.email }}
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">Profile</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
-            </ul>
-        </div>
+        <span class="text-light me-2">{{ current_user.email }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-light">Logout</a>
         {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-light">Login</a>
         <a href="{{ url_for('auth.register') }}"
             class="btn btn-sm btn-outline-secondary ms-2 d-none d-md-inline-block">Register</a>
         {% endif %}
-    </div>
-
-    <!-- Future notification area -->
-    <div class="notification-area me-3 d-none d-md-block">
-        <!-- Placeholder for notifications -->
-        <button class="btn btn-sm btn-outline-light position-relative d-none" type="button">
-            <i class="bi bi-bell"></i>
-            <span
-                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none">
-                <span class="visually-hidden">New notifications</span>
-            </span>
-        </button>
-    </div>
-
-    <!-- Future search toggle -->
-    <div class="search-toggle me-3 d-none d-md-block">
-        <!-- Placeholder for search -->
-        <button class="btn btn-sm btn-outline-light d-none" type="button">
-            <i class="bi bi-search"></i>
-        </button>
     </div>
 </div>

@@ -187,30 +187,37 @@
             </button>
         </div>
 
-        <!-- Right section: persona info -->
-        <div class="persona-info">
-            <div class="persona-badge">
-                <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
-            </div>
+        <!-- Right sections -->
+        <div class="d-flex align-items-center">
+            <!-- Header status area (Login/User) -->
+            {% include 'partials/_header_status.html' %}
 
-            {% if persona.demographic.city and persona.demographic.country %}
-            <div class="text-light small me-3">
-                <i class="bi bi-geo-alt-fill me-1"></i> {{ persona.demographic.city }}, {{ persona.demographic.country
-                }}
-            </div>
-            {% endif %}
+            <!-- Persona info -->
+            <div class="persona-info ms-3">
+                <div class="persona-badge">
+                    <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
+                </div>
 
-            {% if persona.demographic.language %}
-            <div class="text-light small me-3">
-                <i class="bi bi-translate me-1"></i> {{ persona.demographic.language }}
-            </div>
-            {% endif %}
+                {% if persona.demographic.city and persona.demographic.country %}
+                <div class="text-light small me-3">
+                    <i class="bi bi-geo-alt-fill me-1"></i> {{ persona.demographic.city }}, {{
+                    persona.demographic.country
+                    }}
+                </div>
+                {% endif %}
 
-            <!-- Persona details button -->
-            <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
-                data-bs-target="#personaDetailsModal" title="View Persona Details">
-                <i class="bi bi-person-badge"></i>
-            </button>
+                {% if persona.demographic.language %}
+                <div class="text-light small me-3">
+                    <i class="bi bi-translate me-1"></i> {{ persona.demographic.language }}
+                </div>
+                {% endif %}
+
+                <!-- Persona details button -->
+                <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
+                    data-bs-target="#personaDetailsModal" title="View Persona Details">
+                    <i class="bi bi-person-badge"></i>
+                </button>
+            </div>
         </div>
     </div>
 

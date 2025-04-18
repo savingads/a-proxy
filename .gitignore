@@ -55,3 +55,6 @@ data/*.db
 # Config files
 config.py
 references/
+
+# Local source repositories
+_src/*/

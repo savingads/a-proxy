@@ -165,16 +165,11 @@
 
             <!-- URL form -->
             <form id="browser-navigation" class="url-input-container" method="POST"
-                action="{{ url_for('browsing.visit_page') }}" target="browser-frame">
+                action="{{ url_for('journey.direct_browse', persona_id=persona.id) }}">
                 <div class="input-group">
-                    <input type="url" name="url" id="url-input" class="form-control" placeholder="Enter URL" required>
-                    <!-- Hidden fields for persona parameters -->
-                    <input type="hidden" name="language" value="{{ persona.demographic.language or 'en-US' }}">
-                    {% if persona.demographic.city and persona.demographic.country %}
-                    <input type="hidden" name="geolocation"
-                        value="{{ persona.demographic.latitude }},{{ persona.demographic.longitude }}">
-                    {% endif %}
-                    <input type="hidden" name="take_screenshot" value="false">
+                    <input type="url" name="url" id="url-input" class="form-control"
+                        placeholder="Enter URL (e.g., https://www.google.com)" required value="{{ visited_url or '' }}"
+                        pattern="https?://.+">
                     <button type="submit" class="btn btn-primary">Go</button>
                 </div>
             </form>
@@ -223,7 +218,37 @@
     <div class="browser-container">
         <!-- Browser content -->
         <div class="browser-content">
-            <iframe name="browser-frame" id="browser-frame" class="browser-iframe" src="about:blank"></iframe>
+            {% if url_content %}
+            <div class="p-4 bg-white">
+                <h3>Content Placeholder</h3>
+                <p>{{ url_content }}</p>
+                <hr>
+                <div class="alert alert-info">
+                    <strong>Browsing Info:</strong><br>
+                    <ul>
+                        <li><strong>Persona:</strong> {{ persona.name }}</li>
+                        <li><strong>Language:</strong> {{ persona.demographic.language or 'en-US' }}</li>
+                        {% if persona.demographic.latitude and persona.demographic.longitude %}
+                        <li><strong>Geolocation:</strong> {{ persona.demographic.latitude }},{{
+                            persona.demographic.longitude }}</li>
+                        {% endif %}
+                        <li><strong>Browser Type:</strong> {{ persona.contextual.browser_type or 'Not specified' }}
+                            (from persona)</li>
+                        <li><strong>Device Type:</strong> {{ persona.contextual.device_type or 'Not specified' }} (from
+                            persona)</li>
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <div class="d-flex justify-content-center align-items-center h-100 bg-white">
+                <div class="welcome text-center p-5">
+                    <h1 class="text-primary mb-4">Browse as {{ persona.name }}</h1>
+                    <p class="mb-3">Enter a URL in the address bar above and click "Go" to begin browsing.</p>
+                    <div class="arrow fs-1 text-secondary my-3">↑</div>
+                    <p class="mb-3">Use the bookmark button to save important pages as journey waypoints.</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -389,10 +414,8 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const iframe = document.getElementById('browser-frame');
             const urlInput = document.getElementById('url-input');
             const backButton = document.getElementById('back-button');
             const forwardButton = document.getElementById('forward-button');
@@ -402,132 +425,87 @@
             const historyToggle = document.getElementById('history-toggle');
             const historySidebar = document.getElementById('history-sidebar');
             const historyList = document.getElementById('history-list');
-            const screenshotDataInput = document.getElementById('screenshot-data');
             const saveWaypointModal = document.getElementById('saveWaypointModal');
 
-            // For tracking browsing history in the session
-            const visitedUrls = new Set();
+            // Browser history - stored in session storage for this demo
+            let browserHistory = JSON.parse(sessionStorage.getItem('browserHistory') || '[]');
 
             // Set up URL history sidebar toggle
             historyToggle.addEventListener('click', function () {
                 historySidebar.classList.toggle('open');
             });
 
-            // Initial URL
-            urlInput.value = 'https://www.google.com';
+            // Function to update history sidebar
+            function updateHistorySidebar() {
+                historyList.innerHTML = '';
+                browserHistory.forEach(item => {
+                    const urlElement = document.createElement('div');
+                    urlElement.className = 'history-url';
 
-            // Show welcome message in iframe
-            iframe.srcdoc = `
-                <html>
-                <head>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            margin: 0;
-                            text-align: center;
-                            background-color: #f8f9fa;
-                            color: #212529;
-                        }
-                        .welcome {
-                            max-width: 80%;
-                            padding: 2rem;
-                            border-radius: 0.5rem;
-                            background-color: white;
-                            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
-                        }
-                        h1 { color: #0d6efd; margin-bottom: 1.5rem; }
-                        p { margin-bottom: 1rem; line-height: 1.5; }
-                        .arrow { font-size: 2rem; margin: 1rem 0; color: #6c757d; }
-                    </style>
-                </head>
-                <body>
-                    <div class="welcome">
-                        <h1>Browse as {{ persona.name }}</h1>
-                        <p>Enter a URL in the address bar above and click "Go" to begin browsing.</p>
-                        <div class="arrow">↑</div>
-                        <p>Use the bookmark button to save important pages as journey waypoints.</p>
-                    </div>
-                </body>
-                </html>
-            `;
+                    urlElement.innerHTML = `
+                        <div class="mb-1 fw-bold">${item.title || 'Untitled'}</div>
+                        <div class="text-truncate">${item.url}</div>
+                        <form method="POST" action="{{ url_for('journey.direct_browse', persona_id=persona.id) }}">
+                            <input type="hidden" name="url" value="${item.url}">
+                            <button type="submit" class="btn btn-sm btn-outline-light mt-1">
+                                <i class="bi bi-box-arrow-up-right"></i> Load
+                            </button>
+                        </form>
+                    `;
+
+                    historyList.appendChild(urlElement);
+                });
+            }
+
+            // Initialize history sidebar
+            updateHistorySidebar();
 
             // Set up navigation buttons
             backButton.addEventListener('click', function () {
-                iframe.contentWindow.history.back();
+                window.history.back();
             });
 
             forwardButton.addEventListener('click', function () {
-                iframe.contentWindow.history.forward();
+                window.history.forward();
             });
 
             refreshButton.addEventListener('click', function () {
-                iframe.contentWindow.location.reload();
+                window.location.reload();
             });
 
-            // Update URL in input when iframe navigates
-            iframe.addEventListener('load', function () {
-                try {
-                    // Only update if we have access to the iframe content
-                    if (iframe.contentWindow && iframe.contentWindow.location.href) {
-                        const currentUrl = iframe.contentWindow.location.href;
-                        if (currentUrl !== 'about:blank') {
-                            urlInput.value = currentUrl;
+            // URL form submission
+            const urlForm = document.getElementById('browser-navigation');
+            urlForm.addEventListener('submit', function () {
+                const url = urlInput.value;
 
-                            // Add to visited URLs
-                            if (currentUrl && !visitedUrls.has(currentUrl)) {
-                                visitedUrls.add(currentUrl);
+                // Add to browsing history if not already present
+                if (url && !browserHistory.some(item => item.url === url)) {
+                    browserHistory.unshift({
+                        url: url,
+                        title: 'Visit to ' + url,
+                        timestamp: new Date().toISOString()
+                    });
 
-                                // Update history sidebar
-                                const urlElement = document.createElement('div');
-                                urlElement.className = 'history-url';
-
-                                let title;
-                                try {
-                                    title = iframe.contentDocument.title || currentUrl;
-                                } catch (e) {
-                                    title = currentUrl;
-                                }
-
-                                urlElement.innerHTML = `
-                                    <div class="mb-1 fw-bold">${title}</div>
-                                    <div class="text-truncate">${currentUrl}</div>
-                                    <button class="btn btn-sm btn-outline-light mt-1 load-url" data-url="${currentUrl}">
-                                        <i class="bi bi-box-arrow-up-right"></i> Load
-                                    </button>
-                                `;
-
-                                historyList.prepend(urlElement);
-
-                                // Add event listener to the new button
-                                urlElement.querySelector('.load-url').addEventListener('click', function () {
-                                    urlInput.value = this.getAttribute('data-url');
-                                    document.getElementById('browser-navigation').submit();
-                                });
-                            }
-                        }
+                    // Keep only the last 10 items
+                    if (browserHistory.length > 10) {
+                        browserHistory = browserHistory.slice(0, 10);
                     }
-                } catch (e) {
-                    // Cross-origin errors will occur if navigating to external sites
-                    console.log('Could not access iframe location due to same-origin policy');
+
+                    // Save to session storage
+                    sessionStorage.setItem('browserHistory', JSON.stringify(browserHistory));
+
+                    // Update history sidebar
+                    updateHistorySidebar();
                 }
             });
 
             // Prepare waypoint data when opening the modal
             saveWaypointModal.addEventListener('show.bs.modal', function (event) {
-                // Get the current URL from the browser
-                waypointUrlInput.value = urlInput.value;
+                // Get the current URL 
+                waypointUrlInput.value = urlInput.value || '';
 
-                // Try to get the title from the iframe
-                try {
-                    waypointTitleInput.value = iframe.contentDocument.title;
-                } catch (e) {
-                    // Default title if we can't access the iframe content
-                    waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
-                }
+                // Set a default title
+                waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
 
                 // Add any journeys this user already has
                 if (document.getElementById('journey-existing')) {
@@ -552,38 +530,6 @@
                     });
                 }
             });
-
-            // Handle screenshots for waypoints
-            if (document.getElementById('capture-screenshot')) {
-                document.getElementById('save-waypoint-form').addEventListener('submit', function (event) {
-                    if (document.getElementById('capture-screenshot').checked) {
-                        // Show a loading indicator
-                        const submitBtn = this.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Capturing...';
-                        submitBtn.disabled = true;
-
-                        // Capture the screenshot
-                        event.preventDefault(); // Prevent form submission until screenshot is captured
-                        html2canvas(iframe).then(canvas => {
-                            const imageData = canvas.toDataURL('image/png');
-                            screenshotDataInput.value = imageData;
-
-                            // Now submit the form
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                            this.submit();
-                        }).catch(err => {
-                            console.error('Error capturing screenshot:', err);
-                            screenshotDataInput.value = '';
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                            this.submit(); // Submit anyway, just without screenshot
-                        });
-                    }
-                    // If checkbox not checked, form submits normally without capturing screenshot
-                });
-            }
         });
     </script>
 </body>

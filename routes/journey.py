@@ -346,7 +346,7 @@ def complete_journey(journey_id):
         flash(f"Error completing journey: {str(e)}", "danger")
         return redirect(url_for('journey.view_journey', journey_id=journey_id))
 
-@journey_bp.route("/direct-browse/<int:persona_id>")
+@journey_bp.route("/direct-browse/<int:persona_id>", methods=["GET", "POST"])
 def direct_browse(persona_id):
     """Start a lightweight browsing session with a persona."""
     # Import inside function to avoid circular imports
@@ -371,9 +371,35 @@ def direct_browse(persona_id):
     except Exception as e:
         logging.error(f"Error getting journeys for persona {persona_id}: {e}")
         existing_journeys = []
+    
+    # Handle URL submission
+    url_content = None
+    visited_url = None
+    
+    if request.method == "POST":
+        url = request.form.get("url", "")
+        if url:
+            visited_url = url
+            # For now, just display the URL that was entered
+            url_content = f"You entered: {url}"
+            
+            # Record that we're using this persona's language and location
+            language = persona.get('demographic', {}).get('language', 'en-US')
+            
+            # Get geolocation from persona if available
+            lat = persona.get('demographic', {}).get('latitude')
+            lng = persona.get('demographic', {}).get('longitude')
+            geolocation = f"{lat},{lng}" if lat and lng else None
+            
+            # Log the browsing for debugging purposes
+            logging.info(f"Browsing as {persona['name']} to {url} with language {language} and geolocation {geolocation}")
 
     # Render the direct browsing template
-    return render_template("direct_browse.html", persona=persona, existing_journeys=existing_journeys)
+    return render_template("direct_browse.html", 
+                          persona=persona, 
+                          existing_journeys=existing_journeys,
+                          url_content=url_content,
+                          visited_url=visited_url)
 
 @journey_bp.route("/save-waypoint/<int:persona_id>", methods=["POST"])
 def save_page_as_waypoint(persona_id):

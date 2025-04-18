@@ -665,3 +665,7 @@ Integrate persona context from the persona-service into the direct-chat route, s
 
 ## Status
 - This plan is in progress. Implementation steps will be tracked here.
+
+## Documentation Reference
+
+For information about common errors and troubleshooting, see [docs/COMMON_ERRORS.md](docs/COMMON_ERRORS.md).

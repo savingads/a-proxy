@@ -1,29 +1,18 @@
 # A-Proxy Development Setup Progress
 
-## 2025-04-08: Initial WSL Development Environment Setup
+This file contains older development setup information. For current documentation, please refer to the main CLAUDE.md file in the root directory and other documentation files in the docs directory.
 
-- Created comprehensive development environment setup documentation
-  - `SETUP_DEV_ENVIRONMENT.md` - Detailed manual setup instructions
-  - `WSL_SETUP.md` - WSL-specific setup instructions
-  - `MULTIPLE_ENVIRONMENTS.md` - Guide for managing multiple development environments
+## Organization of Documentation
 
-- Created automation scripts
-  - `setup-dev-environment.sh` - Automates the installation of dependencies and setup process
-  - `start-dev.sh` - Simple script to start the application in development mode
+- **CLAUDE.md**: Main project progress and implementation details
+- **docs/COMMON_ERRORS.md**: Common errors and their solutions
+- **docs/SETUP_DEV_ENVIRONMENT.md**: Detailed setup instructions
+- **docs/WSL_SETUP.md**: WSL-specific setup instructions
+- **docs/MULTIPLE_ENVIRONMENTS.md**: Managing multiple environments
+- **docs/PERSONA_API.md**: API documentation
+- **docs/DOCKER.md**: Docker setup and configuration
+- **docs/IMPLEMENTATION_NOTES.md**: Implementation details
 
-- Setup process includes:
-  - Installation of required dependencies (Python, pip, Node.js, npm)
-  - Creation of Python virtual environment
-  - Installation of Python and Node.js packages
-  - Database initialization
-  - Option to create sample personas
+## Historical Note: 2025-04-08 Initial WSL Development Environment Setup
 
-- The setup is designed to be compatible with existing development environments
-  - Uses isolated virtual environment
-  - Database path can be customized
-  - Port can be specified when starting the application
-
-Next steps:
-- Test the setup process on different WSL instances
-- Document any additional dependencies or configuration needed for specific features
-- Consider creating a database migration script for updating existing installations
+This content has been integrated into the current documentation. Please see the docs directory for up-to-date information.

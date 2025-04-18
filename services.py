@@ -21,7 +21,8 @@ class ContextProvider(ABC):
     def get_token_estimate(self, text):
         """Estimate tokens used by text"""
         try:
-            encoding = tiktoken.encoding_for_model("claude-3-opus-20240229")
+            # Use cl100k_base encoding which is close to what Claude uses
+            encoding = tiktoken.get_encoding("cl100k_base")
             tokens = len(encoding.encode(text))
             return tokens
         except Exception as e:

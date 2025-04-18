@@ -269,6 +269,18 @@
                 <i class="bi bi-translate me-1"></i> {{ persona.demographic.language }}
                 {% endif %}
             </div>
+            <!-- Context Depth Indicator -->
+            <div class="context-depth-indicator ms-3 d-flex align-items-center">
+                <span class="badge bg-secondary me-1 px-2 py-1" id="context-persona" title="Using persona information">
+                    <i class="bi bi-person"></i>
+                </span>
+                <span class="badge bg-secondary me-1 px-2 py-1" id="context-journey" title="Using journey information">
+                    <i class="bi bi-map"></i>
+                </span>
+                <span class="badge bg-secondary me-1 px-2 py-1" id="context-history" title="Using conversation history">
+                    <i class="bi bi-chat-dots"></i> <span id="history-count">0</span>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -745,8 +757,14 @@
                 message: message,
                 conversation_id: conversationId,
                 persona_id: "{{ persona.id }}",
-                chat_mode: currentMode
+                chat_mode: currentMode,
+                chat_history: getCurrentHistory() // Send the current chat history
             };
+
+            // Add journey_id if available
+            {% if journey %}
+            payload.journey_id = "{{ journey.id }}";
+            {% endif %}
 
             try {
                 const response = await fetch("{{ url_for('agent.standalone_agent_message') }}", {
@@ -758,6 +776,42 @@
                 removeTypingIndicator();
                 if (data.success && data.response) {
                     addMessage(data.response, 'agent');
+
+                    // Update context depth indicators
+                    if (data.context_depth) {
+                        // Context persona indicator
+                        const personaBadge = document.getElementById('context-persona');
+                        if (data.context_depth.persona) {
+                            personaBadge.classList.remove('bg-secondary');
+                            personaBadge.classList.add('bg-success');
+                        } else {
+                            personaBadge.classList.remove('bg-success');
+                            personaBadge.classList.add('bg-secondary');
+                        }
+
+                        // Context journey indicator
+                        const journeyBadge = document.getElementById('context-journey');
+                        if (data.context_depth.journey) {
+                            journeyBadge.classList.remove('bg-secondary');
+                            journeyBadge.classList.add('bg-info');
+                        } else {
+                            journeyBadge.classList.remove('bg-info');
+                            journeyBadge.classList.add('bg-secondary');
+                        }
+
+                        // Context history indicator
+                        const historyBadge = document.getElementById('context-history');
+                        const historyCount = document.getElementById('history-count');
+                        if (data.context_depth.history && data.context_depth.history > 0) {
+                            historyBadge.classList.remove('bg-secondary');
+                            historyBadge.classList.add('bg-warning');
+                            historyCount.textContent = data.context_depth.history;
+                        } else {
+                            historyBadge.classList.remove('bg-warning');
+                            historyBadge.classList.add('bg-secondary');
+                            historyCount.textContent = '0';
+                        }
+                    }
                 } else {
                     addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
                 }

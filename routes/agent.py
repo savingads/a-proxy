@@ -54,15 +54,30 @@ def standalone_agent_message():
                 "error": "Claude API key is not configured. Please set ANTHROPIC_API_KEY in your environment or config.py."
             }), 500
         
-        # Get persona_id and chat_mode if provided (for direct chat)
+        # Get persona_id, journey_id and chat_mode
         persona_id = data.get('persona_id')
+        journey_id = data.get('journey_id')
         chat_mode = data.get('chat_mode', 'with')
+        chat_history = data.get('chat_history', [])
         
-        # If persona_id is provided, generate system prompt from persona context
-        if persona_id and not system_prompt:
-            raw_context = fetch_persona_context(persona_id)
-            persona_context = flatten_persona_context(raw_context)
-            system_prompt = persona_context_to_system_prompt(persona_context, mode=chat_mode)
+        # If user provided a system prompt, use it directly
+        if not system_prompt:
+            # Use the new context management system
+            from services import ContextManager, PersonaContextProvider, JourneyContextProvider
+            
+            # Initialize context manager
+            ctx_manager = ContextManager(max_tokens=8000)
+            
+            # Add providers
+            ctx_manager.add_provider(PersonaContextProvider())
+            ctx_manager.add_provider(JourneyContextProvider())
+            
+            # Generate the full system prompt with all context
+            system_prompt = ctx_manager.get_combined_context(
+                persona_id=persona_id,
+                journey_id=journey_id,
+                mode=chat_mode
+            )
         
         # Fallback if still not set
         if not system_prompt:
@@ -76,14 +91,45 @@ def standalone_agent_message():
             logger.info(f"Creating Anthropic client with API key: {'*' * len(ANTHROPIC_API_KEY)}")
             client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
             
+            # Prepare messages array 
+            messages = []
+            
+            # First add any chat history if provided
+            if chat_history and isinstance(chat_history, list):
+                # Limit history to prevent token overflow
+                max_history_messages = 10  # Adjust based on typical message length
+                
+                # Only use the most recent messages if history is too long
+                history_to_use = chat_history[-max_history_messages:] if len(chat_history) > max_history_messages else chat_history
+                
+                for msg in history_to_use:
+                    role = msg.get('role', '')
+                    content = msg.get('content', '')
+                    
+                    # Map roles to Claude's expected format
+                    claude_role = 'user'  # Default
+                    if role == 'agent' or role == 'target':
+                        claude_role = 'assistant'
+                    elif role in ['user', 'persona']:
+                        claude_role = 'user'
+                        
+                    if content and role:
+                        messages.append({"role": claude_role, "content": content})
+            
+            # Then add the current message
+            messages.append({"role": "user", "content": message})
+            
             # Send message to Claude
-            logger.info(f"Sending message to Claude with model: {model}")
+            logger.info(f"Sending message to Claude with model: {model} and {len(messages)} messages")
+            
+            # Add context depth info to logs
+            context_tokens = len(system_prompt.split()) * 1.3  # Rough estimate
+            logger.info(f"System prompt size estimate: ~{int(context_tokens)} tokens")
+            
             response = client.messages.create(
                 model=model,
                 system=system_prompt,
-                messages=[
-                    {"role": "user", "content": message}
-                ],
+                messages=messages,
                 max_tokens=4096
             )
             
@@ -93,10 +139,20 @@ def standalone_agent_message():
             
             logger.info(f"Response content: {response_content[:200]}...")
             
+            # Calculate context depth for returning to client
+            context_depth = {}
+            if persona_id:
+                context_depth["persona"] = True
+            if journey_id:
+                context_depth["journey"] = True
+            if chat_history and len(chat_history) > 0:
+                context_depth["history"] = len(chat_history)
+            
             return jsonify({
                 "success": True,
                 "response": response_content,
-                "conversation_id": conversation_id
+                "conversation_id": conversation_id,
+                "context_depth": context_depth
             })
         except Exception as e:
             logger.error(f"Error calling Claude API directly: {e}", exc_info=True)

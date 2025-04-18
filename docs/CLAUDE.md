@@ -63,7 +63,15 @@ Updates completed:
    - Added smart detection to determine which chat mode to start with based on available history
    - Ensured that both "chat with" and "chat as" histories are properly loaded and displayed
 
-These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page now clearly offers both browse and chat options as ways to continue or start a journey. Users can also pick up conversations exactly where they left off when returning to a journey.
+4. **Enhanced Context Management**:
+   - Implemented a modular context provider system in services.py
+   - Created structured providers for persona and journey context
+   - Added ability to pass previous conversations to Claude as context
+   - Implemented token counting and management to prevent context overflow
+   - Added visual indicators in the UI to show what context is being used
+   - Built a system that automatically manages context priorities
+
+These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page clearly offers both browse and chat options as ways to continue or start a journey. Users can now pick up conversations exactly where they left off when returning to a journey, with Claude maintaining awareness of both persona details and journey context. The contextual depth indicators provide transparency about what information is being used.
 
 ## Known Issues (2025-04-18)
 

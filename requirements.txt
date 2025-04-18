@@ -19,3 +19,6 @@ flask-cors==4.0.0
 
 # Claude API Integration
 anthropic==0.49.0
+
+# Context token counting
+tiktoken==0.5.2

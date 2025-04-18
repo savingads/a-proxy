@@ -40,6 +40,24 @@ Updates completed:
    - Removed all VPN references and related UI elements
    - Created feature cards for main application functions
 
+## Chat Feature and Journey Integration Improvements (2025-04-18)
+
+Updates completed:
+1. **Enhanced Chat Save and Journey Integration**:
+   - Added a custom 'fromjson' Jinja2 filter to the Flask application to fix template rendering errors
+   - Modified the Save Chat modal to now show "Save Chat as Waypoint" for better clarity
+   - Improved journey context detection to automatically select the current journey when saving
+   - Enhanced waypoint handling to support both "chat with" and "chat as" perspectives in a single waypoint
+   - Added a tabbed interface in waypoint display to show both chat perspectives separately
+
+2. **Journey View Improvements**:
+   - Updated the Journey view page to offer two options for continuing a journey: Browse or Chat
+   - Modified the empty journey prompt to give users a choice between browsing and chatting
+   - Ensured Chat option correctly passes the journey_id parameter to maintain journey context
+   - Improved UI consistency across journey interaction points
+
+These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page now clearly offers both browse and chat options as ways to continue or start a journey.
+
 ## Known Issues (2025-04-18)
 
 1. **User email not displaying in header**: 

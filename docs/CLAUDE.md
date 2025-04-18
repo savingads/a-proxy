@@ -71,7 +71,14 @@ Updates completed:
    - Added visual indicators in the UI to show what context is being used
    - Built a system that automatically manages context priorities
 
-These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page clearly offers both browse and chat options as ways to continue or start a journey. Users can now pick up conversations exactly where they left off when returning to a journey, with Claude maintaining awareness of both persona details and journey context. The contextual depth indicators provide transparency about what information is being used.
+5. **Journey UI Refinements**:
+   - Simplified the journey view interface by removing unnecessary buttons
+   - Removed "Continue Conversation" buttons from waypoint cards
+   - Removed "Ask Agent" and "Timeline" buttons from the journey page header
+   - Consolidated the dropdown menu items into direct action buttons
+   - Streamlined the overall navigation and user flow
+
+These changes ensure users can seamlessly save both perspectives of a chat to the same waypoint, making the journey experience more cohesive. The improved journey page clearly offers both browse and chat options as ways to continue or start a journey. Users can now pick up conversations exactly where they left off when continuing with chat. Claude maintains awareness of both persona details and journey context during conversations, with visual indicators providing transparency about what information is being used. The streamlined UI reduces clutter and focuses the experience on the core functionality.
 
 ## Known Issues (2025-04-18)
 

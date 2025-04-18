@@ -286,8 +286,38 @@ def save_direct_chat(persona_id):
                 # For AJAX, return JSON error
                 return jsonify({'success': False, 'error': error_msg}), 500, response_headers
         
-        # Format chat history into agent data format
-        agent_data = {
+        # Check if we already have a waypoint for this journey with the other chat mode
+        existing_waypoint = None
+        if journey_id:
+            # Get waypoints for this journey
+            waypoints = database.get_waypoints(journey_id)
+            
+            # Check if any existing waypoint has a matching title but different mode
+            # This handles both "Chat with X" and "Chat as X" cases
+            other_mode = 'with' if chat_mode == 'as' else 'as'
+            other_mode_query = f"agent://conversation/{other_mode}"
+            
+            for wp in waypoints:
+                # Check if this is a chat waypoint with the other perspective
+                if (wp.get('url', '').startswith('agent://conversation/') and 
+                    wp.get('url') != f"agent://conversation/{chat_mode}"):
+                    
+                    # If agent_data exists, parse it to check if it's for the same conversation
+                    agent_data_str = wp.get('agent_data')
+                    if agent_data_str:
+                        try:
+                            existing_data = json.loads(agent_data_str)
+                            # Consider it the same conversation if titles match (ignoring the mode part)
+                            existing_title = existing_data.get('title', '')
+                            if title.replace(f"Chat {chat_mode} ", "") == existing_title.replace(f"Chat {other_mode} ", ""):
+                                existing_waypoint = wp
+                                break
+                        except:
+                            # If parsing fails, continue to next waypoint
+                            pass
+        
+        # Format current chat history into agent data format
+        new_agent_data = {
             'id': str(int(time.time())),
             'title': title,
             'summary': notes,
@@ -296,21 +326,63 @@ def save_direct_chat(persona_id):
             'timestamp': datetime.now().isoformat()
         }
         
-        # Add the waypoint with type 'agent' or 'persona' based on chat mode
+        # Get appropriate waypoint type based on chat mode
         waypoint_type = 'agent' if chat_mode == 'with' else 'persona'
         
         # Create URL representation
-        url = "agent://conversation/" + (chat_mode or 'with')
+        url = "agent://conversation/" + chat_mode
         
         try:
-            waypoint_id = database.add_waypoint(
-                journey_id=journey_id,
-                url=url,
-                title=title,
-                notes=notes,
-                type=waypoint_type,
-                agent_data=json.dumps(agent_data)
-            )
+            if existing_waypoint:
+                # We already have a waypoint for the other perspective
+                waypoint_id = existing_waypoint['id']
+                
+                # Get existing agent data
+                try:
+                    existing_data = json.loads(existing_waypoint.get('agent_data', '{}'))
+                    
+                    # Combine the data - keep both histories
+                    combined_data = {
+                        'id': existing_data.get('id', str(int(time.time()))),
+                        'title': title,  # Use the latest title
+                        'summary': notes,  # Use the latest notes
+                        'with_history': existing_data.get('history') if existing_data.get('mode') == 'with' else chat_history,
+                        'as_history': existing_data.get('history') if existing_data.get('mode') == 'as' else chat_history,
+                        'timestamp': datetime.now().isoformat(),
+                        'has_both_modes': True  # Flag indicating this waypoint has both perspectives
+                    }
+                    
+                    # Update the existing waypoint
+                    database.update_waypoint(
+                        waypoint_id=waypoint_id,
+                        title=title,
+                        notes=notes,
+                        agent_data=json.dumps(combined_data)
+                    )
+                    
+                    logger.info(f"Updated existing waypoint {waypoint_id} with combined chat data")
+                    
+                except Exception as e:
+                    logger.error(f"Error parsing existing agent data: {e}")
+                    # Fall back to creating a new waypoint
+                    waypoint_id = database.add_waypoint(
+                        journey_id=journey_id,
+                        url=url,
+                        title=title,
+                        notes=notes,
+                        type=waypoint_type,
+                        agent_data=json.dumps(new_agent_data)
+                    )
+            else:
+                # Create a new waypoint
+                waypoint_id = database.add_waypoint(
+                    journey_id=journey_id,
+                    url=url,
+                    title=title,
+                    notes=notes,
+                    type=waypoint_type,
+                    agent_data=json.dumps(new_agent_data)
+                )
             
             logger.info(f"Successfully added waypoint {waypoint_id} to journey {journey_id}")
             

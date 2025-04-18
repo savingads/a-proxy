@@ -27,6 +27,16 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = SESSION_COOKIE_HTTPONLY
     app.config['SESSION_COOKIE_SAMESITE'] = SESSION_COOKIE_SAMESITE
     
+    # Add custom Jinja2 filters
+    import json
+    @app.template_filter('fromjson')
+    def fromjson_filter(value):
+        """Convert a JSON string to a Python object"""
+        try:
+            return json.loads(value)
+        except:
+            return {}
+    
     # --- Flask-Login setup ---
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'

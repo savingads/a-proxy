@@ -414,7 +414,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="saveChatModalLabel">Save Chat</h5>
+                    <h5 class="modal-title" id="saveChatModalLabel">Save Chat as Waypoint</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="save-chat-form">
@@ -435,8 +435,13 @@
                             <label class="form-label">Save to Journey</label>
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="radio" name="journey_option" id="journey-new"
-                                    value="new" checked>
+                                    value="new">
                                 <label class="form-check-label" for="journey-new">Create New Journey</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="journey_option" id="journey-existing"
+                                    value="existing">
+                                <label class="form-check-label" for="journey-existing">Save to Existing Journey</label>
                             </div>
                             <div id="existing-journey-select" style="display: none;">
                                 <select class="form-select mt-2" id="journey-id">
@@ -786,6 +791,31 @@
                 };
             });
 
+            // Check if we're in a journey context
+            function isInJourney() {
+                // Check for journey badge in the DOM
+                return document.querySelector('.journey-badge') !== null;
+            }
+
+            // Get current journey ID if available
+            function getCurrentJourneyId() {
+                const journeyBadge = document.querySelector('.journey-badge a');
+                if (journeyBadge) {
+                    // Extract journey ID from the URL
+                    const journeyUrl = journeyBadge.getAttribute('href');
+                    const journeyId = journeyUrl.match(/journey_id=(\d+)/) ||
+                        journeyUrl.match(/journey\/(\d+)/);
+                    return journeyId ? journeyId[1] : null;
+                }
+                return null;
+            }
+
+            // Get current journey name if available
+            function getCurrentJourneyName() {
+                const journeyBadge = document.querySelector('.journey-badge a');
+                return journeyBadge ? journeyBadge.textContent.trim() : null;
+            }
+
             // Setup the save chat modal
             saveChatModal.addEventListener('show.bs.modal', function () {
                 // Update title based on current mode
@@ -795,6 +825,26 @@
                 document.getElementById('chat-title').value = currentMode === 'with'
                     ? `Chat with ${personaName} - ${new Date().toLocaleDateString()}`
                     : `Chat as ${personaName} - ${new Date().toLocaleDateString()}`;
+
+                // Set up journey options based on current context
+                if (isInJourney()) {
+                    // We're in a journey, select "Save to Existing Journey" by default
+                    document.getElementById('journey-existing').checked = true;
+
+                    // Show the journey dropdown
+                    document.getElementById('existing-journey-select').style.display = 'block';
+                    document.getElementById('new-journey-form').style.display = 'none';
+                } else {
+                    // Not in a journey, select "Create New Journey" by default
+                    document.getElementById('journey-new').checked = true;
+
+                    // Show the new journey form
+                    document.getElementById('existing-journey-select').style.display = 'none';
+                    document.getElementById('new-journey-form').style.display = 'block';
+                }
+
+                // Load existing journeys into the dropdown
+                loadExistingJourneys();
             });
 
             // Setup journey option radio buttons
@@ -816,32 +866,36 @@
                 // Get the persona name from the DOM to avoid template variable scope issues
                 const personaName = document.querySelector('.persona-badge').textContent.trim();
 
-                // Add some dummy journeys
-                const dummyJourneys = [
-                    { id: 1, name: `${personaName}'s Shopping Journey` },
-                    { id: 2, name: `${personaName}'s Research Project` },
-                    { id: 3, name: 'Product Exploration' }
-                ];
+                // Check if we're in a journey first
+                const currentJourneyId = getCurrentJourneyId();
+                const currentJourneyName = getCurrentJourneyName();
 
-                dummyJourneys.forEach(journey => {
+                if (currentJourneyId && currentJourneyName) {
+                    // We have a current journey, add it first and select it
                     const option = document.createElement('option');
-                    option.value = journey.id;
-                    option.textContent = journey.name;
+                    option.value = currentJourneyId;
+                    option.textContent = currentJourneyName;
+                    option.selected = true;
                     journeySelect.appendChild(option);
-                });
+                }
+
+                // Add other journeys - in a real implementation, we would fetch from server
+                // For demo purposes, add dummy journeys if not in a journey
+                if (!currentJourneyId) {
+                    const dummyJourneys = [
+                        { id: 1, name: `${personaName}'s Shopping Journey` },
+                        { id: 2, name: `${personaName}'s Research Project` },
+                        { id: 3, name: 'Product Exploration' }
+                    ];
+
+                    dummyJourneys.forEach(journey => {
+                        const option = document.createElement('option');
+                        option.value = journey.id;
+                        option.textContent = journey.name;
+                        journeySelect.appendChild(option);
+                    });
+                }
             }
-
-            // Call this when the save modal is shown
-            saveChatModal.addEventListener('show.bs.modal', function () {
-                // Get the persona name from the DOM to avoid template variable scope issues
-                const personaName = document.querySelector('.persona-badge').textContent.trim();
-
-                // Update the journey name default value
-                document.getElementById('journey-name').value = `${personaName}'s Conversation Journey`;
-
-                // Load existing journeys
-                loadExistingJourneys();
-            });
 
             // Handle save chat form submission
             document.getElementById('save-chat-form').addEventListener('submit', function (event) {

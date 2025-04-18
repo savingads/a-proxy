@@ -327,14 +327,13 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="persona_id" class="form-label">Associated Persona</label>
-                                        <select class="form-select" id="persona_id" name="persona_id">
-                                            <option value="">None (Generic Journey)</option>
+                                        <label for="persona_id" class="form-label">Associated Persona *</label>
+                                        <select class="form-select" id="persona_id" name="persona_id" required>
                                             {% for persona in personas %}
                                             <option value="{{ persona.id }}">{{ persona.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <div class="form-text">Optionally link this journey to a specific persona.</div>
+                                        <div class="form-text">Select a persona for this journey.</div>
                                     </div>
 
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">

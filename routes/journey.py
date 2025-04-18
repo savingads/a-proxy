@@ -36,9 +36,16 @@ def create_journey():
             persona_id = request.form.get("persona_id")
             journey_type = request.form.get("journey_type", "marketing")
             
-            # Convert empty string to None for foreign key
+            # Validate that persona_id is provided
             if not persona_id:
-                persona_id = None
+                error_msg = "A persona is required to create a journey."
+                if is_ajax_request:
+                    return jsonify({
+                        'success': False,
+                        'error': error_msg
+                    }), 400
+                flash(error_msg, "danger")
+                return redirect(url_for('journey.create_journey'))
             
             # Create the journey
             journey_id = database.create_journey(

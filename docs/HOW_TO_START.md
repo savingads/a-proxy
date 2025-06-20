@@ -22,48 +22,43 @@ That's it! The script handles everything else, including setting up directories,
 
 For detailed Docker instructions, advanced configuration options, and troubleshooting, see [DOCKER.md](DOCKER.md).
 
-## Option 2: Manual Installation
+## Option 2: Manual Installation (Updated)
 
-If you prefer not to use Docker, follow these steps for manual installation.
+**Note**: The persona service has been integrated directly into the main application, so no separate microservice setup is needed.
 
 ### Prerequisites
 
-Before starting A-Proxy, ensure you have:
+1. Python 3.8+ with pip
+2. Node.js with npm
+3. Git for version control
 
-1. Installed all required dependencies:
+### Quick Manual Setup
+
+1. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    npm install
    ```
 
-2. Set up VPN configuration (if using VPN features):
-   - Created `nordvpn/auth.txt` with your NordVPN credentials
-   - Downloaded OpenVPN configuration files to `nordvpn/ovpn_udp/` or `nordvpn/ovpn_tcp/`
-
-3. Set up the database:
-   
+2. **Set up environment**:
    ```bash
-   python database.py  # Initialize the database
-   python create_sample_personas.py  # Optional: Add sample data
+   cp .env.example .env
+   # Edit .env and add your ANTHROPIC_API_KEY for Claude integration
    ```
 
-### Starting the Application Manually
+3. **Initialize the database**:
+   ```bash
+   mkdir -p data
+   python database.py
+   python create_sample_personas_simple.py  # Optional: Add sample data
+   ```
 
-The recommended way to start A-Proxy manually is:
+4. **Start the application**:
+   ```bash
+   python app.py
+   ```
 
-```bash
-python app.py
-```
-
-This command:
-- Launches the Flask web server on port 5002 (default)
-- Enables debug mode for development
-- Activates auto-reloading on code changes
-
-You can then access the application by opening a web browser and navigating to:
-```
-http://localhost:5002
-```
+The application will be available at http://localhost:5002
 
 ### Custom Port Configuration
 
@@ -81,17 +76,9 @@ See [DOCKER.md](DOCKER.md) for Docker-specific troubleshooting.
 
 ### Manual Installation Issues
 
-If you encounter issues with manual installation:
+**Common Issues:**
+- **Port conflicts**: Use `--port` option to specify different port
+- **Database issues**: Remove `data/personas.db` and run `python database.py` to reinitialize
+- **Missing dependencies**: Ensure virtual environment is activated and run `pip install -r requirements.txt`
 
-1. Check terminal output for error messages
-2. Verify VPN credentials if using VPN features
-3. Ensure all prerequisites are properly installed
-4. Check database connection by running `python database.py`
-
-If you encounter database issues:
-1. Try removing the existing database and recreating it:
-   ```bash
-   rm -f data/personas.db
-   python database.py
-   ```
-2. Restart the application after recreating the database
+**For detailed setup instructions and troubleshooting, see the main [CLAUDE.md](../CLAUDE.md) file.**

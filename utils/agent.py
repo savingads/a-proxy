@@ -9,6 +9,8 @@ sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 
 import agent_module
 import agent_module
+import agent_module
+import agent_module
 from agent_module import create_proethica_agent_blueprint
 from agent_module.adapters.a_proxy_claude import AProxyClaudeAdapter
 

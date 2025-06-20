@@ -79,19 +79,13 @@ class ResilientPersonaClient(PersonaClient):
         
 def get_persona_client():
     """
-    Get a configured Persona API client instance
+    Get a configured Persona client instance - using direct database access
     
     Returns:
-        ResilientPersonaClient: Configured client instance
+        DirectPersonaClient: Direct database client instance
     """
-    return ResilientPersonaClient(
-        base_url=PERSONA_API_BASE_URL,
-        api_version=PERSONA_API_VERSION,
-        timeout=PERSONA_API_TIMEOUT,
-        auth_token=PERSONA_API_AUTH_TOKEN,
-        max_retries=3,
-        retry_delay=1
-    )
+    from utils.persona_client_direct import get_direct_persona_client
+    return get_direct_persona_client()
 
 # Create a singleton instance for reuse
 _persona_client = None
@@ -101,7 +95,7 @@ def get_client():
     Get or create a singleton Persona client instance
     
     Returns:
-        ResilientPersonaClient: Shared client instance
+        DirectPersonaClient: Shared client instance
     """
     global _persona_client
     if _persona_client is None:

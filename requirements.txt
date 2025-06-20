@@ -13,9 +13,9 @@ requests==2.31.0
 python-dateutil==2.8.2
 flask-cors==4.0.0
 # Add persona client - commented out until installed
-personaclient==0.1.0
+# personaclient==0.1.0
 # For local development, use the following instead:
-# -e ./persona-client
+-e ./persona-client
 
 # Claude API Integration
 anthropic==0.49.0

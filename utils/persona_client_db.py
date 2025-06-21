@@ -23,17 +23,16 @@ class DatabasePersonaClient:
         logger.info(f"Getting personas from database with page={page}, per_page={per_page}")
         
         try:
-            # Get all personas from the database
-            personas_list = database.get_all_personas()
+            # Get personas from the database with pagination
+            result = database.get_all_personas(page=page, per_page=per_page)
             
-            # Apply pagination
-            start_idx = (page - 1) * per_page
-            end_idx = start_idx + per_page
-            paginated_personas = personas_list[start_idx:end_idx]
+            # Extract personas from result
+            personas_list = result.get('personas', [])
+            total = result.get('total', 0)
             
             # Format personas correctly - convert database format to API format
             formatted_personas = []
-            for persona in paginated_personas:
+            for persona in personas_list:
                 formatted = self._format_persona(persona)
                 formatted_personas.append(formatted)
             
@@ -42,8 +41,8 @@ class DatabasePersonaClient:
                 "pagination": {
                     "page": page,
                     "per_page": per_page,
-                    "total": len(personas_list),
-                    "total_pages": (len(personas_list) + per_page - 1) // per_page
+                    "total": total,
+                    "total_pages": (total + per_page - 1) // per_page if total > 0 else 0
                 }
             }
         except Exception as e:

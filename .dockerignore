@@ -11,7 +11,7 @@ __pycache__/
 venv/
 env/
 ENV/
-.env
+# .env - commented out to allow default config
 .venv
 
 # Data directories (these will be mounted as volumes)

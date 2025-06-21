@@ -32,6 +32,17 @@ def dashboard():
     vpn_running = is_vpn_running()
     ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
     
+    # Get IP-based location info if no VPN info available
+    if not ip_info:
+        try:
+            import requests
+            # Get user's public IP and location info
+            response = requests.get('https://ipapi.co/json/', timeout=5)
+            if response.status_code == 200:
+                ip_info = response.json()
+        except:
+            ip_info = {}
+    
     # Get the version from VERSION.txt
     try:
         with open('VERSION.txt', 'r') as f:

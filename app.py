@@ -3,7 +3,8 @@ import logging
 import argparse
 from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
 from flask_login import LoginManager
-from utils.user import get_user, User
+from database import get_user_by_email
+from routes.auth import User, user_from_row
 
 # Import blueprints
 from routes.home import home_bp
@@ -57,11 +58,14 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Only one user in demo, but could be extended
-        for user in [get_user('admin')]:
-            if user and user.get_id() == user_id:
-                return user
-        return None
+        # Load user from database
+        from database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (int(user_id),))
+        row = cursor.fetchone()
+        conn.close()
+        return user_from_row(row) if row else None
     # --- End Flask-Login setup ---
     
     # Register blueprints
@@ -86,6 +90,13 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=5002, help='Port to run the application on')
     parser.add_argument('--host', type=str, default='127.0.0.1', help='Host address to run the application on')
     args = parser.parse_args()
+    
+    # Initialize default user if needed
+    try:
+        from init_default_user import init_default_user
+        init_default_user()
+    except Exception as e:
+        logging.error(f"Failed to initialize default user: {e}")
     
     app = create_app()
     app.run(debug=True, use_reloader=True, port=args.port, host=args.host)

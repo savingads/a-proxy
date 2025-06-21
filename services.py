@@ -160,16 +160,19 @@ def start_vpn_service():
 
 def fetch_persona_context(persona_id, persona_service_url="http://localhost:5050/api/v1/personas/"):
     """
-    Fetch persona details from the persona-service REST API.
+    Fetch persona details from the database.
     Returns a dict of persona attributes or None if not found.
     """
-    url = f"{persona_service_url}{persona_id}"
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
+        # Import here to avoid circular imports
+        import database
+        persona = database.get_persona(persona_id)
+        if not persona:
+            logger.error(f"Persona not found: {persona_id}")
+            return None
+        return persona
     except Exception as e:
-        print(f"Error fetching persona context: {e}")
+        logger.error(f"Error fetching persona context: {e}")
         return None
 
 def format_persona_system_prompt(persona_data, mode="with"):

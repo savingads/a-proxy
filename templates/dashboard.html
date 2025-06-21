@@ -101,8 +101,18 @@
             <div class="card-body">
                 <h3 class="card-title h5"><i class="bi bi-globe me-2"></i>Location & Language</h3>
                 <ul class="list-group list-group-flush">
+                    {% if ip_info and ip_info.get('latitude') and ip_info.get('longitude') %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Geolocation
+                        IP Location
+                        <span class="badge bg-success rounded-pill">{{ ip_info.city }}, {{ ip_info.country_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        IP Coordinates
+                        <span class="badge bg-success rounded-pill">{{ "%.4f"|format(ip_info.latitude) }}, {{ "%.4f"|format(ip_info.longitude) }}</span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Browser Geolocation
                         <span id="browser-geolocation" class="badge bg-primary rounded-pill">Loading...</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -211,11 +221,27 @@
 <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize map with a default view
-        var map = L.map('map').setView([0, 0], 2);
+        // Initialize map with IP location or default view
+        {% if ip_info and ip_info.get('latitude') and ip_info.get('longitude') %}
+        var defaultLat = {{ ip_info.latitude }};
+        var defaultLng = {{ ip_info.longitude }};
+        var defaultZoom = 10;
+        {% else %}
+        var defaultLat = 0;
+        var defaultLng = 0;
+        var defaultZoom = 2;
+        {% endif %}
+        
+        var map = L.map('map').setView([defaultLat, defaultLng], defaultZoom);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+        
+        {% if ip_info and ip_info.get('latitude') and ip_info.get('longitude') %}
+        // Add IP location marker
+        L.marker([{{ ip_info.latitude }}, {{ ip_info.longitude }}]).addTo(map)
+            .bindPopup('IP-based location: {{ ip_info.city }}, {{ ip_info.country_name }}');
+        {% endif %}
 
         // Browser Language
         document.getElementById('browser-language').textContent = navigator.language || navigator.userLanguage || 'Not available';
@@ -291,10 +317,19 @@
                     const lng = position.coords.longitude;
                     document.getElementById('browser-geolocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
-                    // Update map with the location
+                    // Update map with the browser location
                     map.setView([lat, lng], 13);
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('Your browser location')
+                    L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: '/static/css/images/marker-icon.png',
+                            shadowUrl: '/static/css/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map)
+                        .bindPopup('Your precise browser location')
                         .openPopup();
                 },
                 function (error) {

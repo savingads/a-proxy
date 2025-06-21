@@ -3,10 +3,15 @@
 {% block content %}
 <div class="container mt-5" style="max-width: 400px;">
     <h2 class="mb-4">Login</h2>
+    <div class="alert alert-info">
+        <strong>Demo Credentials:</strong><br>
+        Email: admin@example.com<br>
+        Password: password
+    </div>
     <form method="POST">
         <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" required>
+            <label for="username" class="form-label">Email</label>
+            <input type="email" class="form-control" id="username" name="username" placeholder="admin@example.com" required>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>

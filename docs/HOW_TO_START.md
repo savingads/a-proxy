@@ -56,6 +56,14 @@ For detailed Docker instructions, advanced configuration options, and troublesho
 
 The application will be available at http://localhost:5002
 
+### Default Login Credentials
+
+When you first start the application, use these credentials to log in:
+- **Email**: admin@example.com
+- **Password**: password
+
+**Important**: Change these credentials in production environments!
+
 ### Custom Port Configuration
 
 If port 5002 is already in use, you can specify a different port:

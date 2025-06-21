@@ -39,20 +39,22 @@ RUN mkdir -p /app/data /app/nordvpn/ovpn_udp /app/nordvpn/ovpn_tcp
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 
-# Copy package.json and install Node.js dependencies
-COPY package*.json ./
-RUN npm install
-
 # Copy application code
 COPY . .
+
+# Use .env.docker as default if no .env exists
+RUN if [ ! -f .env ]; then cp .env.docker .env; fi
 
 # Create a startup script to initialize the database if it doesn't exist
 RUN echo '#!/bin/bash\n\
 if [ ! -f "/app/data/personas.db" ]; then\n\
     echo "Initializing database..."\n\
     python /app/database.py\n\
-    python /app/create_sample_personas.py\n\
+    python /app/create_sample_personas_simple.py\n\
 fi\n\
+\n\
+echo "Initializing default user..."\n\
+python /app/init_default_user.py\n\
 \n\
 echo "Starting A-Proxy application..."\n\
 python /app/app.py --host 0.0.0.0 --port 5002\n\

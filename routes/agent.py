@@ -193,7 +193,7 @@ def flatten_persona_context(raw_context):
 def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
     # Import inside function to avoid circular imports
-    from utils.persona_client import get_client
+    from utils.persona_client_db import get_db_persona_client
     import database
     import json
     
@@ -235,7 +235,7 @@ def direct_chat(persona_id):
     # Get persona data
     persona = None
     try:
-        client = get_client()
+        client = get_db_persona_client()
         persona = client.get_persona(persona_id)
         if not persona:
             flash("Persona not found", "danger")
@@ -534,9 +534,9 @@ def journey_agent(journey_id):
     persona = None
     if journey['persona_id']:
         # Import inside function to avoid circular imports
-        from utils.persona_client import get_client
+        from utils.persona_client_db import get_db_persona_client
         try:
-            client = get_client()
+            client = get_db_persona_client()
             persona = client.get_persona(journey['persona_id'])
         except Exception as e:
             logging.error(f"Error getting persona {journey['persona_id']}: {e}")
@@ -572,9 +572,9 @@ def agent_message(journey_id):
         persona = None
         if journey['persona_id']:
             # Import inside function to avoid circular imports
-            from utils.persona_client import get_client
+            from utils.persona_client_db import get_db_persona_client
             try:
-                client = get_client()
+                client = get_db_persona_client()
                 persona = client.get_persona(journey['persona_id'])
             except Exception as e:
                 logging.error(f"Error getting persona {journey['persona_id']}: {e}")

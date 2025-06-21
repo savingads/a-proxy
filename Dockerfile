@@ -42,8 +42,8 @@ RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 # Copy application code
 COPY . .
 
-# Use .env.docker as default if no .env exists
-RUN if [ ! -f .env ]; then cp .env.docker .env; fi
+# Always use .env.docker as default in container (API key should be provided via environment variables)
+RUN cp .env.docker .env
 
 # Create a startup script to initialize the database if it doesn't exist
 RUN echo '#!/bin/bash\n\

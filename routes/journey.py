@@ -81,11 +81,11 @@ def create_journey():
             flash(f"Error creating journey: {str(e)}", "danger")
     
     # Import inside function to avoid circular imports
-    from utils.persona_client import get_client
+    from utils.persona_client_db import get_db_persona_client
     
     try:
         # Get personas from the API
-        client = get_client()
+        client = get_db_persona_client()
         result = client.get_personas(page=1, per_page=100)
         personas = result.get('personas', [])
     except Exception as e:
@@ -141,11 +141,11 @@ def edit_journey(journey_id):
             flash(f"Error updating journey: {str(e)}", "danger")
     
     # Import inside function to avoid circular imports
-    from utils.persona_client import get_client
+    from utils.persona_client_db import get_db_persona_client
     
     try:
         # Get personas from the API
-        client = get_client()
+        client = get_db_persona_client()
         result = client.get_personas(page=1, per_page=100)
         personas = result.get('personas', [])
     except Exception as e:
@@ -183,9 +183,9 @@ def browse_journey(journey_id):
     persona = None
     if journey['persona_id']:
         # Import inside function to avoid circular imports
-        from utils.persona_client import get_client
+        from utils.persona_client_db import get_db_persona_client
         try:
-            client = get_client()
+            client = get_db_persona_client()
             persona = client.get_persona(journey['persona_id'])
         except Exception as e:
             logging.error(f"Error getting persona {journey['persona_id']}: {e}")
@@ -357,12 +357,12 @@ def complete_journey(journey_id):
 def direct_browse(persona_id):
     """Start a lightweight browsing session with a persona."""
     # Import inside function to avoid circular imports
-    from utils.persona_client import get_client
+    from utils.persona_client_db import get_db_persona_client
     
     # Get persona data
     persona = None
     try:
-        client = get_client()
+        client = get_db_persona_client()
         persona = client.get_persona(persona_id)
         if not persona:
             flash("Persona not found", "danger")
@@ -574,11 +574,11 @@ def create_journey_from_browse(persona_id):
 def interact_as():
     """Choose a persona to interact with (browse or chat)."""
     # Import inside function to avoid circular imports
-    from utils.persona_client import get_client
+    from utils.persona_client_db import get_db_persona_client
     
     try:
         # Get personas from the API
-        client = get_client()
+        client = get_db_persona_client()
         result = client.get_personas(page=1, per_page=100)
         personas = result.get('personas', [])
     except Exception as e:

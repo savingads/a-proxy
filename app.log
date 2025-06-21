@@ -1312,3 +1312,471 @@ INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:36:00] "[36mGET /static/css/dash
 INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:36:34] "[32mPOST /login HTTP/1.1[0m" 302 -
 INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:36:34] "GET / HTTP/1.1" 200 -
 INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:36:51] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:37] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:37] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:37] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:37] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:48] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:48] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:48] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:37:48] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:38:25] "[32mPOST /login HTTP/1.1[0m" 302 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:38:25] "GET /home HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:38:25] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:38:25] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:38:25] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:40:14] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:40:19] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:09] "GET /home HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:09] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:09] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:28] "GET /home HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:28] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:28] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:47:28] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:47:47] "GET / HTTP/1.1" 200 -
+INFO:utils.persona_client_db:Initializing database-backed persona client
+INFO:routes.persona_api_db:Getting personas with page=1, per_page=100
+INFO:utils.persona_client_db:Getting personas from database with page=1, per_page=100
+INFO:routes.persona_api_db:Found 3 personas
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "GET /personas HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:09] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:11] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:11] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:11] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:11] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:11] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "GET /archives HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "GET /settings HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:12] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:14] "GET /journeys HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:14] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:14] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:14] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:15] "GET /journey/create HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:15] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:15] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:15] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "GET /create-persona HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/css/persona.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:16] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:18] "GET /home HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:18] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:18] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:18] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:20] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:21] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:21] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:21] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:21] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:24] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:48:31] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:49:07] "GET /dashboard HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:14] "GET /static/css/leaflet.css HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:49:43] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:49:52] "GET /dashboard HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:31] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:33] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /static/css/bootstrap.min.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /static/css/leaflet.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /static/css/dashboard.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /static/js/leaflet.js HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:50:34] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /static/css/leaflet.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /static/css/dashboard.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /static/css/bootstrap.min.css HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /static/js/leaflet.js HTTP/1.1" 200 -
+INFO:werkzeug:172.23.224.1 - - [21/Jun/2025 06:51:30] "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:51:59] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:51:59] "GET /static/css/bootstrap.min.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:00] "GET /static/css/leaflet.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:00] "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:00] "GET /static/js/leaflet.js HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:00] "GET /static/css/dashboard.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:00] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:04] "GET /static/css/images/marker-icon.png HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:04] "GET /static/css/images/marker-shadow.png HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:16] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:routes.persona_api_db:Getting personas with page=1, per_page=100
+INFO:utils.persona_client_db:Getting personas from database with page=1, per_page=100
+INFO:routes.persona_api_db:Found 3 personas
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:17] "GET /personas HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "GET /static/js/index.js HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "GET /static/js/dashboard.js HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:18] "GET /vpn-status HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:19] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:20] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:21] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:21] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:21] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:21] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:22] "GET /settings HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:22] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:22] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:22] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:24] "GET /journeys HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "GET /journey/create HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:25] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "GET /create-persona HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:27] "GET /static/css/persona.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:34] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:35] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:35] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:35] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:routes.persona_api_db:Getting personas with page=1, per_page=100
+INFO:utils.persona_client_db:Getting personas from database with page=1, per_page=100
+INFO:routes.persona_api_db:Found 3 personas
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:47] "GET /personas HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:48] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:52] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:56] "GET /vpn-status HTTP/1.1" 200 -
+INFO:utils.persona_client_db:Getting persona 3 from database
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "GET /persona/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/css/persona.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:57] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:58] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:58] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:52:58] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:01] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:04] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:07] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:11] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:12] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:12] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:12] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:12] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:37] "[32mGET /direct-chat/3 HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:37] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:37] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:37] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:37] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:50] "[32mPOST /login HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:50] "GET /home HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:50] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:51] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:51] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:57] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:57] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:57] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:57] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:57] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:58] "GET /direct-chat/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:59] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:59] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:53:59] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:routes.agent:Received agent message request: {"message": "What are some of your favorite websites? Please give me the urls", "conversation_id": "1750503238740", "persona_id": "3", "chat_mode": "with", "chat_history": [{"role": "agent", "content"...
+INFO:routes.agent:Creating Anthropic client with API key: ************************************************************************************************************
+INFO:routes.agent:Sending message to Claude with model: claude-3-opus-20240229 and 3 messages
+INFO:routes.agent:System prompt size estimate: ~271 tokens
+DEBUG:anthropic._base_client:Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'json_data': {'max_tokens': 4096, 'messages': [{'role': 'assistant', 'content': "Hello, I'm Hiroshi Tanaka. How can I help you today?"}, {'role': 'user', 'content': 'What are some of your favorite websites? Please give me the urls'}, {'role': 'user', 'content': 'What are some of your favorite websites? Please give me the urls'}], 'model': 'claude-3-opus-20240229', 'system': "Persona Context:\nDemographic:\n- Id: 3\n- Persona Id: 3\n- Latitude: 35.6762\n- Longitude: 139.6503\n- Language: ja-JP\n- Country: JP\n- City: Tokyo\n- Region: Kanto\n- Age: 35\n- Gender: Male\n- Education: Bachelor's Degree\n- Income: Medium-High\n- Occupation: Business Analyst\n- Geolocation: 35.6762,139.6503\nPsychographic:\n- Id: 3\n- Persona Id: 3\n- Interests: anime, gaming, technology, traditional culture\n- Personal Values: respect, efficiency, tradition\n- Attitudes: detail-oriented, respectful, technology-forward\n- Lifestyle: Urban traditional-modern blend\n- Personality: Methodical, respectful\n- Opinions: quality-focused, tradition-respecting\nBehavioral:\n- Id: 3\n- Persona Id: 3\n- Browsing Habits: tech reviews, gaming sites, news\n- Purchase History: electronics, games, traditional items\n- Brand Interactions: Sony, Nintendo, Uniqlo\n- Device Usage: {'mobile': '8 hours/day', 'desktop': '4 hours/day', 'gaming': '3 hours/day'}\n- Social Media Activity: {'line': 'daily', 'twitter': 'daily', 'instagram': 'weekly'}\n- Content Consumption: {'videos': '4 hours/day', 'manga': '2 hours/day', 'news': '1 hour/day'}\nContextual:\n- Id: 3\n- Persona Id: 3\n- Time Of Day: evening\n- Day Of Week: weekday\n- Season: summer\n- Weather: humid\n- Device Type: mobile\n- Browser Type: chrome\n- Screen Size: 390x844\n- Connection Type: 5g\nRespond as this persona in all interactions.\n\nYou are the persona described above. Respond to the user's messages accordingly."}}
+DEBUG:anthropic._base_client:Sending HTTP Request: POST https://api.anthropic.com/v1/messages
+DEBUG:httpcore.connection:connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
+DEBUG:httpcore.connection:connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x73bb4055f350>
+DEBUG:httpcore.connection:start_tls.started ssl_context=<ssl.SSLContext object at 0x73bb434d0550> server_hostname='api.anthropic.com' timeout=5.0
+DEBUG:httpcore.connection:start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x73bb427868d0>
+DEBUG:httpcore.http11:send_request_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_headers.complete
+DEBUG:httpcore.http11:send_request_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_body.complete
+DEBUG:httpcore.http11:receive_response_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 21 Jun 2025 10:54:23 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'80000'), (b'anthropic-ratelimit-input-tokens-remaining', b'80000'), (b'anthropic-ratelimit-input-tokens-reset', b'2025-06-21T10:54:14Z'), (b'anthropic-ratelimit-output-tokens-limit', b'16000'), (b'anthropic-ratelimit-output-tokens-remaining', b'16000'), (b'anthropic-ratelimit-output-tokens-reset', b'2025-06-21T10:54:24Z'), (b'anthropic-ratelimit-requests-limit', b'2000'), (b'anthropic-ratelimit-requests-remaining', b'1999'), (b'anthropic-ratelimit-requests-reset', b'2025-06-21T10:54:13Z'), (b'anthropic-ratelimit-tokens-limit', b'96000'), (b'anthropic-ratelimit-tokens-remaining', b'96000'), (b'anthropic-ratelimit-tokens-reset', b'2025-06-21T10:54:14Z'), (b'request-id', b'req_011CQMF22ZKS5U6FTCLP3SuQ'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'6a41e1ca-8556-4ef2-887c-48b7bd8fc57f'), (b'via', b'1.1 google'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Server', b'cloudflare'), (b'CF-RAY', b'9532f7745c7cc99b-IAD'), (b'Content-Encoding', b'gzip')])
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+DEBUG:httpcore.http11:receive_response_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_body.complete
+DEBUG:httpcore.http11:response_closed.started
+DEBUG:httpcore.http11:response_closed.complete
+DEBUG:anthropic._base_client:HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Sat, 21 Jun 2025 10:54:23 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '80000', 'anthropic-ratelimit-input-tokens-remaining': '80000', 'anthropic-ratelimit-input-tokens-reset': '2025-06-21T10:54:14Z', 'anthropic-ratelimit-output-tokens-limit': '16000', 'anthropic-ratelimit-output-tokens-remaining': '16000', 'anthropic-ratelimit-output-tokens-reset': '2025-06-21T10:54:24Z', 'anthropic-ratelimit-requests-limit': '2000', 'anthropic-ratelimit-requests-remaining': '1999', 'anthropic-ratelimit-requests-reset': '2025-06-21T10:54:13Z', 'anthropic-ratelimit-tokens-limit': '96000', 'anthropic-ratelimit-tokens-remaining': '96000', 'anthropic-ratelimit-tokens-reset': '2025-06-21T10:54:14Z', 'request-id': 'req_011CQMF22ZKS5U6FTCLP3SuQ', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': '6a41e1ca-8556-4ef2-887c-48b7bd8fc57f', 'via': '1.1 google', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'server': 'cloudflare', 'cf-ray': '9532f7745c7cc99b-IAD', 'content-encoding': 'gzip'})
+DEBUG:anthropic._base_client:request_id: req_011CQMF22ZKS5U6FTCLP3SuQ
+INFO:routes.agent:Received response from Claude
+INFO:routes.agent:Response content: Here are some of my favorite websites that I frequent:
+
+For tech reviews:
+- https://www.engadget.com/jp/  - Engadget日本版 has in-depth tech product reviews
+- https://www.itmedia.co.jp/ - ITmedia covers ...
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:24] "POST /agent/message HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:45] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:45] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:45] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:45] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:45] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:49] "GET /direct-browse/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:50] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:50] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:54:50] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:root:Browsing as Hiroshi Tanaka to https://www.edo-tokyo-museum.or.jp/ with language ja-JP and geolocation 35.6762,139.6503
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:55:57] "POST /direct-browse/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:55:58] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:55:58] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:55:58] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:56:56] "GET /direct-browse/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:56:59] "GET /journeys HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:56:59] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:56:59] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:56:59] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:08] "GET /journey/create HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:09] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:09] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:56] "[32mPOST /journey/create HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:57] "GET /journey/2 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:57] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:57] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:57:57] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:58:13] "GET /journey/2/browse HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:58:14] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:58:14] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 06:58:14] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:03] "GET /journey/2 HTTP/1.1" 200 -
+INFO:routes.persona_api_db:Getting personas with page=1, per_page=100
+INFO:utils.persona_client_db:Getting personas from database with page=1, per_page=100
+INFO:routes.persona_api_db:Found 3 personas
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "GET /personas HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:06] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:07] "GET /vpn-status HTTP/1.1" 200 -
+INFO:utils.persona_client_db:Getting persona 3 from database
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "GET /persona/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/css/persona.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:09] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:10] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:10] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:10] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:13] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:16] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:19] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:23] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:04:26] "GET /vpn-status HTTP/1.1" 200 -
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): ipapi.co:443
+DEBUG:urllib3.connectionpool:https://ipapi.co:443 "GET /json/ HTTP/1.1" 429 116
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:24] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:25] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:25] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:28] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:28] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:28] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:11:28] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:routes.persona_api_db:Getting personas with page=1, per_page=100
+INFO:utils.persona_client_db:Getting personas from database with page=1, per_page=100
+INFO:routes.persona_api_db:Found 3 personas
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "GET /personas HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:17] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:18] "GET /vpn-status HTTP/1.1" 200 -
+INFO:utils.persona_client_db:Getting persona 3 from database
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:19] "GET /persona/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/persona.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/js/index.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/images/marker-shadow.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "[36mGET /static/css/images/marker-icon.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:20] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:23] "GET /vpn-status HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:24] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:25] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:25] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:25] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:25] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:27] "GET /direct-chat/3 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:27] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:27] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:27] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:routes.agent:Received agent message request: {"message": "What are some of your favorite websites. Please give me the urls", "conversation_id": "1750504348224", "persona_id": "3", "chat_mode": "with", "chat_history": [{"role": "agent", "content"...
+INFO:routes.agent:Creating Anthropic client with API key: ************************************************************************************************************
+INFO:routes.agent:Sending message to Claude with model: claude-3-opus-20240229 and 3 messages
+INFO:routes.agent:System prompt size estimate: ~271 tokens
+DEBUG:anthropic._base_client:Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'json_data': {'max_tokens': 4096, 'messages': [{'role': 'assistant', 'content': "Hello, I'm Hiroshi Tanaka. How can I help you today?"}, {'role': 'user', 'content': 'What are some of your favorite websites. Please give me the urls'}, {'role': 'user', 'content': 'What are some of your favorite websites. Please give me the urls'}], 'model': 'claude-3-opus-20240229', 'system': "Persona Context:\nDemographic:\n- Id: 3\n- Persona Id: 3\n- Latitude: 35.6762\n- Longitude: 139.6503\n- Language: ja-JP\n- Country: JP\n- City: Tokyo\n- Region: Kanto\n- Age: 35\n- Gender: Male\n- Education: Bachelor's Degree\n- Income: Medium-High\n- Occupation: Business Analyst\n- Geolocation: 35.6762,139.6503\nPsychographic:\n- Id: 3\n- Persona Id: 3\n- Interests: anime, gaming, technology, traditional culture\n- Personal Values: respect, efficiency, tradition\n- Attitudes: detail-oriented, respectful, technology-forward\n- Lifestyle: Urban traditional-modern blend\n- Personality: Methodical, respectful\n- Opinions: quality-focused, tradition-respecting\nBehavioral:\n- Id: 3\n- Persona Id: 3\n- Browsing Habits: tech reviews, gaming sites, news\n- Purchase History: electronics, games, traditional items\n- Brand Interactions: Sony, Nintendo, Uniqlo\n- Device Usage: {'mobile': '8 hours/day', 'desktop': '4 hours/day', 'gaming': '3 hours/day'}\n- Social Media Activity: {'line': 'daily', 'twitter': 'daily', 'instagram': 'weekly'}\n- Content Consumption: {'videos': '4 hours/day', 'manga': '2 hours/day', 'news': '1 hour/day'}\nContextual:\n- Id: 3\n- Persona Id: 3\n- Time Of Day: evening\n- Day Of Week: weekday\n- Season: summer\n- Weather: humid\n- Device Type: mobile\n- Browser Type: chrome\n- Screen Size: 390x844\n- Connection Type: 5g\nRespond as this persona in all interactions.\n\nYou are the persona described above. Respond to the user's messages accordingly."}}
+DEBUG:anthropic._base_client:Sending HTTP Request: POST https://api.anthropic.com/v1/messages
+DEBUG:httpcore.connection:connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
+DEBUG:httpcore.connection:connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x73bb40607a70>
+DEBUG:httpcore.connection:start_tls.started ssl_context=<ssl.SSLContext object at 0x73bb40601d50> server_hostname='api.anthropic.com' timeout=5.0
+DEBUG:httpcore.connection:start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x73bb404268d0>
+DEBUG:httpcore.http11:send_request_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_headers.complete
+DEBUG:httpcore.http11:send_request_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_body.complete
+DEBUG:httpcore.http11:receive_response_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 21 Jun 2025 11:12:54 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'80000'), (b'anthropic-ratelimit-input-tokens-remaining', b'80000'), (b'anthropic-ratelimit-input-tokens-reset', b'2025-06-21T11:12:43Z'), (b'anthropic-ratelimit-output-tokens-limit', b'16000'), (b'anthropic-ratelimit-output-tokens-remaining', b'16000'), (b'anthropic-ratelimit-output-tokens-reset', b'2025-06-21T11:12:54Z'), (b'anthropic-ratelimit-requests-limit', b'2000'), (b'anthropic-ratelimit-requests-remaining', b'1999'), (b'anthropic-ratelimit-requests-reset', b'2025-06-21T11:12:42Z'), (b'anthropic-ratelimit-tokens-limit', b'96000'), (b'anthropic-ratelimit-tokens-remaining', b'96000'), (b'anthropic-ratelimit-tokens-reset', b'2025-06-21T11:12:43Z'), (b'request-id', b'req_011CQMGRpSbCxfoaNB2WDHhw'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'6a41e1ca-8556-4ef2-887c-48b7bd8fc57f'), (b'via', b'1.1 google'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Server', b'cloudflare'), (b'CF-RAY', b'9533128b28d3d6b0-IAD'), (b'Content-Encoding', b'gzip')])
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+DEBUG:httpcore.http11:receive_response_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_body.complete
+DEBUG:httpcore.http11:response_closed.started
+DEBUG:httpcore.http11:response_closed.complete
+DEBUG:anthropic._base_client:HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Sat, 21 Jun 2025 11:12:54 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '80000', 'anthropic-ratelimit-input-tokens-remaining': '80000', 'anthropic-ratelimit-input-tokens-reset': '2025-06-21T11:12:43Z', 'anthropic-ratelimit-output-tokens-limit': '16000', 'anthropic-ratelimit-output-tokens-remaining': '16000', 'anthropic-ratelimit-output-tokens-reset': '2025-06-21T11:12:54Z', 'anthropic-ratelimit-requests-limit': '2000', 'anthropic-ratelimit-requests-remaining': '1999', 'anthropic-ratelimit-requests-reset': '2025-06-21T11:12:42Z', 'anthropic-ratelimit-tokens-limit': '96000', 'anthropic-ratelimit-tokens-remaining': '96000', 'anthropic-ratelimit-tokens-reset': '2025-06-21T11:12:43Z', 'request-id': 'req_011CQMGRpSbCxfoaNB2WDHhw', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': '6a41e1ca-8556-4ef2-887c-48b7bd8fc57f', 'via': '1.1 google', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'server': 'cloudflare', 'cf-ray': '9533128b28d3d6b0-IAD', 'content-encoding': 'gzip'})
+DEBUG:anthropic._base_client:request_id: req_011CQMGRpSbCxfoaNB2WDHhw
+INFO:routes.agent:Received response from Claude
+INFO:routes.agent:Response content: Here are a few of my favorite websites that I frequently visit:
+
+1. Gigazine (https://gigazine.net/) - A popular Japanese tech news and review site. I love keeping up with the latest gadgets and techn...
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:55] "POST /agent/message HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:57] "GET /interact-as HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:58] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:58] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:58] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:12:58] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:01] "GET /archives HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:01] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:01] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+DEBUG:httpcore.connection:close.started
+DEBUG:httpcore.connection:close.complete
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:01] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:04] "GET /settings HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:04] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:04] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:04] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:06] "GET /journeys HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:07] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:07] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:07] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:10] "GET /journey/2 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:10] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:10] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:10] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:16] "GET /journey/2/browse HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:16] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:16] "[36mGET /static/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [21/Jun/2025 07:13:16] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -

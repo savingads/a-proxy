@@ -53,28 +53,16 @@
     <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4">About A-Proxy</h2>
+                <h2 class="card-title h4">A-Proxy</h2>
                 <p class="card-text">
-                    A-Proxy is a tool that allows you to test websites with different user contexts and
-                    perspectives.
-                    This helps you compare how websites appear and behave for different types of users.
+                    Chat as different personas and archive conversations for analysis. Each persona has 
+                    configurable demographic, psychographic, and behavioral attributes that influence 
+                    interactions with AI models.
                 </p>
                 <p class="card-text">
-                    The application enables capturing web pages and chats from particular perspectives to help
-                    understand and archive personalized web and chat experiences.
+                    Conversations are automatically archived with metadata including model parameters, 
+                    persona context, and response characteristics for later reference and comparison.
                 </p>
-                <p class="card-text">
-                    With A-Proxy, you can:
-                </p>
-                <ul>
-                    <li>Simulate different browser language settings</li>
-                    <li>Override geolocation data in the browser</li>
-                    <li>Create and manage user personas with demographic, psychographic, behavioral, and
-                        contextual data</li>
-                    <li>Capture and archive personalized website experiences</li>
-                    <li>Track user journeys through websites</li>
-                    <li>Test how websites adapt to different contexts</li>
-                </ul>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a href="{{ url_for('home.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
@@ -91,12 +79,12 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4"><i class="bi bi-people me-2"></i>Personas</h2>
+                <h2 class="card-title h4"><i class="bi bi-chat-dots me-2"></i>Chat as Persona</h2>
                 <p class="card-text">
-                    Create detailed user personas with demographic, psychographic, behavioral, and contextual
-                    information to simulate how different users would experience the web.
+                    Engage with AI models from the perspective of defined personas. Responses reflect
+                    demographic and psychological attributes.
                 </p>
-                <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-primary">Manage Personas</a>
+                <a href="{{ url_for('journey.interact_as') }}" class="btn btn-outline-primary">Start Chat</a>
             </div>
         </div>
     </div>
@@ -104,12 +92,12 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4"><i class="bi bi-archive me-2"></i>Archives</h2>
+                <h2 class="card-title h4"><i class="bi bi-people me-2"></i>Manage Personas</h2>
                 <p class="card-text">
-                    Capture and store snapshots of web pages as they appear to different personas, building
-                    an archive of personalized web experiences.
+                    Create and configure persona attributes including demographics, interests, 
+                    values, and behavioral patterns.
                 </p>
-                <a href="{{ url_for('archives.list_archives') }}" class="btn btn-outline-primary">View Archives</a>
+                <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-primary">View Personas</a>
             </div>
         </div>
     </div>
@@ -119,12 +107,12 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4"><i class="bi bi-map me-2"></i>Journeys</h2>
+                <h2 class="card-title h4"><i class="bi bi-archive me-2"></i>Conversation Archives</h2>
                 <p class="card-text">
-                    Track and analyze how different personas navigate through websites, recording their
-                    journey to better understand the user experience.
+                    Access archived conversations with associated model parameters and 
+                    persona context for analysis.
                 </p>
-                <a href="{{ url_for('journey.list_journeys') }}" class="btn btn-outline-primary">View Journeys</a>
+                <a href="{{ url_for('archives.list_archives') }}" class="btn btn-outline-primary">View Archives</a>
             </div>
         </div>
     </div>
@@ -132,12 +120,12 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title h4"><i class="bi bi-person-gear me-2"></i>Interact As</h2>
+                <h2 class="card-title h4"><i class="bi bi-map me-2"></i>Journey Tracking</h2>
                 <p class="card-text">
-                    Browse the web or chat with AI as if you were your defined persona, experiencing
-                    content through their simulated perspective.
+                    Review persona interaction sessions and conversation progressions 
+                    over time.
                 </p>
-                <a href="{{ url_for('journey.interact_as') }}" class="btn btn-outline-primary">Interact As Persona</a>
+                <a href="{{ url_for('journey.list_journeys') }}" class="btn btn-outline-primary">View Journeys</a>
             </div>
         </div>
     </div>

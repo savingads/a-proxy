@@ -113,7 +113,12 @@
                     {% endif %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Browser Geolocation
-                        <span id="browser-geolocation" class="badge bg-primary rounded-pill">Loading...</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="browser-geolocation" class="badge bg-primary rounded-pill">Loading...</span>
+                            <button id="retry-geolocation" class="btn btn-sm btn-outline-secondary" style="display: none;" onclick="requestGeolocation()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Language
@@ -210,7 +215,12 @@
             <div class="card-body">
                 <h3 class="card-title h5"><i class="bi bi-geo-alt me-2"></i>Your Location</h3>
                 <div id="map"></div>
-                <p class="text-muted small">This map shows your browser's reported location.</p>
+                <p class="text-muted small">
+                    Map shows IP-based location by default. Browser geolocation requires permission and may not work over HTTP.
+                    {% if ip_info and ip_info.get('latitude') and ip_info.get('longitude') %}
+                    <br><strong>Current IP location:</strong> {{ ip_info.city }}, {{ ip_info.country_name }}
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
@@ -309,37 +319,58 @@
             document.getElementById('browser-downlink').textContent = 'Not available';
         }
 
-        // Geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    document.getElementById('browser-geolocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        // Geolocation function
+        function requestGeolocation() {
+            if (navigator.geolocation) {
+                document.getElementById('browser-geolocation').textContent = 'Requesting...';
+                document.getElementById('retry-geolocation').style.display = 'none';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        document.getElementById('browser-geolocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
-                    // Update map with the browser location
-                    map.setView([lat, lng], 13);
-                    L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: '/static/css/images/marker-icon.png',
-                            shadowUrl: '/static/css/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map)
-                        .bindPopup('Your precise browser location')
-                        .openPopup();
-                },
-                function (error) {
-                    console.error("Error getting geolocation:", error);
-                    document.getElementById('browser-geolocation').textContent = 'Not available';
-                }
-            );
-        } else {
-            document.getElementById('browser-geolocation').textContent = 'Not supported';
+                        // Update map with the browser location
+                        map.setView([lat, lng], 13);
+                        L.marker([lat, lng])
+                            .addTo(map)
+                            .bindPopup('Your precise browser location')
+                            .openPopup();
+                    },
+                    function (error) {
+                        console.error("Geolocation error:", error);
+                        let errorMsg = 'Not available';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = 'Permission denied';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = 'Position unavailable';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = 'Request timeout';
+                                break;
+                            default:
+                                errorMsg = 'Unknown error';
+                                break;
+                        }
+                        document.getElementById('browser-geolocation').textContent = errorMsg;
+                        document.getElementById('retry-geolocation').style.display = 'inline-block';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0  // Force fresh request
+                    }
+                );
+            } else {
+                document.getElementById('browser-geolocation').textContent = 'Not supported';
+            }
         }
+
+        // Initial geolocation request
+        requestGeolocation();
     });
 </script>
 {% endblock %}

@@ -15,7 +15,7 @@ A-Proxy is a Flask-based web application that allows users to browse the web thr
 
 ### Architecture
 - **Main Application**: Flask app (`app.py`) running on port 5002
-- **Persona Service**: Separate microservice running on port 5050 (located in `_src/persona-service/`)
+- **Integrated Persona Management**: Direct database access via `routes/persona_api_db.py`
 - **Database**: SQLite database (`data/personas.db`) for persistent storage
 - **Frontend**: Bootstrap-based UI with JavaScript for interactive features
 
@@ -55,10 +55,9 @@ A-Proxy is a Flask-based web application that allows users to browse the web thr
 The recommended way to start the application is using `start.sh`, which:
 1. Checks repository status
 2. Activates virtual environment
-3. Ensures required source repositories exist
-4. Installs dependencies
-5. Initializes databases
-6. Starts both the Persona Service (port 5050) and A-Proxy (port 5002)
+3. Ensures required dependencies are installed
+4. Initializes databases
+5. Starts A-Proxy application (port 5002)
 
 ### Current Issues to Address
 

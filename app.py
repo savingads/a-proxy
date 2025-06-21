@@ -9,7 +9,7 @@ from utils.user import get_user, User
 from routes.home import home_bp
 from routes.vpn import vpn_bp
 # Choose which persona implementation to use (API or direct DB access)
-from routes.persona_api import persona_bp  # Fixed implementation using API
+from routes.persona_api_db import persona_bp  # Using direct database implementation
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
 from routes.journey import journey_bp

@@ -18,13 +18,9 @@ Docker provides the easiest setup experience by handling all dependencies and en
    http://localhost:5002
    ```
 
-That's it! The script handles everything else, including setting up directories, placeholders for VPN credentials, and building and starting the container.
-
 For detailed Docker instructions, advanced configuration options, and troubleshooting, see [DOCKER.md](DOCKER.md).
 
 ## Option 2: Manual Installation (Updated)
-
-**Note**: The persona service has been integrated directly into the main application, so no separate microservice setup is needed.
 
 ### Prerequisites
 

@@ -29,13 +29,33 @@ docker compose build
 # Start without AI features (for testing/demo)
 docker compose up -d
 
-# OR start with AI features
+# OR start with AI features (recommended)
 ANTHROPIC_API_KEY=your-api-key-here docker compose up -d
+
+# Alternative: Set API key in docker-compose.yml environment section
+# Edit docker-compose.yml and uncomment/set ANTHROPIC_API_KEY, then:
+docker compose up -d
 ```
 
 ### 3. Access the Application
 - Open http://localhost:5002
 - Login with: `admin@example.com` / `password`
+
+### Managing the Container
+```bash
+# Stop the application
+docker compose down
+
+# Start existing container
+docker compose up -d
+
+# View status
+docker compose ps
+
+# Update and restart
+docker compose pull
+docker compose up -d --build
+```
 
 ## Manual Setup (Development)
 
@@ -222,6 +242,12 @@ docker compose build --no-cache
 docker compose up -d
 
 # Check container logs
+docker compose logs
+
+# Follow logs in real-time
+docker compose logs -f
+
+# Check specific container logs
 docker logs a-proxy-a-proxy-1
 ```
 

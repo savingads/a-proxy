@@ -52,8 +52,7 @@ local_settings.py
 # Data directories and files
 data/*.db
 
-# Config files
-config.py
+# Config files (config.py now tracked since it contains no secrets)
 references/
 
 # Local source repositories

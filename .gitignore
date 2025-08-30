@@ -52,9 +52,39 @@ local_settings.py
 # Data directories and files
 data/*.db
 
-# Config files
-config.py
+# Config files (config.py now tracked since it contains no secrets)
 references/
 
 # Local source repositories
 _src/*/
+
+# Development documentation (not for public version control)
+CLAUDE.md
+
+# Documentation directories (development/internal only)
+docs/
+*/docs/
+
+# Scripts and development artifacts
+scripts/
+*/scripts/
+scratch/
+*/scratch/
+pending_delete/
+*/pending_delete/
+
+# Cache directories
+cache/
+*/cache/
+*_cache/
+*/*_cache/
+
+# Archive directories
+archive/
+*/archive/
+
+# Test artifacts
+.pytest_cache/
+*.temp
+temp_*/
+*_temp/

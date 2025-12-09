@@ -58,8 +58,11 @@ references/
 # Local source repositories
 _src/*/
 
-# Development documentation (internal notes, not CLAUDE.md)
-# CLAUDE.md is now tracked for project documentation
+# Development documentation
+CLAUDE.md
+
+# Claude Code configuration
+.claude/
 
 # Documentation archive subdirectories
 docs/archive/

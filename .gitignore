@@ -67,6 +67,12 @@ CLAUDE.md
 # Documentation archive subdirectories
 docs/archive/
 
+# Internal documentation (not for public docs)
+docs-internal/
+
+# MkDocs build output
+site/
+
 # Scripts and development artifacts
 scripts/
 */scripts/

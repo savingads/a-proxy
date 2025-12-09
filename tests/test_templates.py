@@ -9,27 +9,39 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import app
 import database
+from database.connection import DatabaseConnection
 
 class TestTemplates(unittest.TestCase):
     """Test cases for the template structure and navigation consistency"""
-    
+
     def setUp(self):
         """Set up test fixtures before each test method"""
         # Create a temporary database file
         self.db_fd, self.db_path = tempfile.mkstemp()
-        
-        # Save the original DB_PATH and replace it with our test database
-        self.original_db_path = database.DB_PATH
-        database.DB_PATH = self.db_path
-        
+
+        # Save the original db instance and replace it with our test database
+        import database.connection as conn_module
+        self.original_db_instance = conn_module._db_instance
+        conn_module._db_instance = DatabaseConnection(self.db_path)
+
+        # Reset repository singletons to use new connection
+        database._persona_repo = None
+        database._journey_repo = None
+        database._archive_repo = None
+        database._user_repo = None
+        database._settings_repo = None
+
         # Initialize the database
         database.init_db()
-        
+        database.create_persona_tables()
+        database.init_settings_table()
+        database.init_user_table()
+
         # Create the Flask test client
         self.app = app.create_app()
         self.app.config['TESTING'] = True
         self.client = self.app.test_client()
-        
+
         # Create a test persona to use in tests
         self.test_persona = {
             "name": "Test Persona",
@@ -42,12 +54,20 @@ class TestTemplates(unittest.TestCase):
             }
         }
         self.test_persona_id = database.save_persona(self.test_persona)
-    
+
     def tearDown(self):
         """Clean up test fixtures after each test method"""
-        # Reset the DB_PATH
-        database.DB_PATH = self.original_db_path
-        
+        # Reset the db instance
+        import database.connection as conn_module
+        conn_module._db_instance = self.original_db_instance
+
+        # Reset repository singletons
+        database._persona_repo = None
+        database._journey_repo = None
+        database._archive_repo = None
+        database._user_repo = None
+        database._settings_repo = None
+
         # Close and remove the temporary database
         os.close(self.db_fd)
         os.unlink(self.db_path)
@@ -81,12 +101,12 @@ class TestTemplates(unittest.TestCase):
     
     def test_persona_view_page_extends_base_template(self):
         """Test that the persona view page extends the base template"""
-        response = self.client.get(f'/view-persona/{self.test_persona_id}')
+        response = self.client.get(f'/persona/{self.test_persona_id}')
         self.assertEqual(response.status_code, 200)
-        
+
         # Parse the HTML
         soup = BeautifulSoup(response.data, 'html.parser')
-        
+
         # Check for sidebar navigation
         sidebar = soup.select('.sidebar')
         self.assertTrue(len(sidebar) > 0, "Sidebar not found in persona view page")
@@ -158,16 +178,17 @@ class TestTemplates(unittest.TestCase):
         self.assertTrue(len(danger_zone) > 0, "Danger zone card not found in edit journey page")
     
     def test_browse_as_page_extends_base_template(self):
-        """Test that the browse-as page extends the base template"""
-        response = self.client.get('/browse-as')
+        """Test that the browse-as (now interact-as) page extends the base template"""
+        # /browse-as redirects to /interact-as, so follow redirects
+        response = self.client.get('/interact-as')
         self.assertEqual(response.status_code, 200)
-        
+
         # Parse the HTML
         soup = BeautifulSoup(response.data, 'html.parser')
-        
+
         # Check for sidebar navigation
         sidebar = soup.select('.sidebar')
-        self.assertTrue(len(sidebar) > 0, "Sidebar not found in browse-as page")
+        self.assertTrue(len(sidebar) > 0, "Sidebar not found in interact-as page")
     
     def test_archives_page_extends_base_template(self):
         """Test that the archives page extends the base template"""
@@ -186,7 +207,7 @@ class TestTemplates(unittest.TestCase):
         pages = [
             '/',
             '/personas',
-            '/browse-as',
+            '/interact-as',
             '/journeys',
             '/journey/create',
             '/archives'

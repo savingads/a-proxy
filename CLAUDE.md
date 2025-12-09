@@ -106,7 +106,12 @@ DEBUG=True                     # Enable debug mode
 ## Testing
 
 ```bash
+# Run full test suite
+python tests/test_runner.py
+
+# Run individual test files
 python tests/test_database.py
+python tests/test_app.py
 ```
 
 ## API Endpoints
@@ -114,12 +119,45 @@ python tests/test_database.py
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/personas` | GET | List all personas |
-| `/personas/<id>` | GET | Get persona details |
-| `/personas/create` | POST | Create new persona |
+| `/persona/<id>` | GET | View persona details |
+| `/create-persona` | GET/POST | Create new persona |
+| `/edit-persona/<id>` | GET/POST | Edit existing persona |
+| `/delete-persona/<id>` | POST | Delete persona |
 | `/journeys` | GET | List all journeys |
 | `/journey/<id>` | GET | Journey details with waypoints |
+| `/journey/<id>/browse` | GET | Browse as journey persona |
+| `/interact-as` | GET | Interact as persona (replaces `/browse-as`) |
 | `/agent/message` | POST | Send message to Claude |
 | `/direct-chat/<persona_id>` | GET | Chat interface for persona |
+
+## Recent Changes (December 2025)
+
+### Repository Pattern Refactoring
+
+The database layer was refactored to use a clean repository pattern:
+
+- **DatabaseConnection class** (`database/connection.py`): Manages SQLite connections with context managers
+- **Repository classes** (`database/repositories/`): PersonaRepository, JourneyRepository, ArchiveRepository, UserRepository, SettingsRepository
+- **Backward-compatible API**: Legacy functions in `database/__init__.py` delegate to repositories
+- **Test infrastructure updated**: Tests use the new connection pattern for test database isolation
+
+### Verification Status (December 9, 2025)
+
+**Web Application**: Working correctly
+- Flask app starts and responds on port 5002
+- All main routes return HTTP 200
+- Login, personas, journeys, archives pages load successfully
+
+**Test Suite Status** (41 tests total):
+- Database tests: 6/6 passing
+- Migration tests: 3/3 passing
+- VPN utils tests: 9/9 passing
+- App tests: 8/13 passing (5 need foreign key fix in update flow)
+- Template tests: 8/11 passing (3 navigation-related issues)
+
+**Known Issues**:
+1. Persona update with psychographic/behavioral/contextual data triggers foreign key constraint (repository delete-before-insert pattern)
+2. Navigation link consistency test expects uniform sidebar across all pages
 
 ## Integration Points
 

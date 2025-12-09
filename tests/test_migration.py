@@ -9,6 +9,9 @@ import sys
 # Add parent directory to path to import from parent directory
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Add scripts/utilities/python to path for migrate_database
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'utilities', 'python')))
+
 # Import the migrate_database module
 import migrate_database
 

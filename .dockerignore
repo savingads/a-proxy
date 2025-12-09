@@ -11,12 +11,16 @@ __pycache__/
 venv/
 env/
 ENV/
-.env
 .venv
+
+# Environment files (will use docker env vars)
+.env
+.env.*
 
 # Data directories (these will be mounted as volumes)
 data/
 nordvpn/
+archives/
 personas.db
 
 # Editor directories and files
@@ -36,3 +40,16 @@ DOCKER.md
 
 # OS specific files
 .DS_Store
+Thumbs.db
+
+# Development files
+CLAUDE.md
+.claude/
+scripts/
+scratch/
+*.bak
+*.backup
+*~
+
+# Documentation (not needed in container)
+docs/archive/

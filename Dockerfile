@@ -42,29 +42,32 @@ RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 # Copy application code
 COPY . .
 
-# Always use .env.docker as default in container (API key should be provided via environment variables)
-RUN cp .env.docker .env
-
-# Create a startup script to initialize the database if it doesn't exist
+# Create startup script
+# Note: Database auto-initializes on first import via database/__init__.py
 RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+echo "A-Proxy Container Starting..."\n\
+\n\
+# Create sample personas if database is empty\n\
 if [ ! -f "/app/data/personas.db" ]; then\n\
-    echo "Initializing database..."\n\
-    python /app/database.py\n\
+    echo "Creating sample personas..."\n\
     python /app/create_sample_personas_simple.py\n\
 fi\n\
 \n\
-echo "Initializing default user..."\n\
+# Initialize default user (idempotent - skips if exists)\n\
+echo "Checking default user..."\n\
 python /app/init_default_user.py\n\
 \n\
-echo "Starting A-Proxy application..."\n\
-python /app/app.py --host 0.0.0.0 --port 5002\n\
+echo "Starting A-Proxy on port 5002..."\n\
+exec python /app/app.py --host 0.0.0.0 --port 5002\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose the application port
 EXPOSE 5002
 
 # Define health check for container monitoring
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:5002/ || exit 1
 
 # Run the start script

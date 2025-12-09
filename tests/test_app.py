@@ -32,6 +32,10 @@ class TestApp(unittest.TestCase):
         database._user_repo = None
         database._settings_repo = None
 
+        # Reset persona client singleton
+        import utils.persona_client_db as persona_client_module
+        persona_client_module._db_persona_client = None
+
         # Initialize the database
         database.init_db()
         database.create_persona_tables()
@@ -68,6 +72,10 @@ class TestApp(unittest.TestCase):
         database._archive_repo = None
         database._user_repo = None
         database._settings_repo = None
+
+        # Reset persona client singleton
+        import utils.persona_client_db as persona_client_module
+        persona_client_module._db_persona_client = None
 
         # Close and remove the temporary database
         os.close(self.db_fd)
@@ -149,19 +157,19 @@ class TestApp(unittest.TestCase):
         }
 
         # Check the number of personas before
-        personas_before = len(database.get_all_personas())
+        personas_before = database.get_all_personas()['total']
 
         # Send a POST request to create the new persona via create-persona route
         response = self.client.post('/create-persona', data=form_data, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
         # Check that a new persona was added to the database
-        personas_after = len(database.get_all_personas())
+        personas_after = database.get_all_personas()['total']
         self.assertEqual(personas_after, personas_before + 1)
 
         # Find the new persona in the database
         new_persona = None
-        for persona in database.get_all_personas():
+        for persona in database.get_all_personas()['personas']:
             if persona['name'] == 'New Test Persona':
                 new_persona = persona
                 break
@@ -196,21 +204,21 @@ class TestApp(unittest.TestCase):
         temp_persona_id = database.save_persona(temp_persona)
         
         # Check the number of personas before
-        personas_before = len(database.get_all_personas())
-        
+        personas_before = database.get_all_personas()['total']
+
         # Send a POST request to delete the persona
         response = self.client.post(f'/delete-persona/{temp_persona_id}', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        
+
         # Check that the success message is in the response
         self.assertIn(b'deleted successfully', response.data)
-        
+
         # Check that a persona was removed from the database
-        personas_after = len(database.get_all_personas())
+        personas_after = database.get_all_personas()['total']
         self.assertEqual(personas_after, personas_before - 1)
-        
+
         # Check that the deleted persona is no longer in the database
-        for persona in database.get_all_personas():
+        for persona in database.get_all_personas()['personas']:
             self.assertNotEqual(persona['id'], temp_persona_id)
     
     def test_journey_browse_page(self):

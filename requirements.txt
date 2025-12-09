@@ -21,3 +21,6 @@ pillow
 
 # Context token counting
 tiktoken==0.5.2
+
+# Testing
+beautifulsoup4==4.12.2

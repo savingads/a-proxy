@@ -58,12 +58,11 @@ references/
 # Local source repositories
 _src/*/
 
-# Development documentation (not for public version control)
-CLAUDE.md
+# Development documentation (internal notes, not CLAUDE.md)
+# CLAUDE.md is now tracked for project documentation
 
-# Documentation directories (development/internal only)
-docs/
-*/docs/
+# Documentation archive subdirectories
+docs/archive/
 
 # Scripts and development artifacts
 scripts/

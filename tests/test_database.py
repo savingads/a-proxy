@@ -10,27 +10,33 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import database
+from database import connection as db_connection
 
 class TestDatabase(unittest.TestCase):
     """Test cases for database operations"""
-    
+
     def setUp(self):
         """Set up test fixtures before each test method"""
         # Create a temporary database file
         self.db_fd, self.db_path = tempfile.mkstemp()
-        
+
         # Save the original DB_PATH and replace it with our test database
-        self.original_db_path = database.DB_PATH
-        database.DB_PATH = self.db_path
-        
+        self.original_db_path = db_connection.DEFAULT_DB_PATH
+        db_connection.DEFAULT_DB_PATH = self.db_path
+
+        # Reset the global database instance to use new path
+        db_connection._db_instance = None
+
         # Initialize the database
         database.init_db()
-    
+        database.create_persona_tables()
+
     def tearDown(self):
         """Clean up test fixtures after each test method"""
         # Reset the DB_PATH
-        database.DB_PATH = self.original_db_path
-        
+        db_connection.DEFAULT_DB_PATH = self.original_db_path
+        db_connection._db_instance = None
+
         # Close and remove the temporary database
         os.close(self.db_fd)
         os.unlink(self.db_path)
@@ -173,24 +179,25 @@ class TestDatabase(unittest.TestCase):
             {"name": "Test 2", "demographic": {"language": "fr-FR"}},
             {"name": "Test 3", "demographic": {"language": "de-DE"}}
         ]
-        
+
         # Save all personas
         for persona in test_personas:
             database.save_persona(persona)
-        
-        # Retrieve all personas
-        all_personas = database.get_all_personas()
-        
+
+        # Retrieve all personas (now returns dict with pagination)
+        result = database.get_all_personas()
+        all_personas = result.get('personas', [])
+
         # Check that we have at least 3 personas
         self.assertGreaterEqual(len(all_personas), 3)
-        
+
         # Check that our test personas are in the result
         # (by checking for their names and languages)
         found_test_personas = 0
         for persona in all_personas:
             if persona['name'] in ["Test 1", "Test 2", "Test 3"]:
                 found_test_personas += 1
-        
+
         self.assertEqual(found_test_personas, 3)
     
     def test_archived_website_and_memento(self):

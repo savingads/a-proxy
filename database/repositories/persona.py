@@ -103,11 +103,22 @@ class PersonaRepository(BaseRepository):
             now = datetime.now()
 
             if persona_id:
-                # Update existing persona
-                cursor.execute(
-                    "UPDATE personas SET name = ?, updated_at = ? WHERE id = ?",
-                    (persona_data.get('name', 'Unnamed Persona'), now, persona_id)
-                )
+                # Check if persona exists
+                cursor.execute("SELECT id FROM personas WHERE id = ?", (persona_id,))
+                exists = cursor.fetchone()
+
+                if exists:
+                    # Update existing persona
+                    cursor.execute(
+                        "UPDATE personas SET name = ?, updated_at = ? WHERE id = ?",
+                        (persona_data.get('name', 'Unnamed Persona'), now, persona_id)
+                    )
+                else:
+                    # Insert with specific ID (for update-after-delete pattern)
+                    cursor.execute(
+                        "INSERT INTO personas (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
+                        (persona_id, persona_data.get('name', 'Unnamed Persona'), now, now)
+                    )
             else:
                 # Create new persona
                 cursor.execute(
@@ -230,16 +241,20 @@ class PersonaRepository(BaseRepository):
 
     def _save_demographic_data(self, cursor, persona_id: int, demo_data: Dict[str, Any]):
         """Save demographic data for a persona."""
-        latitude = None
-        longitude = None
-        geolocation = demo_data.get('geolocation', '')
-        if geolocation and ',' in geolocation:
-            try:
-                lat_str, lng_str = geolocation.split(',', 1)
-                latitude = float(lat_str.strip())
-                longitude = float(lng_str.strip())
-            except (ValueError, TypeError):
-                pass
+        # First check for direct latitude/longitude fields
+        latitude = demo_data.get('latitude')
+        longitude = demo_data.get('longitude')
+
+        # If not provided directly, try to parse from geolocation string
+        if latitude is None and longitude is None:
+            geolocation = demo_data.get('geolocation', '')
+            if geolocation and ',' in geolocation:
+                try:
+                    lat_str, lng_str = geolocation.split(',', 1)
+                    latitude = float(lat_str.strip())
+                    longitude = float(lng_str.strip())
+                except (ValueError, TypeError):
+                    pass
 
         cursor.execute("SELECT id FROM demographic_data WHERE persona_id = ?", (persona_id,))
         exists = cursor.fetchone()

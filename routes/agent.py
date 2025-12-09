@@ -2,14 +2,9 @@ from flask import Blueprint, request, jsonify, render_template, flash, redirect,
 import logging
 import json
 import database
-import sys
-import os
 import time
 from datetime import datetime
 from flask_login import login_required
-
-# Add agent_module to the path
-sys.path.append(os.path.join(os.getcwd(), 'agent_module'))
 
 # Create blueprint
 agent_bp = Blueprint('agent', __name__)
@@ -164,29 +159,6 @@ def standalone_agent_message():
         trace = traceback.format_exc()
         logger.error(f"Traceback: {trace}")
         return jsonify({"success": False, "error": str(e)}), 500
-
-from services import fetch_persona_context
-
-def flatten_persona_context(raw_context):
-    """
-    Flatten all persona fields for sidebar/system prompt display.
-    Returns a dict with Demographic, Psychographic, Behavioral, Contextual as sub-dicts.
-    """
-    if not raw_context:
-        return {}
-    demographic = raw_context.get("demographic", {})
-    psychographic = raw_context.get("psychographic", {})
-    behavioral = raw_context.get("behavioral", {})
-    contextual = raw_context.get("contextual", {})
-    # Convert lists to comma-separated strings for compactness
-    def compact(d):
-        return {k: ", ".join(v) if isinstance(v, list) else v for k, v in d.items()}
-    return {
-        "Demographic": compact(demographic),
-        "Psychographic": compact(psychographic),
-        "Behavioral": compact(behavioral),
-        "Contextual": compact(contextual)
-    }
 
 @agent_bp.route("/direct-chat/<int:persona_id>")
 @login_required

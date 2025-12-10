@@ -1116,10 +1116,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistent-cookies" class="md-nav__link">
+  <a href="#cookie-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Persistent Cookies
+        Cookie Limitations
       
     </span>
   </a>
@@ -1144,10 +1144,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#managed-attributes" class="md-nav__link">
+  <a href="#what-a-proxy-configures" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Managed Attributes
+        What A-Proxy Configures
       
     </span>
   </a>
@@ -1155,10 +1155,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#unmanaged-attributes" class="md-nav__link">
+  <a href="#not-configured" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Unmanaged Attributes
+        Not Configured
       
     </span>
   </a>
@@ -1847,10 +1847,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistent-cookies" class="md-nav__link">
+  <a href="#cookie-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Persistent Cookies
+        Cookie Limitations
       
     </span>
   </a>
@@ -1875,10 +1875,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#managed-attributes" class="md-nav__link">
+  <a href="#what-a-proxy-configures" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Managed Attributes
+        What A-Proxy Configures
       
     </span>
   </a>
@@ -1886,10 +1886,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#unmanaged-attributes" class="md-nav__link">
+  <a href="#not-configured" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Unmanaged Attributes
+        Not Configured
       
     </span>
   </a>
@@ -2166,35 +2166,37 @@
 <h3 id="session-cookies">Session Cookies<a class="headerlink" href="#session-cookies" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Created during browsing</li>
-<li>Persist within the session</li>
+<li>Persist within the browsing session</li>
 <li>Cleared when session ends</li>
 </ul>
-<h3 id="persistent-cookies">Persistent Cookies<a class="headerlink" href="#persistent-cookies" title="Permanent link">&para;</a></h3>
+<h3 id="cookie-limitations">Cookie Limitations<a class="headerlink" href="#cookie-limitations" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Can be configured per persona</li>
-<li>Simulate returning user behavior</li>
-<li>Enable personalization testing</li>
+<li>No persistent cookie profiles per persona</li>
+<li>Each session starts fresh</li>
+<li>Cookie-based personalization requires building history within a session</li>
 </ul>
 <h2 id="browser-fingerprinting">Browser Fingerprinting<a class="headerlink" href="#browser-fingerprinting" title="Permanent link">&para;</a></h2>
-<p>Some websites use browser fingerprinting beyond cookies:</p>
-<h3 id="managed-attributes">Managed Attributes<a class="headerlink" href="#managed-attributes" title="Permanent link">&para;</a></h3>
-<p>A-Proxy configures these fingerprint elements:</p>
+<p>Some websites use browser fingerprinting beyond cookies.</p>
+<h3 id="what-a-proxy-configures">What A-Proxy Configures<a class="headerlink" href="#what-a-proxy-configures" title="Permanent link">&para;</a></h3>
+<p>A-Proxy sets these basic browser attributes:</p>
 <ul>
-<li>User-Agent string</li>
-<li>Screen resolution</li>
-<li>Language preferences</li>
-<li>Timezone (derived from location)</li>
+<li>User-Agent string (based on device/browser type)</li>
+<li>Accept-Language header</li>
+<li>Viewport dimensions</li>
 </ul>
-<h3 id="unmanaged-attributes">Unmanaged Attributes<a class="headerlink" href="#unmanaged-attributes" title="Permanent link">&para;</a></h3>
-<p>Some fingerprint elements are harder to control:</p>
+<h3 id="not-configured">Not Configured<a class="headerlink" href="#not-configured" title="Permanent link">&para;</a></h3>
+<p>A-Proxy does not spoof these fingerprint elements:</p>
 <ul>
 <li>Canvas fingerprinting</li>
 <li>WebGL fingerprinting</li>
 <li>Audio fingerprinting</li>
+<li>Timezone</li>
+<li>Installed fonts</li>
+<li>Hardware concurrency</li>
 </ul>
-<div class="admonition note">
+<div class="admonition warning">
 <p class="admonition-title">Fingerprint Limitations</p>
-<p>Full fingerprint spoofing requires additional tools. A-Proxy focuses on high-impact attributes.</p>
+<p>A-Proxy provides basic browser configuration, not full fingerprint spoofing. Websites using advanced fingerprinting may still identify the browser environment.</p>
 </div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <h3 id="planning-sessions">Planning Sessions<a class="headerlink" href="#planning-sessions" title="Permanent link">&para;</a></h3>

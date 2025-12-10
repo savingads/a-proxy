@@ -1,10 +1,13 @@
 # Develop Personas via Chat
 
-A-Proxy allows personas to be developed and refined through conversations with Claude AI. This approach creates more natural, organically developed personas.
+A-Proxy allows personas to be developed through conversations with Claude AI. Archivists chat with or about personas, then manually update the persona profile based on insights from the conversation.
 
 ## Overview
 
-Instead of filling out forms, archivists can chat with Claude while adopting a persona perspective. The system extracts relevant attributes from these conversations to build out the persona profile.
+The chat interface provides a space to explore persona characteristics through dialogue. Claude responds in context, helping archivists think through persona attributes. After conversations, archivists manually update persona profiles with relevant information.
+
+!!! note "Manual Update Required"
+    A-Proxy does not automatically extract attributes from conversations. After chatting, navigate to the persona edit page to add or update attributes based on the conversation.
 
 ## Starting a Persona Chat
 
@@ -22,64 +25,7 @@ Instead of filling out forms, archivists can chat with Claude while adopting a p
 3. Choose **Chat** mode
 4. Start the conversation
 
-## Chat Techniques
-
-### Directive Statements
-
-Provide explicit information about the persona:
-
-```
-You: "You have a job as a chef at a restaurant on 36th Street in Brooklyn."
-
-Claude: "That's right, I work at a small Italian place in Park Slope.
-The morning prep is my favorite part of the day - there's something
-meditative about chopping vegetables before the lunch rush."
-```
-
-The system extracts:
-- Occupation: Chef
-- Location: Brooklyn, 36th Street
-- Workplace type: Italian restaurant
-- Work schedule: Morning shifts
-
-### Exploratory Questions
-
-Ask questions to develop personality and preferences:
-
-```
-You: "What websites do you usually visit when looking for recipe inspiration?"
-
-Claude: "I spend a lot of time on Serious Eats - Kenji Lopez-Alt's
-scientific approach to cooking really appeals to me. I also follow
-several Italian food blogs and check supplier sites for seasonal
-ingredients."
-```
-
-The system extracts:
-- Browsing habits: Serious Eats, Italian food blogs, supplier sites
-- Interests: Scientific cooking approach, seasonal ingredients
-- Personality: Detail-oriented, methodical
-
-### Scenario Development
-
-Place the persona in situations to reveal behavior:
-
-```
-You: "You're planning a special dinner menu for next week. Walk me
-through how you'd research and prepare."
-
-Claude: "First, I'd check what's coming in fresh from our local farms
-this week - I usually browse the Greenmarket site on my phone during
-my commute. Then I'd spend some time on my laptop looking at classic
-Italian preparations..."
-```
-
-The system extracts:
-- Device usage: Mobile for quick browsing, laptop for research
-- Values: Local sourcing, seasonal cooking
-- Behavioral patterns: Research habits, planning approach
-
-## Persona Modes
+## Chat Modes
 
 ### Chat AS the Persona
 
@@ -92,6 +38,8 @@ Claude (as persona): I'm pretty skeptical of it, honestly. For my
 restaurant, I need to see and smell the ingredients...
 ```
 
+This mode helps explore how a persona might think or behave.
+
 ### Chat ABOUT the Persona
 
 Discuss and develop the persona in third person:
@@ -102,40 +50,59 @@ Claude: Given their values around local sourcing and quality, they would
 likely be skeptical of food delivery apps...
 ```
 
-## Attribute Extraction
+This mode helps analyze persona characteristics objectively.
 
-The system monitors conversations for extractable information:
+## Conversation Techniques
 
-| Mentioned Information | Extracted Attribute | Category |
-|----------------------|---------------------|----------|
-| "I work at a restaurant" | occupation: Chef | Demographic |
-| "I usually browse on my phone" | device_type: mobile | Contextual |
-| "Local sourcing matters to me" | personal_values: [local sourcing] | Psychographic |
-| "I check recipe sites every morning" | time_of_day: morning | Contextual |
+### Directive Statements
 
-## Building Context Over Time
+Establish persona facts through statements:
 
-Each conversation builds on previous ones:
-
-**Session 1**: Establish basic identity
 ```
-"You're a chef in Brooklyn who values local ingredients."
+You: "You have a job as a chef at a restaurant on 36th Street in Brooklyn."
+
+Claude: "That's right, I work at a small Italian place in Park Slope.
+The morning prep is my favorite part of the day..."
 ```
 
-**Session 2**: Develop behaviors
+After this conversation, you would manually update:
+
+- Occupation field: Chef
+- City field: Brooklyn
+- Add to interests: Italian cuisine, cooking
+
+### Exploratory Questions
+
+Ask questions to discover preferences:
+
 ```
-"Tell me about your typical morning routine before work."
+You: "What websites do you usually visit when looking for recipe inspiration?"
+
+Claude: "I spend a lot of time on Serious Eats - Kenji Lopez-Alt's
+scientific approach to cooking really appeals to me..."
 ```
 
-**Session 3**: Refine preferences
+After this conversation, you would manually update:
+
+- Browsing habits: Add "recipe sites", "food blogs"
+- Interests: Add "scientific cooking"
+
+### Scenario Development
+
+Place the persona in situations:
+
 ```
-"What brands of kitchen equipment do you trust?"
+You: "You're planning a special dinner menu for next week. Walk me
+through how you'd research and prepare."
+
+Claude: "First, I'd check what's coming in fresh from our local farms
+this week - I usually browse the Greenmarket site on my phone..."
 ```
 
-**Session 4**: Add depth
-```
-"How has your approach to cooking evolved over the years?"
-```
+After this conversation, you would manually update:
+
+- Device usage: Mobile for quick browsing
+- Personal values: Add "local sourcing"
 
 ## Recording Conversations
 
@@ -143,41 +110,78 @@ Chat sessions are automatically saved as waypoints in journeys:
 
 1. Each message exchange is recorded
 2. Conversation context is preserved
-3. Extracted attributes are linked to the persona
-4. Chat history can be reviewed later
+3. Chat history can be reviewed later
+
+This preserves the conversation for:
+
+- Future reference when updating personas
+- Research on LLM interaction patterns
+- Documentation of persona development process
+
+## Workflow: Chat Then Update
+
+### Step 1: Have a Conversation
+
+Chat with Claude to explore the persona. Take notes on relevant details that emerge.
+
+### Step 2: Review the Conversation
+
+The conversation is saved as a waypoint. Review it to identify persona attributes.
+
+### Step 3: Update the Persona
+
+1. Navigate to **Personas**
+2. Click the persona name
+3. Click **Edit**
+4. Update relevant fields based on conversation insights
+5. Click **Save**
+
+## Building Personas Over Multiple Sessions
+
+**Session 1**: Establish basic identity
+```
+"You're a chef in Brooklyn who values local ingredients."
+```
+Then update: occupation, location, values
+
+**Session 2**: Develop behaviors
+```
+"Tell me about your typical morning routine before work."
+```
+Then update: time_of_day, lifestyle
+
+**Session 3**: Refine preferences
+```
+"What brands of kitchen equipment do you trust?"
+```
+Then update: brand_interactions, purchase_history
+
+**Session 4**: Add depth
+```
+"How has your approach to cooking evolved over the years?"
+```
+Then update: attitudes, personality
 
 ## Best Practices
 
-### Start Broad, Then Narrow
+### Keep Notes During Chat
 
-1. Begin with general characteristics
-2. Progressively add specific details
-3. Allow natural personality traits to emerge
+Note specific attributes mentioned during conversation for later data entry.
 
 ### Maintain Consistency
 
-- Review previous conversations before new sessions
-- Refer back to established facts
-- Flag contradictions for resolution
+- Review existing persona data before new sessions
+- Refer back to established facts in conversation
+- Resolve contradictions through follow-up questions
 
 ### Document Reasoning
 
-Include notes about why certain attributes were chosen:
+Add notes to persona fields explaining why attributes were chosen:
 
 ```
-User: "You decided to focus on Italian cuisine after training in Rome."
+Occupation: Chef
+(Established in chat session 2024-12-09, discussed restaurant work)
 ```
-
-This provides research context for the persona development.
-
-## Reviewing Extracted Data
-
-After chat sessions:
-
-1. Navigate to the persona's profile
-2. Review newly extracted attributes
-3. Confirm or adjust automatically detected information
-4. Add manual annotations if needed
 
 ## Related Guides
 

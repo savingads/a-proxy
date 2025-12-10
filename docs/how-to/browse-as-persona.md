@@ -120,38 +120,40 @@ Cookies affect personalization and tracking:
 ### Session Cookies
 
 - Created during browsing
-- Persist within the session
+- Persist within the browsing session
 - Cleared when session ends
 
-### Persistent Cookies
+### Cookie Limitations
 
-- Can be configured per persona
-- Simulate returning user behavior
-- Enable personalization testing
+- No persistent cookie profiles per persona
+- Each session starts fresh
+- Cookie-based personalization requires building history within a session
 
 ## Browser Fingerprinting
 
-Some websites use browser fingerprinting beyond cookies:
+Some websites use browser fingerprinting beyond cookies.
 
-### Managed Attributes
+### What A-Proxy Configures
 
-A-Proxy configures these fingerprint elements:
+A-Proxy sets these basic browser attributes:
 
-- User-Agent string
-- Screen resolution
-- Language preferences
-- Timezone (derived from location)
+- User-Agent string (based on device/browser type)
+- Accept-Language header
+- Viewport dimensions
 
-### Unmanaged Attributes
+### Not Configured
 
-Some fingerprint elements are harder to control:
+A-Proxy does not spoof these fingerprint elements:
 
 - Canvas fingerprinting
 - WebGL fingerprinting
 - Audio fingerprinting
+- Timezone
+- Installed fonts
+- Hardware concurrency
 
-!!! note "Fingerprint Limitations"
-    Full fingerprint spoofing requires additional tools. A-Proxy focuses on high-impact attributes.
+!!! warning "Fingerprint Limitations"
+    A-Proxy provides basic browser configuration, not full fingerprint spoofing. Websites using advanced fingerprinting may still identify the browser environment.
 
 ## Best Practices
 

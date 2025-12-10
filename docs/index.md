@@ -6,27 +6,23 @@ A-Proxy is a persona-driven web archiving system that enables targeted web crawl
 
 A-Proxy serves two primary archival objectives:
 
-1. **Persona-Driven Web Crawling**: Develop detailed persona representations through cumulative chat conversations to enable targeted web crawling from specific perspectives.
+1. **Persona-Driven Web Crawling**: Create detailed persona representations to enable targeted web crawling from specific demographic, behavioral, and contextual perspectives.
 
-2. **LLM Evolution Documentation**: Archive chat interactions to study how large language models develop over time and respond to increasing personalization.
+2. **LLM Evolution Documentation**: Archive chat interactions to study how large language models respond to different persona contexts over time.
 
 ## How It Works
 
-The system operates through a feedback loop:
+### Workflow
 
-```
-Persona Generation --> Persona Development via Chat --> Targeted Crawling --> Dual Archival Value
-```
+1. **Persona Creation**: Archivists create personas with four attribute categories (demographic, psychographic, behavioral, contextual) through the web interface.
 
-### The Feedback Loop
+2. **Chat-Assisted Development**: Optional conversations with Claude AI help explore persona characteristics. Archivists then manually update persona profiles based on insights from the conversation.
 
-1. **Persona Generation**: Archivists create initial personas across four data categories (demographic, psychographic, behavioral, contextual) with LLM assistance.
+3. **Targeted Browsing**: Browse websites with browser variables configured to reflect persona characteristics (location via VPN, language, user-agent).
 
-2. **Persona Development**: Through chat conversations, personas evolve and gain depth. Relevant features are reified to build components that browsers and content delivery systems use for targeting.
+4. **Archiving**: Capture web pages as they appear to the configured persona, preserving both content and context.
 
-3. **Targeted Crawling**: Archivists crawl websites from persona perspectives. Browser variables reflect persona characteristics (location, language, user-agent), cookies set context, and browsing sessions capture how different users experience the web.
-
-4. **Dual Archival Value**: Refined personas enable crawls from specific perspectives while preserved chats document LLM behavior changes over time.
+5. **Research Value**: Preserved archives document personalized web experiences; chat logs document LLM interactions with different persona contexts.
 
 ## Key Features
 
@@ -35,15 +31,30 @@ Persona Generation --> Persona Development via Chat --> Targeted Crawling --> Du
 | Persona Management | Create and manage user personas with 4-dimensional attributes |
 | Journey Tracking | Record sequences of web interactions as "journeys" with "waypoints" |
 | Web Archiving | Archive webpages with persona-specific context (language, geolocation) |
-| AI Integration | Chat with Claude AI as or about a persona to develop attributes |
-| VPN Simulation | Test from different geographic regions using VPN integration |
+| Claude AI Chat | Chat with Claude AI as or about a persona |
+| VPN Integration | Browse from different geographic regions using NordVPN |
+
+## Current Capabilities
+
+**Working:**
+
+- Full CRUD for personas with all 4 dimensions
+- Journey and waypoint management
+- Claude AI chat (requires API key)
+- VPN integration (requires NordVPN setup)
+- Web page archiving with screenshots
+- Internet Archive submission
+
+**Manual processes:**
+
+- Persona attribute updates after chat sessions
+- Archive comparison (no built-in diff tool)
 
 ## Use Cases
 
 - Targeted web archiving from diverse demographic perspectives
 - Documenting how different user groups experience websites
 - Preserving persona-LLM interactions for future research
-- Studying LLM behavioral changes over time
 - Creating archival records that reflect multiple viewpoints
 
 ## Getting Started

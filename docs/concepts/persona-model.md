@@ -81,15 +81,15 @@ Situational and environmental factors at the time of interaction.
 
 ## Persona Development
 
-Personas can be developed through two methods:
+Personas are created and updated manually through the web interface.
 
-### 1. Manual Creation
+### Manual Creation and Editing
 
-Archivists directly specify attribute values when creating or editing personas through the web interface.
+Archivists specify attribute values when creating or editing personas. All four dimensions can be configured through form fields.
 
-### 2. Chat-Based Development
+### Chat-Assisted Development
 
-Through conversations with Claude AI, personas can be developed organically:
+Conversations with Claude AI can help archivists explore and refine persona characteristics:
 
 ```
 Archivist: "You have a job as a chef at a restaurant in Brooklyn."
@@ -97,7 +97,7 @@ Claude (as persona): "That's right, I work at a small Italian place
 in Park Slope. The morning prep is my favorite part of the day..."
 ```
 
-The system extracts relevant attributes from these conversations to update the persona profile.
+After such conversations, archivists manually update the persona profile with relevant attributes discovered during the chat. See [Develop Personas via Chat](../how-to/develop-personas.md) for the workflow.
 
 ## Attribute Reification
 

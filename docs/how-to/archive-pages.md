@@ -8,20 +8,19 @@ Web archiving in A-Proxy captures page content along with the persona context us
 
 ## Initiating an Archive
 
-### During Browsing
+### From the Browsing Interface
 
 1. Navigate to a page while browsing as a persona
 2. Click the **Archive** button in the interface
 3. The system captures the current page state
 
-### Bulk Archiving
+### Direct Archive
 
-For multiple pages:
+Use the archive endpoint with persona context:
 
-1. Create a list of target URLs
-2. Select the persona context
-3. Initiate batch capture
-4. Monitor progress
+1. Provide the target URL
+2. Select the persona context (language, geolocation)
+3. Submit the archive request
 
 ## Captured Data
 
@@ -31,45 +30,20 @@ Each archive record contains:
 |-----------|-------------|
 | HTML Content | Full page source |
 | Screenshot | Visual capture of rendered page |
-| HTTP Headers | Server response headers |
-| Cookies | Session cookies at capture time |
 | Timestamp | Exact capture datetime |
-| Persona Context | Attributes used during retrieval |
+| Persona ID | Associated persona for context |
 
-### Metadata Stored
+### Storage Structure
 
-```json
-{
-    "url": "https://example.com/page",
-    "capture_time": "2024-12-09T10:30:00Z",
-    "persona_id": 1,
-    "browser_context": {
-        "user_agent": "...",
-        "accept_language": "en-US",
-        "viewport": "1920x1080"
-    },
-    "network_context": {
-        "exit_ip_region": "US-NY",
-        "connection_type": "wifi"
-    }
-}
-```
-
-## Storage Location
-
-Archives are stored in the `archives/` directory:
+Archives are stored in the `archives/` directory, organized by URL hash and timestamp:
 
 ```
 archives/
-├── 2024/
-│   └── 12/
-│       └── 09/
-│           ├── archive_001/
-│           │   ├── page.html
-│           │   ├── screenshot.png
-│           │   └── metadata.json
-│           └── archive_002/
-│               └── ...
+├── [url_hash]/
+│   └── [timestamp]/
+│       ├── content.html
+│       ├── screenshot.png
+│       └── metadata.json
 ```
 
 ## Viewing Archives
@@ -77,17 +51,31 @@ archives/
 ### Archive List
 
 1. Navigate to **Archives**
-2. Browse archived pages by date or persona
+2. Browse archived pages
 3. Click to view individual archives
 
 ### Archive Detail
 
 Each archive view displays:
 
-- Rendered page preview
-- Original HTML source
+- HTML content viewer
+- Screenshot preview
 - Capture metadata
-- Associated persona information
+- Option to submit to Internet Archive
+
+### Memento Viewer
+
+View the captured HTML content rendered in the browser.
+
+## Internet Archive Integration
+
+A-Proxy can submit captures to the Internet Archive:
+
+1. View an archive/memento
+2. Click **Submit to Internet Archive**
+3. The URL is submitted to the Wayback Machine
+
+Rate limiting is enforced (configurable in **Settings**).
 
 ## Archive Formats
 
@@ -106,46 +94,29 @@ PNG screenshot capturing:
 - Visible viewport at capture time
 - Rendered state including dynamic content
 
-### Full Page Archive (Optional)
-
-Extended capture including:
-
-- All referenced resources (CSS, images, scripts)
-- Structured as WARC or similar format
-
-## Comparison Capabilities
-
-Compare archives across:
-
-### Temporal Comparison
-
-Same URL archived at different times:
-
-1. Select two archive dates
-2. View side-by-side
-3. Identify content changes
-
-### Persona Comparison
-
-Same URL with different personas:
-
-1. Select two personas
-2. Compare captured content
-3. Document personalization differences
-
 ## Limitations
 
 ### Dynamic Content
 
-- JavaScript-rendered content may vary
+- JavaScript-rendered content may vary between captures
 - Infinite scroll content is limited to initial load
 - Authenticated content requires session handling
 
 ### External Resources
 
-- Third-party resources may be blocked
+- Third-party resources may be blocked or unavailable
 - CDN content may differ by region
 - Ad content is inherently variable
+
+### Features Not Yet Implemented
+
+The following features are not currently available:
+
+- **Bulk archiving**: Archives must be created one at a time
+- **Comparison tools**: No built-in side-by-side comparison
+- **WARC format**: Archives are stored as HTML/screenshot, not WARC
+
+To compare archives, manually open multiple archive views or use external diff tools.
 
 ## Research Considerations
 
@@ -154,7 +125,7 @@ Same URL with different personas:
 For reproducible research:
 
 1. Document exact persona configuration
-2. Record VPN/network settings
+2. Record VPN/network settings if used
 3. Note capture timing
 4. Version the capture methodology
 
@@ -166,6 +137,14 @@ When citing archived content:
 [Page Title]. Archived [DATE] via A-Proxy using persona
 [PERSONA_NAME] with geographic context [LOCATION].
 ```
+
+## Settings
+
+Archive settings are available at **Settings**:
+
+- Internet Archive integration enable/disable
+- Rate limit for Internet Archive submissions
+- View daily submission count
 
 ## Related Guides
 

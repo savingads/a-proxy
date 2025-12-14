@@ -81,6 +81,10 @@ scratch/
 pending_delete/
 */pending_delete/
 
+# Node dependencies
+node_modules/
+*/node_modules/
+
 # Cache directories
 cache/
 */cache/

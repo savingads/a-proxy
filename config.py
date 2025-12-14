@@ -11,8 +11,21 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # Additional Flask configuration
 DEBUG = os.environ.get('FLASK_DEBUG', 'False') == 'True'
 
-# Anthropic API configuration
+# LLM provider configuration
+LLM_PROVIDER = os.environ.get('LLM_PROVIDER')
+
+# API keys
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+
+# Default models
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022')
+OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
+GOOGLE_MODEL = os.environ.get('GOOGLE_MODEL', 'gemini-1.5-pro')
+
+# Token limits
+LLM_MAX_OUTPUT_TOKENS = int(os.environ.get('LLM_MAX_OUTPUT_TOKENS', '1024'))
 
 # Region to language mapping
 REGION_LANGUAGE_MAP = {

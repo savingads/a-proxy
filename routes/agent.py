@@ -5,6 +5,7 @@ import database
 import time
 from datetime import datetime
 from flask_login import login_required
+from services.persona_attribute_service import PersonaAttributeService
 
 # Create blueprint
 agent_bp = Blueprint('agent', __name__)
@@ -453,9 +454,15 @@ def save_direct_chat(persona_id):
                     type=waypoint_type,
                     agent_data=json.dumps(new_agent_data)
                 )
-            
+
             logger.info(f"Successfully added waypoint {waypoint_id} to journey {journey_id}")
-            
+
+            try:
+                persona_updater = PersonaAttributeService()
+                persona_updater.process_waypoint(waypoint_id)
+            except Exception:
+                logger.error("Persona attribute extraction failed", exc_info=True)
+
             # Success response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({

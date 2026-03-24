@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation and Language Test</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .info-box {
+            background-color: var(--bs-dark-bg-subtle);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            padding-left: 20px;
+        }
+        
+        .success-icon {
+            color: #28a745;
+        }
+        
+        .error-icon {
+            color: #dc3545;
+        }
+        
+        .warning-icon {
+            color: #ffc107;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header bar -->
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
+            <i class="bi bi-house-door me-2"></i>A-Proxy
+        </a>
+        <div class="d-flex align-items-center">
+            <a href="{{ url_for('persona.create_persona') }}" class="btn btn-outline-light me-3">
+                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+            </a>
+        </div>
+    </header>
+
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-dark shadow-sm">
+                    <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Geolocation and Language Test</h3>
+                        <span class="badge bg-info">Test Results</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-box" style="border-left: 4px solid #28a745;">
+                            <h4><i class="bi bi-gear me-2"></i>Target Settings</h4>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p><span class="label">Target Language:</span> <span class="badge bg-secondary" id="target-language-display">{{ target_language }}</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><span class="label">Target Geolocation:</span> <span class="badge bg-secondary" id="target-geolocation-display">{{ target_geolocation }}</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <h4><i class="bi bi-globe me-2"></i>Actual Browser Settings</h4>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <p>
+                                        <span class="label">Browser Language:</span> 
+                                        <span id="browser-language">Detecting...</span>
+                                        <span id="browser-language-icon"></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+                                        <span class="label">Navigator Language:</span> 
+                                        <span id="navigator-language">Detecting...</span>
+                                        <span id="navigator-language-icon"></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+                                        <span class="label">Accept-Language Header:</span> 
+                                        <span id="accept-language">Detecting...</span>
+                                        <span id="accept-language-icon"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <h4><i class="bi bi-geo-alt me-2"></i>Actual Browser Geolocation</h4>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p>
+                                        <span class="label">Geolocation (JavaScript API):</span> 
+                                        <span id="js-geolocation">Detecting...</span>
+                                        <span id="js-geolocation-icon"></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>
+                                        <span class="label">Geolocation Status:</span> 
+                                        <span id="geolocation-status" class="text-info">Waiting...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-4 bg-dark">
+                            <div class="card-header bg-dark">
+                                <h5 class="mb-0"><i class="bi bi-map me-2"></i>Location Map</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('persona.create_persona') }}" class="btn btn-primary">
+                                <i class="bi bi-arrow-left me-1"></i> Return to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+    <script>
+        // Get target settings from the display elements
+        const targetLanguage = document.getElementById('target-language-display').textContent;
+        const targetGeolocation = document.getElementById('target-geolocation-display').textContent;
+        const isTargetGeolocationSpecified = targetGeolocation && targetGeolocation !== "Not specified";
+        
+        // Helper function to check if a value matches the target
+        function checkValueMatch(value, target, element) {
+            // Clean up and standardize values for comparison
+            const cleanValue = value ? value.trim().toLowerCase() : '';
+            const cleanTarget = target ? target.trim().toLowerCase() : '';
+            
+            // Handle empty/not specified cases
+            if (cleanTarget === 'not specified' || cleanTarget === '') {
+                element.innerHTML = '<i class="bi bi-dash-circle text-secondary"></i>';
+                return;
+            }
+            
+            // Check if value contains target or vice versa
+            const matches = cleanValue.includes(cleanTarget) || cleanTarget.includes(cleanValue);
+            
+            if (matches) {
+                element.innerHTML = '<i class="bi bi-check-circle success-icon"></i>';
+            } else {
+                element.innerHTML = '<i class="bi bi-x-circle error-icon"></i>';
+            }
+        }
+        
+        // Display language information
+        const browserLang = navigator.language || 'Not available';
+        const navigatorLang = navigator.languages ? navigator.languages.join(', ') : 'Not available';
+        
+        document.getElementById('browser-language').textContent = browserLang;
+        document.getElementById('navigator-language').textContent = navigatorLang;
+        
+        // Check if browser language matches target
+        checkValueMatch(browserLang, targetLanguage, document.getElementById('browser-language-icon'));
+        checkValueMatch(navigatorLang, targetLanguage, document.getElementById('navigator-language-icon'));
+
+        // Function to get Accept-Language header
+        fetch('/get-headers')
+            .then(response => response.json())
+            .then(data => {
+                const acceptLang = data['accept-language'] || 'Not available';
+                document.getElementById('accept-language').textContent = acceptLang;
+                checkValueMatch(acceptLang, targetLanguage, document.getElementById('accept-language-icon'));
+            })
+            .catch(error => {
+                console.error('Error fetching headers:', error);
+                document.getElementById('accept-language').textContent = 'Error fetching';
+                document.getElementById('accept-language-icon').innerHTML = '<i class="bi bi-exclamation-triangle warning-icon"></i>';
+            });
+
+        // Initialize map with dark theme
+        var map = L.map('map').setView([0, 0], 2);
+        
+        // Use a darker map theme
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add target geolocation marker if available
+        if (isTargetGeolocationSpecified) {
+            try {
+                const targetCoords = targetGeolocation.split(',');
+                if (targetCoords.length === 2) {
+                    const targetLat = parseFloat(targetCoords[0].trim());
+                    const targetLng = parseFloat(targetCoords[1].trim());
+
+                    if (!isNaN(targetLat) && !isNaN(targetLng)) {
+                        // Create a green marker for target location
+                        const targetIcon = L.divIcon({
+                            html: '<div style="background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                            className: 'target-marker',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        });
+
+                        L.marker([targetLat, targetLng], { icon: targetIcon }).addTo(map)
+                            .bindPopup('<b>Target Location</b><br>Set in dashboard')
+                            .openPopup();
+
+                        // If no browser geolocation yet, center on target
+                        map.setView([targetLat, targetLng], 5);
+                    }
+                }
+            } catch (e) {
+                console.error("Error adding target marker:", e);
+            }
+        }
+
+        // Get geolocation using JavaScript API
+        if (navigator.geolocation) {
+            document.getElementById('geolocation-status').textContent = 'Requesting position...';
+            document.getElementById('geolocation-status').className = 'text-info';
+
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('js-geolocation').textContent = `${lat}, ${lng}`;
+                    document.getElementById('geolocation-status').textContent = 'Position successfully obtained';
+                    document.getElementById('geolocation-status').className = 'text-success';
+
+                    // Check if geolocation matches target
+                    checkValueMatch(`${lat},${lng}`, targetGeolocation, document.getElementById('js-geolocation-icon'));
+                    
+                    // Update map with the location
+                    map.setView([lat, lng], 5);
+
+                    // Create a blue marker for actual browser location
+                    const browserIcon = L.divIcon({
+                        html: '<div style="background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                        className: 'browser-marker',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+
+                    L.marker([lat, lng], { icon: browserIcon }).addTo(map)
+                        .bindPopup('<b>Actual Browser Location</b><br>Detected via JavaScript API')
+                        .openPopup();
+
+                    // Add a legend to the map
+                    const legend = L.control({ position: 'bottomright' });
+                    legend.onAdd = function (map) {
+                        const div = L.DomUtil.create('div', 'info legend');
+                        div.style.backgroundColor = '#222';
+                        div.style.color = '#fff';
+                        div.style.padding = '10px';
+                        div.style.borderRadius = '5px';
+                        div.style.border = '1px solid #444';
+
+                        div.innerHTML = `
+                            <div style="margin-bottom: 5px;"><div style="display: inline-block; background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; margin-right: 5px;"></div> Target Location</div>
+                            <div><div style="display: inline-block; background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; margin-right: 5px;"></div> Actual Browser Location</div>
+                        `;
+                        return div;
+                    };
+                    legend.addTo(map);
+                    
+                    // If both locations are available, fit bounds to show both
+                    if (isTargetGeolocationSpecified) {
+                        try {
+                            const targetCoords = targetGeolocation.split(',');
+                            if (targetCoords.length === 2) {
+                                const targetLat = parseFloat(targetCoords[0].trim());
+                                const targetLng = parseFloat(targetCoords[1].trim());
+                                
+                                if (!isNaN(targetLat) && !isNaN(targetLng)) {
+                                    // Create bounds that include both points with some padding
+                                    const bounds = L.latLngBounds(
+                                        L.latLng(lat, lng),
+                                        L.latLng(targetLat, targetLng)
+                                    ).pad(0.5); // Add 50% padding around the bounds
+                                    
+                                    map.fitBounds(bounds);
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Error fitting bounds:", e);
+                        }
+                    }
+                },
+                // Error callback
+                function (error) {
+                    let errorMessage;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'User denied the request for geolocation';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'The request to get user location timed out';
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            errorMessage = 'An unknown error occurred';
+                            break;
+                    }
+                    document.getElementById('js-geolocation').textContent = 'Failed to get location';
+                    document.getElementById('geolocation-status').textContent = errorMessage;
+                    document.getElementById('geolocation-status').className = 'text-danger';
+                    document.getElementById('js-geolocation-icon').innerHTML = '<i class="bi bi-x-circle error-icon"></i>';
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            document.getElementById('js-geolocation').textContent = 'Geolocation is not supported by this browser';
+            document.getElementById('geolocation-status').textContent = 'API not available';
+            document.getElementById('geolocation-status').className = 'text-warning';
+            document.getElementById('js-geolocation-icon').innerHTML = '<i class="bi bi-exclamation-triangle warning-icon"></i>';
+        }
+    </script>
+</body>
+</html>

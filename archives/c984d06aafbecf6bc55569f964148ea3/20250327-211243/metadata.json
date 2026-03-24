@@ -1,0 +1,24 @@
+{
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "timestamp": "20250327-211243",
+  "language": "en-US",
+  "geolocation": null,
+  "persona_id": null,
+  "http_status": 200,
+  "content_type": "text/html",
+  "content_length": 1256,
+  "headers": {
+    "Accept-Ranges": "bytes",
+    "Content-Type": "text/html",
+    "ETag": "\"84238dfc8092e5d9c0dac8ef93371a07:1736799080.121134\"",
+    "Last-Modified": "Mon, 13 Jan 2025 20:11:20 GMT",
+    "Vary": "Accept-Encoding",
+    "Content-Encoding": "gzip",
+    "Cache-Control": "max-age=1907",
+    "Date": "Fri, 28 Mar 2025 01:12:51 GMT",
+    "Alt-Svc": "h3=\":443\"; ma=93600,h3-29=\":443\"; ma=93600,quic=\":443\"; ma=93600; v=\"43\"",
+    "Content-Length": "648",
+    "Connection": "keep-alive"
+  }
+}

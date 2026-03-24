@@ -1,0 +1,79 @@
+/* A-Proxy Documentation Custom Styles */
+
+/* Theme-aware images */
+[data-md-color-scheme="slate"] .light-only { display: none; }
+[data-md-color-scheme="default"] .dark-only { display: none; }
+
+/* Table styling */
+.md-typeset table:not([class]) {
+    font-size: 0.85rem;
+}
+
+.md-typeset table:not([class]) th {
+    background-color: var(--md-primary-fg-color);
+    color: var(--md-primary-bg-color);
+}
+
+/* Code block styling */
+.md-typeset code {
+    font-size: 0.85em;
+}
+
+/* Admonition customization */
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+    border-color: var(--md-accent-fg-color);
+}
+
+/* Navigation improvements */
+.md-nav__link {
+    font-size: 0.75rem;
+}
+
+/* Screenshot styling */
+.md-typeset img {
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-typeset img {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Diagram styling */
+.md-typeset pre code {
+    white-space: pre;
+}
+
+/* Persona dimension colors */
+.dimension-demographic { color: #2196F3; }
+.dimension-psychographic { color: #9C27B0; }
+.dimension-behavioral { color: #4CAF50; }
+.dimension-contextual { color: #FF9800; }
+
+/* Waypoint type indicators */
+.waypoint-browse { color: #2196F3; }
+.waypoint-agent { color: #9C27B0; }
+
+/* Journey status colors */
+.status-active { color: #4CAF50; }
+.status-completed { color: #607D8B; }
+.status-paused { color: #FF9800; }
+
+/* VPN status indicators */
+.vpn-connected { color: #4CAF50; }
+.vpn-disconnected { color: #F44336; }
+.vpn-connecting { color: #FF9800; }
+
+/* Architecture diagram styling */
+.architecture-box {
+    border: 1px solid var(--md-default-fg-color--light);
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Footer styling */
+.md-footer-meta {
+    background-color: var(--md-default-bg-color);
+}

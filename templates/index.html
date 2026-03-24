@@ -1,85 +1,612 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN Status</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Dark theme is set as default -->
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.122.0">
+    <title>CurrentWeb Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            width: 100%;
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        /* Replace high-contrast white borders with subtle card styling */
+        .show-grid [class^="col"] {
+            position: relative;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            background-color: var(--bs-dark-bg-subtle);
+            border: none;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            /* Height of navbar */
+        }
+
+        .main-content {
+            margin-left: 250px;
+            /* Adjust this value based on the width of your sidebar */
+        }
+
+        /* Anthropic-style card styling */
+        .custom-card {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+        .custom-list-group .list-group-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2px;
+            border-radius: 4px;
+        }
+
+        #map {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            border-bottom: 2px solid var(--bs-primary);
+            background-color: transparent;
+            color: var(--bs-primary);
+        }
+
+        .tab-content {
+            padding-top: 20px;
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Subtle divider */
+        .subtle-divider {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 1rem 0;
+        }
+    </style>
+
+
+    <!-- Custom styles for this template -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4">VPN Status</h1>
-        <div class="row">
-            <div class="col-md-6">
-                <p><strong>VPN Running:</strong> {{ vpn_running }}</p>
-                {% if vpn_running %}
-                <h2>IP Information</h2>
-                <ul class="list-group mb-4">
-                    <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
-                    <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
-                    <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region }}</li>
-                    <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country }}</li>
-                    <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc }}</li>
-                    <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}</li>
-                </ul>
-                <h2>Change VPN Region</h2>
-                <form action="{{ url_for('change_region') }}" method="post" class="mb-4">
-                    <div class="form-group">
-                        <label for="region">Region:</label>
-                        <select id="region" name="region" class="form-control">
-                            <option value="" disabled selected>Select a region</option>
-                            {% if ip_info.region != "North America (US)" %}
-                            <option value="us5725">North America (US)</option>
-                            {% endif %}
-                            {% if ip_info.region != "South America (Brazil)" %}
-                            <option value="br53">South America (Brazil)</option>
-                            {% endif %}
-                            {% if ip_info.region != "Europe (Germany)" %}
-                            <option value="de1088">Europe (Germany)</option>
-                            {% endif %}
-                            {% if ip_info.region != "Asia (Japan)" %}
-                            <option value="jp514">Asia (Japan)</option>
-                            {% endif %}
-                            {% if ip_info.region != "Africa (South Africa)" %}
-                            <option value="za147">Africa (South Africa)</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Change Region</button>
-                </form>
-                {% endif %}
-            </div>
-            <div class="col-md-6">
-                <div id="map" style="width: 100%; height: 400px; border: 2px solid black;"></div>
-                <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-                <script>
-                    var map = L.map('map').setView([51.505, -0.09], 2); // Default view (world map)
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                    {% if vpn_running %}
-                    L.marker([{{ ip_info.loc.split(',')[0] }}, {{ ip_info.loc.split(',')[1] }}]).addTo(map)
-                        .bindPopup('<b>{{ ip_info.city }}</b><br>{{ ip_info.region }}, {{ ip_info.country }}')
-                        .openPopup();
-                    {% endif %}
-                </script>
-            </div>
-        </div>
-        {% if vpn_running %}
-        <h2>Google Page</h2>
-        <p><strong>Language:</strong> {{ language }}</p>
-        <form action="{{ url_for('visit_page') }}" method="post" class="mb-4">
-            <input type="hidden" name="language" value="{{ language }}">
-            <button type="submit" class="btn btn-primary">Visit Google</button>
-        </form>
-        {% endif %}
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}" 
+      data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}" 
+      data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}" 
+      data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+    <!-- Theme toggle removed, using dark theme by default -->
 
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="{{ url_for('home.index') }}">
+            <i class="bi bi-house-door me-2"></i>A-Proxy
+        </a>
+        <form action="{{ url_for('browsing.visit_page') }}" method="post" class="d-flex align-items-center ms-auto me-3"
+            id="preview-form">
+            <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
+            <input type="hidden" name="language" value="{{ language }}">
+            <input type="hidden" name="geolocation" id="form-geolocation"
+                value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+            <button type="submit" class="btn btn-primary me-2">Preview</button>
+            <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
+        </form>
+        <ul class="navbar-nav flex-row d-md-none">
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false"
+                    aria-label="Toggle search">
+                    <i class="bi bi-search"></i>
+                </button>
+            </li>
+            <li class="nav-item text-nowrap">
+                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <i class="bi bi-list"></i>
+                </button>
+            </li>
+        </ul>
+        <div id="navbarSearch" class="navbar-search w-100 collapse">
+            <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'partials/_sidebar.html' %}
+            
+            <!-- Browser Details Section -->
+            <div id="browser-details" class="position-fixed bottom-0 start-0 p-3 bg-body-tertiary" style="width: 250px; z-index: 1000; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-body-secondary text-uppercase">
+                    <span>This Browser</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>Language:</strong> <span id="browser-language">Fetching...</span></span>
+                    </li>
+                    <li class="nav d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>Geolocation:</strong> <span id="browser-geolocation">Fetching...</span></span>
+                    </li>
+                    <li class="nav-item d-flex align-items-center gap-2 px-3 py-2 text-small">
+                        <span><strong>User Agent:</strong> <span id="browser-user-agent">Fetching...</span></span>
+                    </li>
+                </ul>
+            </div>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 subtle-divider">
+                    <h3>Persona</h3>
+                    <div id="flash-message-container"></div>
+                </div>
+                
+                <div class="custom-card mb-4">
+                    <div class="row">
+                        <div class="col">
+                            <strong>Geolocation:</strong> <span id="geolocation">Fetching...</span>
+                        </div>
+                        <div class="col">
+                            <strong>Language:</strong> {{ language }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <form action="{{ url_for('persona.save_persona') }}" method="post" id="save-persona-form">
+                                <input type="hidden" name="geolocation" id="save-geolocation"
+                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+                                <input type="hidden" name="language" id="save-language" value="{{ language }}">
+                                <input type="hidden" name="country" id="save-country"
+                                    value="{% if vpn_running %}{{ ip_info.country }}{% endif %}">
+                                <input type="hidden" name="city" id="save-city"
+                                    value="{% if vpn_running %}{{ ip_info.city }}{% endif %}">
+                                <input type="hidden" name="region" id="save-region"
+                                    value="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="persona_name"
+                                        placeholder="Persona Name" required>
+                                    <button type="submit" class="btn btn-success">Save Persona</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="demographic-tab" data-bs-toggle="tab" href="#demographic"
+                                role="tab" aria-controls="demographic" aria-selected="true">Demographic</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="psychographic-tab" data-bs-toggle="tab" href="#psychographic"
+                                role="tab" aria-controls="psychographic" aria-selected="false">Psychographic</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="behavior-tab" data-bs-toggle="tab" href="#behavior" role="tab"
+                                aria-controls="behavior" aria-selected="false">Behavioral</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="contextual-tab" data-bs-toggle="tab" href="#contextual" role="tab"
+                                aria-controls="contextual" aria-selected="false">Contextual</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="demographic" role="tabpanel"
+                            aria-labelledby="demographic-tab">
+                            <div class="container mt-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>VPN Running:</strong> {{ vpn_running }}</p>
+                                        {% if vpn_running %}
+                                        <div class="custom-card">
+                                            <h4>IP Information</h4>
+                                            <ul class="list-group custom-list-group mb-4">
+                                                <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
+                                                <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
+                                                <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc }}
+                                                </li>
+                                                <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="custom-card">
+                                            <form id="change-region-form" action="{{ url_for('vpn.change_region') }}"
+                                                method="post" class="mb-2">
+                                                <div class="form-group">
+                                                    <label for="region">Region:</label>
+                                                    <select id="region" name="region" class="form-select">
+                                                        <option value="" disabled selected>Select a region</option>
+                                                        {% if ip_info.region != "North America (US)" %}
+                                                        <option value="us5725" data-code="US">North America (US)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "South America (Brazil)" %}
+                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Europe (Germany)" %}
+                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Asia (Japan)" %}
+                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
+                                                        {% endif %}
+                                                        {% if ip_info.region != "Africa (South Africa)" %}
+                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary mt-2">Change VPN Region</button>
+                                                <div id="vpn-spinner" class="spinner-border text-primary" role="status"
+                                                    style="display: none;">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {% else %}
+                                        <div class="custom-card">
+                                            <form action="{{ url_for('vpn.start_vpn_route') }}" method="post" class="mb-2">
+                                                <button type="submit" class="btn btn-primary">Start VPN</button>
+                                                <div class="form-group mt-2">
+                                                    <label for="region">Region:</label>
+                                                    <select id="region" name="region" class="form-select">
+                                                        <option value="" disabled selected>Select a region</option>
+                                                        <option value="us5725" data-code="US">North America (US)</option>
+                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
+                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
+                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
+                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+
+                                        <div class="custom-card">
+                                            <h4>Target Browser Settings</h4>
+                                            <div class="form-group">
+                                                <label for="target-latitude">Latitude:</label>
+                                                <input type="text" id="target-latitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[0] }}{% endif %}"
+                                                    placeholder="0.000">
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <label for="target-longitude">Longitude:</label>
+                                                <input type="text" id="target-longitude" class="form-control"
+                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[1] }}{% endif %}"
+                                                    placeholder="0.000">
+                                            </div>
+                                            <button id="set-geolocation" class="btn btn-secondary mt-2">Set Geolocation</button>
+                                            <div class="form-group mt-3">
+                                                <label for="target-language">Language:</label>
+                                                <select id="target-language" class="form-select">
+                                                    <option value="en-US">English (US)</option>
+                                                    <option value="pt-BR">Portuguese (Brazil)</option>
+                                                    <option value="de-DE">German</option>
+                                                    <option value="ja-JP">Japanese</option>
+                                                    <option value="af-ZA">Afrikaans (South Africa)</option>
+                                                </select>
+                                                <button id="set-language" class="btn btn-secondary mt-2">Set</button>
+                                            </div>
+
+                                            <div class="form-group mt-3">
+                                                <form action="{{ url_for('browsing.test_geolocation') }}" method="post"
+                                                    id="test-browser-form">
+                                                    <input type="hidden" name="language" id="test-language-input"
+                                                        value="en-US">
+                                                    <input type="hidden" name="geolocation" id="test-geolocation-input"
+                                                        value="">
+                                                    <button type="submit" class="btn btn-success">Apply Settings &
+                                                        Test</button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <!-- Removed duplicate latitude/longitude fields -->
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="map" style="width: 100%; height: 400px;">
+                                        </div>
+                                        <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+                                        <script>
+                                            // Create a global map variable so it can be accessed from other functions
+                                            window.map = L.map('map').setView([51.505, -0.09], 2); // Default view (world map)
+                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                            }).addTo(window.map);
+                                            
+                                            // Initialize the markers layer as a global variable
+                                            window.markersLayer = L.layerGroup().addTo(window.map);
+                                            
+                                            {% if vpn_running %}
+                                            // Add the initial VPN location marker
+                                            L.marker([{{ ip_info.loc.split(',')[0] }}, {{ ip_info.loc.split(',')[1] }}])
+                                                .addTo(window.markersLayer)
+                                                .bindPopup('<b>{{ ip_info.city }}</b><br>{{ ip_info.region }}, {{ ip_info.country }}')
+                                                .openPopup();
+                                            {% endif %}
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="psychographic" role="tabpanel"
+                            aria-labelledby="psychographic-tab">
+                            <div class="container mt-4">
+                                <div class="custom-card">
+                                    <h4>Psychographic Data</h4>
+                                    <form action="{{ url_for('persona.save_psychographic_data') }}" method="post"
+                                        id="psychographic-form">
+                                        <input type="hidden" name="persona_id" id="psychographic-persona-id" value="">
+
+                                        <div class="mb-3">
+                                            <label for="interests" class="form-label">Interests (comma separated)</label>
+                                            <input type="text" class="form-control" id="interests" name="interests"
+                                                placeholder="technology, travel, cooking">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="personal_values" class="form-label">Personal Values (comma
+                                                separated)</label>
+                                            <input type="text" class="form-control" id="personal_values"
+                                                name="personal_values" placeholder="family, honesty, freedom">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="attitudes" class="form-label">Attitudes (comma separated)</label>
+                                            <input type="text" class="form-control" id="attitudes" name="attitudes"
+                                                placeholder="optimistic, skeptical, open-minded">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="lifestyle" class="form-label">Lifestyle</label>
+                                            <input type="text" class="form-control" id="lifestyle" name="lifestyle"
+                                                placeholder="urban professional, outdoor enthusiast">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="personality" class="form-label">Personality</label>
+                                            <input type="text" class="form-control" id="personality" name="personality"
+                                                placeholder="introverted, analytical, creative">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="opinions" class="form-label">Opinions (comma separated)</label>
+                                            <input type="text" class="form-control" id="opinions" name="opinions"
+                                                placeholder="privacy-focused, environmentally conscious">
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Save Psychographic Data</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="behavior" role="tabpanel" aria-labelledby="behavior-tab">
+                            <div class="container mt-4">
+                                <div class="custom-card">
+                                    <h4>Behavioral Data</h4>
+                                    <form action="{{ url_for('persona.save_behavioral_data') }}" method="post" id="behavioral-form">
+                                        <input type="hidden" name="persona_id" id="behavioral-persona-id" value="">
+
+                                        <div class="mb-3">
+                                            <label for="browsing_habits" class="form-label">Browsing Habits (comma separated)</label>
+                                            <input type="text" class="form-control" id="browsing_habits" name="browsing_habits"
+                                                placeholder="social media, news, research">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="purchase_history" class="form-label">Purchase History (comma separated)</label>
+                                            <input type="text" class="form-control" id="purchase_history" name="purchase_history"
+                                                placeholder="electronics, clothing, books">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="online_activity" class="form-label">Online Activity</label>
+                                            <input type="text" class="form-control" id="online_activity" name="online_activity"
+                                                placeholder="daily social media, weekly shopping">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="content_consumption" class="form-label">Content Consumption</label>
+                                            <input type="text" class="form-control" id="content_consumption" name="content_consumption"
+                                                placeholder="video streaming, podcasts, articles">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="tech_usage" class="form-label">Technology Usage</label>
+                                            <input type="text" class="form-control" id="tech_usage" name="tech_usage"
+                                                placeholder="mobile-first, desktop for work">
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Save Behavioral Data</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="contextual" role="tabpanel" aria-labelledby="contextual-tab">
+                            <div class="container mt-4">
+                                <div class="custom-card">
+                                    <h4>Contextual Data</h4>
+                                    <form action="{{ url_for('persona.save_contextual_data') }}" method="post" id="contextual-form">
+                                        <input type="hidden" name="persona_id" id="contextual-persona-id" value="">
+
+                                        <div class="mb-3">
+                                            <label for="device" class="form-label">Device</label>
+                                            <select class="form-select" id="device" name="device">
+                                                <option value="" disabled selected>Select a device</option>
+                                                <option value="desktop">Desktop</option>
+                                                <option value="laptop">Laptop</option>
+                                                <option value="tablet">Tablet</option>
+                                                <option value="mobile">Mobile</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="time_of_day" class="form-label">Time of Day</label>
+                                            <select class="form-select" id="time_of_day" name="time_of_day">
+                                                <option value="" disabled selected>Select time of day</option>
+                                                <option value="morning">Morning</option>
+                                                <option value="afternoon">Afternoon</option>
+                                                <option value="evening">Evening</option>
+                                                <option value="night">Night</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="location_type" class="form-label">Location Type</label>
+                                            <select class="form-select" id="location_type" name="location_type">
+                                                <option value="" disabled selected>Select location type</option>
+                                                <option value="home">Home</option>
+                                                <option value="work">Work</option>
+                                                <option value="public">Public Space</option>
+                                                <option value="commuting">Commuting</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="network_type" class="form-label">Network Type</label>
+                                            <select class="form-select" id="network_type" name="network_type">
+                                                <option value="" disabled selected>Select network type</option>
+                                                <option value="home_wifi">Home Wi-Fi</option>
+                                                <option value="work_wifi">Work Wi-Fi</option>
+                                                <option value="public_wifi">Public Wi-Fi</option>
+                                                <option value="mobile_data">Mobile Data</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="browser" class="form-label">Browser</label>
+                                            <select class="form-select" id="browser" name="browser">
+                                                <option value="" disabled selected>Select browser</option>
+                                                <option value="chrome">Chrome</option>
+                                                <option value="firefox">Firefox</option>
+                                                <option value="safari">Safari</option>
+                                                <option value="edge">Edge</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Save Contextual Data</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
 </html>

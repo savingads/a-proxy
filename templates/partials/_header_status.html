@@ -1,0 +1,13 @@
+<div class="header-status-area ms-auto d-flex align-items-center">
+    <!-- Authentication status -->
+    <div class="auth-status me-3">
+        {% if current_user.is_authenticated %}
+        <span class="text-light me-2">{{ current_user.email }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-light">Logout</a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-light">Login</a>
+        <a href="{{ url_for('auth.register') }}"
+            class="btn btn-sm btn-outline-secondary ms-2 d-none d-md-inline-block">Register</a>
+        {% endif %}
+    </div>
+</div>

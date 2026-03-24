@@ -1,0 +1,95 @@
+site_name: A-Proxy Documentation
+site_description: User manual for A-Proxy - Persona-driven web archiving and LLM interaction tracking
+site_author: Christopher B. Rauch
+site_url: https://a-proxy.ontorealm.net/docs
+
+# Repository
+repo_url: https://github.com/savingads/a-proxy
+repo_name: a-proxy
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode (default)
+    - scheme: default
+      primary: blue-grey
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: blue-grey
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+  icon:
+    logo: material/account-multiple
+    repo: fontawesome/brands/github
+
+  font:
+    text: Segoe UI
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang: en
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - First Login: getting-started/first-login.md
+  - Concepts:
+      - Archival Goals: concepts/archival-goals.md
+      - Persona Model: concepts/persona-model.md
+      - Journeys and Waypoints: concepts/journeys-waypoints.md
+  - How-To Guides:
+      - Create Personas: how-to/create-personas.md
+      - Develop Personas via Chat: how-to/develop-personas.md
+      - Manage Journeys: how-to/manage-journeys.md
+      - Browse as Persona: how-to/browse-as-persona.md
+      - Archive Web Pages: how-to/archive-pages.md
+      - VPN Integration: how-to/vpn-integration.md
+      - Settings: how-to/settings.md
+  - Reference:
+      - System Architecture: reference/architecture.md
+      - API Endpoints: reference/api-endpoints.md
+      - Database Schema: reference/database-schema.md
+      - Integration: reference/integration.md
+  - FAQ: faq.md
+  - "Back to A-Proxy": "/"
+
+extra_css:
+  - assets/css/custom.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/savingads/a-proxy

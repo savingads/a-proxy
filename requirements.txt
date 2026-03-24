@@ -1,2 +1,28 @@
-Flask
-requests
+Flask==2.3.2
+Flask-WTF==1.1.1
+Flask-Login==0.6.3
+Werkzeug==2.3.6
+SQLAlchemy==2.0.20
+cryptography==41.0.3
+pycryptodome==3.18.0
+selenium==4.11.2
+openvpn-api==0.3.0
+python-dotenv==1.0.0
+pyOpenSSL==23.2.0
+requests==2.31.0
+python-dateutil==2.8.2
+flask-cors==4.0.0
+# Persona client is now integrated into the main application
+# No separate installation needed
+
+# Claude API Integration
+anthropic==0.49.0
+openai>=1.52.0
+google-generativeai>=0.7.2
+pillow
+
+# Context token counting
+tiktoken==0.5.2
+
+# Testing
+beautifulsoup4==4.12.2

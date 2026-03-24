@@ -1,0 +1,115 @@
+{
+  "psychographic": {
+    "label": "Market Segmentation",
+    "description": "Market-specific psychological and interest factors",
+    "fields": [
+      {
+        "name": "product_interests",
+        "type": "list",
+        "label": "Product Interests",
+        "description": "Products or services the persona is interested in"
+      },
+      {
+        "name": "brand_preferences",
+        "type": "list",
+        "label": "Brand Preferences",
+        "description": "Brands the persona prefers or has loyalty to"
+      },
+      {
+        "name": "purchase_motivations",
+        "type": "list",
+        "label": "Purchase Motivations",
+        "description": "What motivates this persona to make purchases"
+      },
+      {
+        "name": "budget_sensitivity",
+        "type": "string",
+        "label": "Budget Sensitivity",
+        "description": "How price-sensitive is this persona",
+        "options": ["very low", "low", "medium", "high", "very high"]
+      },
+      {
+        "name": "technology_adoption",
+        "type": "string",
+        "label": "Technology Adoption",
+        "description": "How quickly this persona adopts new technology",
+        "options": ["innovator", "early adopter", "early majority", "late majority", "laggard"]
+      }
+    ]
+  },
+  "behavioral": {
+    "label": "Online Behavior",
+    "description": "Digital behavior patterns and preferences",
+    "fields": [
+      {
+        "name": "preferred_channels",
+        "type": "list",
+        "label": "Preferred Channels",
+        "description": "Marketing channels this persona responds to best"
+      },
+      {
+        "name": "content_preferences",
+        "type": "list",
+        "label": "Content Preferences",
+        "description": "Types of content this persona prefers to consume"
+      },
+      {
+        "name": "purchase_frequency",
+        "type": "string",
+        "label": "Purchase Frequency",
+        "description": "How often this persona makes purchases",
+        "options": ["daily", "weekly", "monthly", "quarterly", "yearly", "rarely"]
+      },
+      {
+        "name": "research_habits",
+        "type": "dict",
+        "label": "Research Habits",
+        "description": "How this persona researches products/services"
+      },
+      {
+        "name": "social_engagement",
+        "type": "dict",
+        "label": "Social Engagement",
+        "description": "How this persona engages with social media"
+      }
+    ]
+  },
+  "contextual": {
+    "label": "Scenario Context",
+    "description": "Contextual factors affecting decisions",
+    "fields": [
+      {
+        "name": "purchase_stage",
+        "type": "string",
+        "label": "Purchase Stage",
+        "description": "Current stage in the purchase journey",
+        "options": ["awareness", "consideration", "decision", "post-purchase"]
+      },
+      {
+        "name": "urgency",
+        "type": "string",
+        "label": "Urgency Level",
+        "description": "How urgent is the persona's need",
+        "options": ["very low", "low", "medium", "high", "very high"]
+      },
+      {
+        "name": "pain_points",
+        "type": "list",
+        "label": "Pain Points",
+        "description": "Problems the persona is trying to solve"
+      },
+      {
+        "name": "goals",
+        "type": "list",
+        "label": "Goals",
+        "description": "What the persona is trying to achieve"
+      },
+      {
+        "name": "decision_factors",
+        "type": "list",
+        "label": "Decision Factors",
+        "description": "Key factors influencing purchase decisions"
+      }
+    ]
+  }
+}

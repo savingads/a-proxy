@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Journey - A-Proxy{% endblock %}
+
+{% block extra_style %}
+<style>
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+    }
+
+    @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+            font-size: 3.5rem;
+        }
+    }
+
+    .b-example-divider {
+        width: 100%;
+        height: 3rem;
+        background-color: rgba(0, 0, 0, .1);
+        border: solid rgba(0, 0, 0, .15);
+        border-width: 1px 0;
+        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+    }
+
+    .b-example-vr {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 100vh;
+    }
+
+    .bi {
+        vertical-align: -.125em;
+        fill: currentColor;
+    }
+
+    .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+    }
+
+    .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .btn-bd-primary {
+        --bd-violet-bg: #712cf9;
+        --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+        --bs-btn-font-weight: 600;
+        --bs-btn-color: var(--bs-white);
+        --bs-btn-bg: var(--bd-violet-bg);
+        --bs-btn-border-color: var(--bd-violet-bg);
+        --bs-btn-hover-color: var(--bs-white);
+        --bs-btn-hover-bg: #6528e0;
+        --bs-btn-hover-border-color: #6528e0;
+        --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+        --bs-btn-active-color: var(--bs-btn-hover-color);
+        --bs-btn-active-bg: #5a23c8;
+        --bs-btn-active-border-color: #5a23c8;
+    }
+
+    .bd-mode-toggle {
+        z-index: 1500;
+    }
+
+    .bd-mode-toggle .dropdown-menu .active .bi {
+        display: block !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Edit Journey</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Journey
+        </a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Journey Details</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('journey.edit_journey', journey_id=journey.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Journey Name</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                            value="{{ journey.name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" 
+                            rows="3">{{ journey.description }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="journey_type" class="form-label">Journey Type</label>
+                        <select class="form-select" id="journey_type" name="journey_type">
+                            <option value="marketing" {% if journey.journey_type == "marketing" %}selected{% endif %}>Marketing</option>
+                            <option value="research" {% if journey.journey_type == "research" %}selected{% endif %}>Research</option>
+                            <option value="competitive" {% if journey.journey_type == "competitive" %}selected{% endif %}>Competitive Analysis</option>
+                            <option value="educational" {% if journey.journey_type == "educational" %}selected{% endif %}>Educational</option>
+                            <option value="personal" {% if journey.journey_type == "personal" %}selected{% endif %}>Personal</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="persona_id" class="form-label">Persona (Optional)</label>
+                        <select class="form-select" id="persona_id" name="persona_id">
+                            <option value="">None</option>
+                            {% for persona in personas %}
+                            <option value="{{ persona.id }}" 
+                                {% if journey.persona_id == persona.id %}selected{% endif %}>
+                                {{ persona.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="active" {% if journey.status == "active" %}selected{% endif %}>Active</option>
+                            <option value="completed" {% if journey.status == "completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Metadata Card -->
+        <div class="card mt-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Journey Metadata</h5>
+            </div>
+            <div class="card-body text-muted">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <strong>Created:</strong> 
+                        {% if journey.created_at %}
+                            {% if journey.created_at is string %}
+                                {{ journey.created_at }}
+                            {% else %}
+                                {{ journey.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Last Updated:</strong>
+                        {% if journey.updated_at %}
+                            {% if journey.updated_at is string %}
+                                {{ journey.updated_at }}
+                            {% else %}
+                                {{ journey.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Waypoints:</strong> {{ waypoints|length if waypoints else 0 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Danger Zone Card -->
+        <div class="card mt-4 border-danger">
+            <div class="card-header bg-danger bg-opacity-10 text-danger">
+                <h5 class="mb-0">Danger Zone</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('journey.delete_journey', journey_id=journey.id) }}" method="POST"
+                    onsubmit="return confirm('Are you sure you want to delete this journey? This action cannot be undone.');">
+                    <p class="text-muted mb-3">Once you delete a journey, there is no going back. Please be certain.</p>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete Journey
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

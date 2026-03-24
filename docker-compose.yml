@@ -1,0 +1,17 @@
+services:
+  a-proxy:
+    build: .
+    container_name: a-proxy
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/app/data
+      - ./nordvpn:/app/nordvpn
+      - ./archives:/app/archives
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DEBUG=${DEBUG:-false}
+    env_file:
+      - .env
+    restart: unless-stopped

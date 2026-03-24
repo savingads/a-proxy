@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}A-Proxy - Home{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block extra_style %}
+<style>
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card {
+        height: 100%;
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block header_content %}
+<ul class="navbar-nav flex-row d-md-none">
+    <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Welcome to A-Proxy</h1>
+    <p class="lead">Personalized Web Experience Testing and Archiving</p>
+
+    <!-- Version display in top right -->
+    <div class="version-info text-end">
+        {% if version is defined %}
+        Version {{ version }}
+        {% else %}
+        Version Unknown
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4">A-Proxy</h2>
+                <p class="card-text">
+                    Chat as different personas and archive conversations for analysis. Each persona has 
+                    configurable demographic, psychographic, and behavioral attributes that influence 
+                    interactions with AI models.
+                </p>
+                <p class="card-text">
+                    Conversations are automatically archived with metadata including model parameters, 
+                    persona context, and response characteristics for later reference and comparison.
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a href="{{ url_for('home.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+                        <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-secondary">Manage
+                            Personas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-chat-dots me-2"></i>Chat as Persona</h2>
+                <p class="card-text">
+                    Engage with AI models from the perspective of defined personas. Responses reflect
+                    demographic and psychological attributes.
+                </p>
+                <a href="{{ url_for('journey.interact_as') }}" class="btn btn-outline-primary">Start Chat</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-people me-2"></i>Manage Personas</h2>
+                <p class="card-text">
+                    Create and configure persona attributes including demographics, interests, 
+                    values, and behavioral patterns.
+                </p>
+                <a href="{{ url_for('persona.list_personas') }}" class="btn btn-outline-primary">View Personas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-archive me-2"></i>Conversation Archives</h2>
+                <p class="card-text">
+                    Access archived conversations with associated model parameters and 
+                    persona context for analysis.
+                </p>
+                <a href="{{ url_for('archives.list_archives') }}" class="btn btn-outline-primary">View Archives</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h4"><i class="bi bi-map me-2"></i>Journey Tracking</h2>
+                <p class="card-text">
+                    Review persona interaction sessions and conversation progressions 
+                    over time.
+                </p>
+                <a href="{{ url_for('journey.list_journeys') }}" class="btn btn-outline-primary">View Journeys</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

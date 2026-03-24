@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Journey Timeline - A-Proxy{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/leaflet.css') }}" rel="stylesheet">
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 0.25rem;
+    }
+
+    .waypoint-card {
+        margin-bottom: 1rem;
+    }
+
+    .waypoint-marker {
+        background-color: #0d6efd;
+        border: 2px solid white;
+        border-radius: 50%;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .path-line {
+        stroke: #0d6efd;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 1, 10;
+        stroke-dashoffset: 1;
+    }
+
+    .timeline {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        background-color: #0d6efd;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -3px;
+    }
+
+    .waypoint-timeline {
+        position: relative;
+        width: 45%;
+        margin-bottom: 30px;
+    }
+
+    .left {
+        left: 0;
+    }
+
+    .right {
+        left: 55%;
+    }
+
+    .dot {
+        position: absolute;
+        top: 15px;
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        border: 4px solid #0d6efd;
+        border-radius: 50%;
+        z-index: 1;
+    }
+
+    .right .dot {
+        left: -10px;
+    }
+
+    .left .dot {
+        right: -10px;
+    }
+
+    @media screen and (max-width: 768px) {
+        .timeline::after {
+            left: 20px;
+        }
+
+        .waypoint-timeline {
+            width: 90%;
+            left: 10%;
+        }
+
+        .left .dot,
+        .right .dot {
+            left: -27px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ journey.name }} - Timeline</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('journey.view_journey', journey_id=journey.id) }}"
+                class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-eye"></i> View Details
+            </a>
+            <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}"
+                class="btn btn-sm btn-outline-success">
+                <i class="bi bi-play-fill"></i> Continue
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if waypoints|length > 0 %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Journey Map</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="map"></div>
+            </div>
+            <div class="card-footer text-muted small">
+                <i class="bi bi-info-circle"></i> The map shows the path of the journey through various waypoints. Click
+                on markers for details.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Journey Waypoints Timeline</h5>
+                <span class="badge text-bg-{{ 'success' if journey.status == 'active' else 'secondary' }}">
+                    {{ journey.status }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for waypoint in waypoints %}
+                    <div class="waypoint-timeline {{ 'left' if loop.index0 % 2 == 0 else 'right' }}">
+                        <div class="dot"></div>
+                        <div class="card">
+                            <div class="card-header bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ waypoint.title or 'Waypoint ' + waypoint.sequence_number|string
+                                        }}</h6>
+                                    <span class="badge bg-secondary">Step {{ waypoint.sequence_number }}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>URL:</strong>
+                                    <a href="{{ waypoint.url }}" target="_blank" class="text-truncate d-inline-block"
+                                        style="max-width: 100%;">
+                                        {{ waypoint.url }}
+                                    </a>
+                                </div>
+                                {% if waypoint.notes %}
+                                <div class="mb-2">
+                                    <strong>Notes:</strong>
+                                    <p class="mb-0">{{ waypoint.notes }}</p>
+                                </div>
+                                {% endif %}
+                                <div class="mb-0 text-muted small">
+                                    <i class="bi bi-clock"></i> {{ waypoint.timestamp if waypoint.timestamp else '-' }}
+                                </div>
+                            </div>
+                            {% if waypoint.screenshot_path %}
+                            <div class="text-center p-2">
+                                <img src="{{ url_for('static', filename=waypoint.screenshot_path) }}"
+                                    alt="Screenshot of {{ waypoint.title }}" class="img-fluid rounded border"
+                                    style="max-height: 200px;">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    <i class="bi bi-info-circle me-2"></i> This journey doesn't have any waypoints yet.
+</div>
+<div class="text-center py-5">
+    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/signpost.svg" alt="Signpost icon" width="64"
+        height="64" class="mb-3 text-muted">
+    <h5>Start adding waypoints to your journey</h5>
+    <p class="text-muted">Click the button below to continue your journey and add waypoints.</p>
+    <a href="{{ url_for('journey.browse_journey', journey_id=journey.id) }}" class="btn btn-primary mt-2">
+        <i class="bi bi-play-fill"></i> Continue Journey
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if waypoints | length > 0 %}
+        // Initialize map
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add waypoints to map
+        var waypointsWithCoords = [];
+        {% for waypoint in waypoints %}
+        {% if waypoint.latitude and waypoint.longitude %}
+        waypointsWithCoords.push({
+            id: {{ waypoint.id }},
+        title: "{{ waypoint.title or 'Waypoint ' + waypoint.sequence_number|string }}",
+        url: "{{ waypoint.url }}",
+        sequence: {{ waypoint.sequence_number }},
+        latlng: [{{ waypoint.latitude }}, {{ waypoint.longitude }}],
+        timestamp: "{{ waypoint.timestamp or '' }}"
+  });
+    {% endif %}
+    {% endfor %}
+
+    if (waypointsWithCoords.length > 0) {
+        // Create path between waypoints
+        var pathCoordinates = waypointsWithCoords.map(function (wp) {
+            return wp.latlng;
+        });
+
+        var path = L.polyline(pathCoordinates, {
+            color: '#0d6efd',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '10, 10',
+            lineCap: 'round'
+        }).addTo(map);
+
+        // Add markers for each waypoint
+        waypointsWithCoords.forEach(function (wp) {
+            var icon = L.divIcon({
+                className: 'waypoint-marker',
+                html: wp.sequence,
+                iconSize: [24, 24]
+            });
+
+            var marker = L.marker(wp.latlng, { icon: icon }).addTo(map);
+            marker.bindPopup(
+                '<strong>' + wp.title + '</strong><br>' +
+                '<a href="' + wp.url + '" target="_blank" class="small">' + wp.url + '</a><br>' +
+                (wp.timestamp ? '<small><i class="bi bi-clock"></i> ' + wp.timestamp + '</small>' : '')
+            );
+        });
+
+        // Fit map to show all waypoints
+        map.fitBounds(path.getBounds(), { padding: [50, 50] });
+    } else {
+        // No valid coordinates, show default view
+        map.setView([0, 0], 2);
+        document.getElementById('map').innerHTML =
+            '<div class="d-flex justify-content-center align-items-center h-100">' +
+            '<div class="text-center text-muted">' +
+            '<i class="bi bi-map-fill fs-1"></i>' +
+            '<p class="mt-2">No location data available for this journey</p>' +
+            '</div></div>';
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

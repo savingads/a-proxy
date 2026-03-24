@@ -1,0 +1,72 @@
+<!-- Waypoint Form Partial -->
+<div class="modal-body">
+    <div class="mb-3">
+        <label for="waypoint-url" class="form-label">URL</label>
+        <input type="url" class="form-control" id="waypoint-url" name="url" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="waypoint-title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="waypoint-title" name="title">
+    </div>
+    <div class="mb-3">
+        <label for="waypoint-notes" class="form-label">Notes</label>
+        <textarea class="form-control" id="waypoint-notes" name="notes" rows="3"
+            placeholder="Add any observations or notes about this waypoint"></textarea>
+    </div>
+    {% if with_screenshot is defined and with_screenshot %}
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="capture-screenshot" name="capture-screenshot">
+        <label class="form-check-label" for="capture-screenshot">Capture screenshot</label>
+    </div>
+    <input type="hidden" id="screenshot-data" name="screenshot">
+    {% endif %}
+
+    {% if is_direct_browse is defined and is_direct_browse %}
+    <hr>
+    <div class="mb-3">
+        <label class="form-label">Save to Journey</label>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="journey_option" id="journey-new" value="new" checked>
+            <label class="form-check-label" for="journey-new">Create New Journey</label>
+        </div>
+        {% if existing_journeys is defined and existing_journeys %}
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="journey_option" id="journey-existing" value="existing">
+            <label class="form-check-label" for="journey-existing">Add to Existing Journey</label>
+        </div>
+        <div id="existing-journey-select" style="display: none;">
+            <select class="form-select mt-2" name="journey_id">
+                <option value="">Select a journey...</option>
+                {% for journey in existing_journeys %}
+                <option value="{{ journey.id }}">{{ journey.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="new-journey-form">
+        <div class="mb-3">
+            <label for="journey-name" class="form-label">Journey Name</label>
+            <input type="text" class="form-control" id="journey-name" name="journey_name"
+                placeholder="E.g., Product Research Journey">
+        </div>
+        <div class="mb-3">
+            <label for="journey-description" class="form-label">Description</label>
+            <textarea class="form-control" id="journey-description" name="journey_description" rows="2"
+                placeholder="Brief description of this journey"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="journey-type" class="form-label">Journey Type</label>
+            <select class="form-select" id="journey-type" name="journey_type">
+                <option value="marketing">Marketing</option>
+                <option value="research">Research</option>
+                <option value="shopping">Shopping</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="educational">Educational</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+    </div>
+    {% endif %}
+</div>

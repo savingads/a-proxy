@@ -1,0 +1,20 @@
+<!-- Browser Toolbar Partial -->
+<div class="browser-toolbar">
+    <form id="browser-navigation" class="d-flex w-100" method="POST" action="{{ url_for('browsing.visit_page') }}"
+        target="browser-frame">
+        <button type="button" class="btn btn-outline-secondary me-2" id="back-button">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary me-2" id="forward-button">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary me-2" id="refresh-button">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <div class="input-group">
+            <input type="url" name="url" id="url-input" class="form-control" placeholder="Enter URL" required>
+            <input type="hidden" name="take_screenshot" value="false">
+            <button type="submit" class="btn btn-primary">Go</button>
+        </div>
+    </form>
+</div>

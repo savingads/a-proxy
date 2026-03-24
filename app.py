@@ -1,110 +1,102 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, Response
-import subprocess
-import requests
+from flask import Flask
 import logging
-import os
-from services import start_vpn
-import multiprocessing
-from requests.exceptions import ConnectionError
-import time
+import argparse
+from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
+from flask_login import LoginManager
+from database import get_user_by_email
+from routes.auth import User, user_from_row
 
-app = Flask(__name__)
+# Import blueprints
+from routes.home import home_bp
+from routes.vpn import vpn_bp
+# Choose which persona implementation to use (API or direct DB access)
+from routes.persona_api_db import persona_bp  # Using direct database implementation
+from routes.browsing import browsing_bp
+from routes.archives import archives_bp
+from routes.journey import journey_bp
 
+# Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-REGION_LANGUAGE_MAP = {
-    "US": "en-US",
-    "BR": "pt-BR",
-    "DE": "de-DE",
-    "JP": "ja-JP",
-    "ZA": "af-ZA"
-}
-
-def is_vpn_running():
-    result = subprocess.run(["pgrep", "openvpn"], stdout=subprocess.PIPE)
-    return result.returncode == 0
-
-def get_ip_info():
-    retries = 3
-    backoff_factor = 2
-    for attempt in range(retries):
+def create_app():
+    """Create and configure the Flask application."""
+    app = Flask(__name__)
+    
+    # Configure Flask application
+    app.secret_key = SECRET_KEY
+    app.config['SESSION_COOKIE_SECURE'] = SESSION_COOKIE_SECURE
+    app.config['SESSION_COOKIE_HTTPONLY'] = SESSION_COOKIE_HTTPONLY
+    app.config['SESSION_COOKIE_SAMESITE'] = SESSION_COOKIE_SAMESITE
+    
+    # Add custom Jinja2 filters
+    import json
+    @app.template_filter('fromjson')
+    def fromjson_filter(value):
+        """Convert a JSON string to a Python object"""
         try:
-            response = requests.get("https://ipinfo.io")
-            response.raise_for_status()
-            return response.json()
-        except ConnectionError as e:
-            logging.error(f"Failed to get IP info: {e}")
-            return {"error": "Failed to get IP info"}
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Request exception: {e}")
-            if response.status_code == 429:  # Too Many Requests
-                wait_time = backoff_factor ** attempt
-                logging.debug(f"Rate limited. Retrying in {wait_time} seconds...")
-                time.sleep(wait_time)
-            else:
-                return {"error": "Request exception"}
-    return {"error": "Failed to get IP info after retries"}
+            return json.loads(value)
+        except:
+            return {}
+    
+    # --- Flask-Login setup ---
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
 
-def wait_for_vpn_and_get_ip_info():
-    retries = 5
-    backoff_factor = 2
-    for attempt in range(retries):
-        if is_vpn_running():
-            ip_info = get_ip_info()
-            if "error" not in ip_info:
-                return ip_info
-        wait_time = backoff_factor ** attempt
-        logging.debug(f"Waiting for VPN to establish. Retrying in {wait_time} seconds...")
-        time.sleep(wait_time)
-    return {"error": "Failed to get IP info after retries"}
+    # Custom unauthorized handler for AJAX requests
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import request, jsonify, redirect, url_for
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Return JSON response for AJAX requests
+            return jsonify({
+                'success': False,
+                'error': 'Session expired. Please refresh the page and log in again.'
+            }), 401
+        # For regular requests, redirect to login page
+        return redirect(url_for('auth.login'))
 
-@app.route("/vpn-status")
-def vpn_status():
-    vpn_running = is_vpn_running()
-    ip_info = get_ip_info() if vpn_running else {}
-    return jsonify({
-        "vpn_running": vpn_running,
-        "ip_info": ip_info
-    })
-
-@app.route("/")
-def index():
-    vpn_running = is_vpn_running()
-    ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
-    country = ip_info.get("country", "")
-    language = REGION_LANGUAGE_MAP.get(country, "en-US") if vpn_running else "en-US"
-    return render_template("index.html", vpn_running=vpn_running, ip_info=ip_info, language=language)
-
-@app.route("/visit-page", methods=["POST"])
-def visit_page():
-    language = request.form.get("language", "en-US")
-    os.system(f"python3 /home/chris/a-proxy/visit_page.py {language}")
-    return "Visited Google and took a screenshot."
-
-def vpn_process(region):
-    if is_vpn_running():
-        logging.debug("Stopping current VPN connection")
-        subprocess.run(["sudo", "pkill", "openvpn"])
-    vpn_config_path = f"nordvpn/ovpn_udp/{region}.nordvpn.com.udp.ovpn"
-    if not os.path.exists(vpn_config_path):
-        logging.error(f"VPN configuration file not found: {vpn_config_path}")
-        return
-    start_vpn(region)
-
-@app.route("/change-region", methods=["POST"])
-def change_region():
-    region = request.form.get("region")
-    logging.debug(f"Changing VPN region to: {region}")
-    vpn_proc = multiprocessing.Process(target=vpn_process, args=(region,))
-    vpn_proc.start()
-    logging.debug("VPN region change process started")
-    return redirect(url_for("index"))
+    @login_manager.user_loader
+    def load_user(user_id):
+        # Load user from database
+        from database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (int(user_id),))
+        row = cursor.fetchone()
+        conn.close()
+        return user_from_row(row) if row else None
+    # --- End Flask-Login setup ---
+    
+    # Register blueprints
+    app.register_blueprint(home_bp)
+    app.register_blueprint(vpn_bp)
+    app.register_blueprint(persona_bp)
+    app.register_blueprint(browsing_bp)
+    app.register_blueprint(archives_bp)
+    app.register_blueprint(journey_bp)
+    
+    # Import agent_bp here to prevent circular imports
+    from routes.agent import agent_bp
+    app.register_blueprint(agent_bp)
+    
+    from routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+    
+    return app
 
 if __name__ == "__main__":
-    # Automatically start the VPN service with a default region
-    default_region = "de1088"  # Change this to your desired default region
-    if not is_vpn_running():
-        logging.debug(f"Starting VPN with default region: {default_region}")
-        vpn_proc = multiprocessing.Process(target=vpn_process, args=(default_region,))
-        vpn_proc.start()
-    app.run(host="0.0.0.0", port=5000)
+    parser = argparse.ArgumentParser(description='Run the Flask application')
+    parser.add_argument('--port', type=int, default=5002, help='Port to run the application on')
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='Host address to run the application on')
+    args = parser.parse_args()
+    
+    # Initialize default user if needed
+    try:
+        from init_default_user import init_default_user
+        init_default_user()
+    except Exception as e:
+        logging.error(f"Failed to initialize default user: {e}")
+    
+    app = create_app()
+    app.run(debug=True, use_reloader=True, port=args.port, host=args.host)

@@ -11,6 +11,10 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # Additional Flask configuration
 DEBUG = os.environ.get('FLASK_DEBUG', 'False') == 'True'
 
+# Proxy configuration (replaces VPN)
+PROXY_URL = os.environ.get('PROXY_URL')  # e.g. socks5://user:pass@host:port
+BROWSER_HEADLESS = os.environ.get('BROWSER_HEADLESS', 'True') == 'True'
+
 # LLM provider configuration
 LLM_PROVIDER = os.environ.get('LLM_PROVIDER')
 
@@ -27,22 +31,22 @@ GOOGLE_MODEL = os.environ.get('GOOGLE_MODEL', 'gemini-1.5-pro')
 # Token limits
 LLM_MAX_OUTPUT_TOKENS = int(os.environ.get('LLM_MAX_OUTPUT_TOKENS', '1024'))
 
-# Region to language mapping
+# Region to language/geolocation/timezone mapping
 REGION_LANGUAGE_MAP = {
-    "US": {"language": "en-US"},
-    "GB": {"language": "en-GB"},
-    "CA": {"language": "en-CA"},
-    "AU": {"language": "en-AU"},
-    "DE": {"language": "de-DE"},
-    "FR": {"language": "fr-FR"},
-    "ES": {"language": "es-ES"},
-    "IT": {"language": "it-IT"},
-    "JP": {"language": "ja-JP"},
-    "CN": {"language": "zh-CN"},
-    "IN": {"language": "hi-IN"},
-    "BR": {"language": "pt-BR"},
-    "MX": {"language": "es-MX"},
-    "RU": {"language": "ru-RU"},
-    "KR": {"language": "ko-KR"},
-    # Add more mappings as needed
+    "US": {"language": "en-US", "geolocation": "37.7749,-122.4194", "name": "United States", "timezone": "America/New_York"},
+    "GB": {"language": "en-GB", "geolocation": "51.5074,-0.1278", "name": "United Kingdom", "timezone": "Europe/London"},
+    "CA": {"language": "en-CA", "geolocation": "43.6532,-79.3832", "name": "Canada", "timezone": "America/Toronto"},
+    "AU": {"language": "en-AU", "geolocation": "-33.8688,151.2093", "name": "Australia", "timezone": "Australia/Sydney"},
+    "DE": {"language": "de-DE", "geolocation": "52.5200,13.4050", "name": "Germany", "timezone": "Europe/Berlin"},
+    "FR": {"language": "fr-FR", "geolocation": "48.8566,2.3522", "name": "France", "timezone": "Europe/Paris"},
+    "ES": {"language": "es-ES", "geolocation": "40.4168,-3.7038", "name": "Spain", "timezone": "Europe/Madrid"},
+    "IT": {"language": "it-IT", "geolocation": "41.9028,12.4964", "name": "Italy", "timezone": "Europe/Rome"},
+    "JP": {"language": "ja-JP", "geolocation": "35.6762,139.6503", "name": "Japan", "timezone": "Asia/Tokyo"},
+    "CN": {"language": "zh-CN", "geolocation": "39.9042,116.4074", "name": "China", "timezone": "Asia/Shanghai"},
+    "IN": {"language": "hi-IN", "geolocation": "28.6139,77.2090", "name": "India", "timezone": "Asia/Kolkata"},
+    "BR": {"language": "pt-BR", "geolocation": "-23.5505,-46.6333", "name": "Brazil", "timezone": "America/Sao_Paulo"},
+    "MX": {"language": "es-MX", "geolocation": "19.4326,-99.1332", "name": "Mexico", "timezone": "America/Mexico_City"},
+    "RU": {"language": "ru-RU", "geolocation": "55.7558,37.6173", "name": "Russia", "timezone": "Europe/Moscow"},
+    "KR": {"language": "ko-KR", "geolocation": "37.5665,126.9780", "name": "South Korea", "timezone": "Asia/Seoul"},
+    "ZA": {"language": "af-ZA", "geolocation": "-33.9249,18.4241", "name": "South Africa", "timezone": "Africa/Johannesburg"},
 }

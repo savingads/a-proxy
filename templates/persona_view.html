@@ -72,7 +72,7 @@
     <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
     <input type="hidden" name="language" value="{{ language }}">
     <input type="hidden" name="geolocation" id="form-geolocation"
-        value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+        value="{{ ip_info.loc|default('') if ip_info is defined else '' }}">
     <button type="submit" class="btn btn-primary me-2">Preview</button>
     <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
 </form>

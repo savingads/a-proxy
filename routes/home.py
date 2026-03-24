@@ -1,59 +1,47 @@
-from flask import Blueprint, render_template, request
-from utils.vpn import is_vpn_running, wait_for_vpn_and_get_ip_info
+from flask import Blueprint, render_template, request, session
+from utils.network import is_proxy_configured, get_proxy_url, get_ip_info
 from config import REGION_LANGUAGE_MAP
 
 home_bp = Blueprint('home', __name__)
+
+
+def _get_version():
+    """Read version from VERSION.txt."""
+    try:
+        with open('VERSION.txt', 'r') as f:
+            return f.read().strip()
+    except Exception:
+        return "Unknown"
+
 
 @home_bp.route("/")
 @home_bp.route("/home")
 def index():
     """Render the home page."""
-    vpn_running = is_vpn_running()
-    ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
+    proxy_url = session.get("proxy_url") or get_proxy_url()
+    proxy_configured = bool(proxy_url)
+    ip_info = get_ip_info(proxy_url) if proxy_configured else get_ip_info()
     country = ip_info.get("country", "")
-    language = REGION_LANGUAGE_MAP.get(country, {}).get("language", "en-US") if vpn_running else "en-US"
-    
-    # Get the version from VERSION.txt
-    try:
-        with open('VERSION.txt', 'r') as f:
-            version = f.read().strip()
-    except:
-        version = "Unknown"
-        
-    return render_template("home.html", 
-                          vpn_running=vpn_running, 
-                          ip_info=ip_info, 
-                          language=language,
-                          version=version)
+    language = REGION_LANGUAGE_MAP.get(country, {}).get("language", "en-US")
+
+    return render_template("home.html",
+                           proxy_configured=proxy_configured,
+                           ip_info=ip_info,
+                           language=language,
+                           version=_get_version())
+
 
 @home_bp.route("/dashboard")
 def dashboard():
     """Render the dashboard page."""
-    vpn_running = is_vpn_running()
-    ip_info = wait_for_vpn_and_get_ip_info() if vpn_running else {}
-    
-    # Get IP-based location info if no VPN info available
-    if not ip_info:
-        try:
-            import requests
-            # Get user's public IP and location info
-            response = requests.get('https://ipapi.co/json/', timeout=5)
-            if response.status_code == 200:
-                ip_info = response.json()
-        except:
-            ip_info = {}
-    
-    # Get the version from VERSION.txt
-    try:
-        with open('VERSION.txt', 'r') as f:
-            version = f.read().strip()
-    except:
-        version = "Unknown"
-        
-    return render_template("dashboard.html", 
-                          vpn_running=vpn_running, 
-                          ip_info=ip_info,
-                          version=version)
+    proxy_url = session.get("proxy_url") or get_proxy_url()
+    proxy_configured = bool(proxy_url)
+    ip_info = get_ip_info(proxy_url) if proxy_configured else get_ip_info()
+
+    return render_template("dashboard.html",
+                           proxy_configured=proxy_configured,
+                           ip_info=ip_info,
+                           version=_get_version())
 
 @home_bp.route("/geolocation-test")
 def geolocation_test():

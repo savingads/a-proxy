@@ -6,12 +6,13 @@ services:
       - "5002:5002"
     volumes:
       - ./data:/app/data
-      - ./nordvpn:/app/nordvpn
       - ./archives:/app/archives
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - DEBUG=${DEBUG:-false}
+      - PROXY_URL=${PROXY_URL:-}
+      - BROWSER_HEADLESS=${BROWSER_HEADLESS:-True}
     env_file:
       - .env
     restart: unless-stopped

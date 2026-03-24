@@ -1,8 +1,8 @@
 from flask import Blueprint, request, redirect, url_for, flash, Response, session
 import os
 import logging
-import subprocess
-from utils.vpn import is_vpn_running
+from config import PROXY_URL
+from utils.browser import BrowserManager
 
 browsing_bp = Blueprint('browsing', __name__)
 
@@ -13,25 +13,23 @@ def visit_page():
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation", None)
     take_screenshot = request.form.get("take_screenshot", "false").lower() == "true"
-    
-    # If geolocation is not provided in the form, try to get it from the Persona section
-    if not geolocation:
-        geolocation = request.form.get("geolocation", None)
-    
-    # Build the command with proper argument formatting using relative path
-    command = f"python3 visit_page.py '{url}' --language '{language}'"
-    if geolocation:
-        command += f" --geolocation '{geolocation}'"
-    if take_screenshot:
-        command += " --take-screenshot"
-    
-    logging.debug(f"Executing command: {command}")
-    os.system(command)
-    
-    if take_screenshot:
-        return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}. Screenshot saved."
-    else:
-        return f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}."
+    proxy = session.get("proxy_url") or PROXY_URL
+
+    logging.debug(f"Visiting {url} with language={language}, geolocation={geolocation}")
+
+    manager = BrowserManager.get_instance()
+    result = manager.visit_page(
+        url=url,
+        locale=language,
+        geolocation=geolocation,
+        proxy=proxy,
+        screenshot=take_screenshot,
+    )
+
+    msg = f"Visited {url} with language {language} and geolocation {geolocation or 'not specified'}."
+    if take_screenshot and result.get("screenshot_path"):
+        msg += f" Screenshot saved to {result['screenshot_path']}."
+    return msg
 
 @browsing_bp.route("/archive_page", methods=["POST"])
 def archive_page():
@@ -40,25 +38,29 @@ def archive_page():
     language = request.form.get("language", "en-US")
     geolocation = request.form.get("geolocation")
     persona_id = request.form.get("persona_id")
-    
-    # Convert persona_id to int if it's not None
+    proxy = session.get("proxy_url") or PROXY_URL
+
     if persona_id:
         try:
             persona_id = int(persona_id)
         except ValueError:
             persona_id = None
-    
-    # Build the command with proper argument formatting using relative path
-    command = f"python3 archive_page.py '{url}' --language '{language}'"
-    if geolocation:
-        command += f" --geolocation '{geolocation}'"
-    if persona_id:
-        command += f" --persona-id {persona_id}"
-    
-    logging.debug(f"Executing command: {command}")
-    os.system(command)
-    
-    flash(f"Archived {url} with language {language} and geolocation {geolocation or 'not specified'}.", "success")
+
+    logging.debug(f"Archiving {url} with language={language}, geolocation={geolocation}")
+
+    manager = BrowserManager.get_instance()
+    result = manager.archive_page(
+        url=url,
+        locale=language,
+        geolocation=geolocation,
+        proxy=proxy,
+        persona_id=persona_id,
+    )
+
+    if result:
+        flash(f"Archived {url} with language {language} and geolocation {geolocation or 'not specified'}.", "success")
+    else:
+        flash(f"Failed to archive {url}.", "danger")
     return redirect(url_for('persona.dashboard'))
 
 @browsing_bp.route("/test-geolocation", methods=["POST"])

@@ -1,70 +1,41 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var changeRegionForm = document.getElementById('change-region-form');
-    if (changeRegionForm) {
-        changeRegionForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            var form = event.target;
-            var formData = new FormData(form);
-            document.getElementById('vpn-spinner').style.display = 'inline-block';
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            }).then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                if (data.status === 'changing') {
-                    document.getElementById('region').value = data.region;
-                    pollVpnStatus();
-                }
-            }).catch(function (error) {
-                console.error("Error changing region:", error);
-            });
-        });
-    }
-
-    // This block is replaced by the updated setGeolocationButton handler below
-
-    let pollAttempts = 0;
-    function pollVpnStatus() {
-        fetch('/vpn-status')
+    // Fetch network/proxy status and update UI
+    function fetchNetworkStatus() {
+        fetch('/network-status')
             .then(response => response.json())
             .then(data => {
-                if (data.vpn_running && data.ip_info) {
-                    document.getElementById('vpn-spinner').style.display = 'none';
-                    document.getElementById('geolocation').textContent = data.ip_info.loc || 'Unavailable';
+                if (data.ip_info && !data.ip_info.error) {
+                    const geoEl = document.getElementById('geolocation');
+                    if (geoEl) geoEl.textContent = data.ip_info.loc || 'Unavailable';
 
                     // Update save persona form fields
-                    document.getElementById('save-geolocation').value = data.ip_info.loc || '';
-                    document.getElementById('save-country').value = data.ip_info.country || '';
-                    document.getElementById('save-city').value = data.ip_info.city || '';
-                    document.getElementById('save-region').value = data.ip_info.region || '';
-                }
-                if (pollAttempts < 5) {
-                    pollAttempts++;
-                    setTimeout(pollVpnStatus, 3000);
+                    const saveGeo = document.getElementById('save-geolocation');
+                    if (saveGeo) saveGeo.value = data.ip_info.loc || '';
+                    const saveCountry = document.getElementById('save-country');
+                    if (saveCountry) saveCountry.value = data.ip_info.country || '';
+                    const saveCity = document.getElementById('save-city');
+                    if (saveCity) saveCity.value = data.ip_info.city || '';
+                    const saveRegion = document.getElementById('save-region');
+                    if (saveRegion) saveRegion.value = data.ip_info.region || '';
                 }
             })
-            .catch(error => console.error("Error polling VPN status:", error));
+            .catch(error => console.error("Error fetching network status:", error));
     }
-    pollVpnStatus();
+    fetchNetworkStatus();
 
-    // Initialize geolocation display based on VPN status
+    // Initialize geolocation display
     function initializeGeolocation() {
-        // Check if VPN is running (this is determined by the template)
-        const vpnRunning = document.body.getAttribute('data-vpn-running') === 'True';
-        
-        if (!vpnRunning) {
+        const proxyConfigured = document.body.getAttribute('data-proxy-configured') === 'True';
+
+        if (!proxyConfigured) {
             if (navigator.geolocation) {
-                console.log("Geolocation is supported.");
                 navigator.geolocation.getCurrentPosition(function (position) {
-                    console.log("Geolocation success:", position);
                     document.getElementById('geolocation').textContent = position.coords.latitude + ', ' + position.coords.longitude;
                 }, function (error) {
                     console.error("Geolocation error:", error);
                     document.getElementById('geolocation').textContent = 'Unavailable';
                 });
             } else {
-                console.log("Geolocation is not supported.");
                 document.getElementById('geolocation').textContent = 'Not supported';
             }
         }

@@ -176,10 +176,10 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
-<body data-vpn-running="{{ 'True' if vpn_running else 'False' }}" 
-      data-country="{% if vpn_running %}{{ ip_info.country }}{% endif %}" 
-      data-city="{% if vpn_running %}{{ ip_info.city }}{% endif %}" 
-      data-region="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+<body data-proxy-configured="{{ 'True' if proxy_configured else 'False' }}"
+      data-country="{{ ip_info.country|default('') }}"
+      data-city="{{ ip_info.city|default('') }}"
+      data-region="{{ ip_info.region|default('') }}">
     <!-- Theme toggle removed, using dark theme by default -->
 
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
@@ -191,7 +191,7 @@
             <input type="url" name="url" class="form-control me-2" placeholder="Enter URL" required>
             <input type="hidden" name="language" value="{{ language }}">
             <input type="hidden" name="geolocation" id="form-geolocation"
-                value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+                value="{{ ip_info.loc|default('') }}">
             <button type="submit" class="btn btn-primary me-2">Preview</button>
             <button type="submit" formaction="{{ url_for('browsing.archive_page') }}" class="btn btn-secondary">Archive</button>
         </form>
@@ -257,14 +257,14 @@
                         <div class="col">
                             <form action="{{ url_for('persona.save_persona') }}" method="post" id="save-persona-form">
                                 <input type="hidden" name="geolocation" id="save-geolocation"
-                                    value="{% if vpn_running %}{{ ip_info.loc }}{% endif %}">
+                                    value="{{ ip_info.loc|default('') }}">
                                 <input type="hidden" name="language" id="save-language" value="{{ language }}">
                                 <input type="hidden" name="country" id="save-country"
-                                    value="{% if vpn_running %}{{ ip_info.country }}{% endif %}">
+                                    value="{{ ip_info.country|default('') }}">
                                 <input type="hidden" name="city" id="save-city"
-                                    value="{% if vpn_running %}{{ ip_info.city }}{% endif %}">
+                                    value="{{ ip_info.city|default('') }}">
                                 <input type="hidden" name="region" id="save-region"
-                                    value="{% if vpn_running %}{{ ip_info.region }}{% endif %}">
+                                    value="{{ ip_info.region|default('') }}">
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="persona_name"
                                         placeholder="Persona Name" required>
@@ -300,85 +300,51 @@
                             <div class="container mt-4">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>VPN Running:</strong> {{ vpn_running }}</p>
-                                        {% if vpn_running %}
+                                        <p><strong>Proxy:</strong> {{ 'Connected' if proxy_configured else 'Direct (no proxy)' }}</p>
                                         <div class="custom-card">
                                             <h4>IP Information</h4>
+                                            {% if ip_info and not ip_info.get('error') %}
                                             <ul class="list-group custom-list-group mb-4">
-                                                <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip }}</li>
-                                                <li class="list-group-item"><strong>City:</strong> {{ ip_info.city }}</li>
-                                                <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region }}
-                                                </li>
-                                                <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country }}
-                                                </li>
-                                                <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc }}
-                                                </li>
-                                                <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org }}
-                                                </li>
+                                                <li class="list-group-item"><strong>IP:</strong> {{ ip_info.ip|default('N/A') }}</li>
+                                                <li class="list-group-item"><strong>City:</strong> {{ ip_info.city|default('N/A') }}</li>
+                                                <li class="list-group-item"><strong>Region:</strong> {{ ip_info.region|default('N/A') }}</li>
+                                                <li class="list-group-item"><strong>Country:</strong> {{ ip_info.country|default('N/A') }}</li>
+                                                <li class="list-group-item"><strong>Location:</strong> {{ ip_info.loc|default('N/A') }}</li>
+                                                <li class="list-group-item"><strong>Organization:</strong> {{ ip_info.org|default('N/A') }}</li>
                                             </ul>
+                                            {% else %}
+                                            <p class="text-muted">Unable to fetch IP information.</p>
+                                            {% endif %}
                                         </div>
                                         <div class="custom-card">
-                                            <form id="change-region-form" action="{{ url_for('vpn.change_region') }}"
-                                                method="post" class="mb-2">
+                                            <h4>Proxy Settings</h4>
+                                            <form id="proxy-form" action="{{ url_for('network.set_proxy') }}" method="post" class="mb-2">
                                                 <div class="form-group">
-                                                    <label for="region">Region:</label>
-                                                    <select id="region" name="region" class="form-select">
-                                                        <option value="" disabled selected>Select a region</option>
-                                                        {% if ip_info.region != "North America (US)" %}
-                                                        <option value="us5725" data-code="US">North America (US)</option>
-                                                        {% endif %}
-                                                        {% if ip_info.region != "South America (Brazil)" %}
-                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
-                                                        {% endif %}
-                                                        {% if ip_info.region != "Europe (Germany)" %}
-                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
-                                                        {% endif %}
-                                                        {% if ip_info.region != "Asia (Japan)" %}
-                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
-                                                        {% endif %}
-                                                        {% if ip_info.region != "Africa (South Africa)" %}
-                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
-                                                        {% endif %}
-                                                    </select>
+                                                    <label for="proxy_url">Proxy URL:</label>
+                                                    <input type="text" id="proxy_url" name="proxy_url" class="form-control"
+                                                        placeholder="socks5://user:pass@host:port">
                                                 </div>
-                                                <button type="submit" class="btn btn-primary mt-2">Change VPN Region</button>
-                                                <div id="vpn-spinner" class="spinner-border text-primary" role="status"
-                                                    style="display: none;">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
+                                                <button type="submit" class="btn btn-primary mt-2">Set Proxy</button>
                                             </form>
-                                        </div>
-                                        {% else %}
-                                        <div class="custom-card">
-                                            <form action="{{ url_for('vpn.start_vpn_route') }}" method="post" class="mb-2">
-                                                <button type="submit" class="btn btn-primary">Start VPN</button>
-                                                <div class="form-group mt-2">
-                                                    <label for="region">Region:</label>
-                                                    <select id="region" name="region" class="form-select">
-                                                        <option value="" disabled selected>Select a region</option>
-                                                        <option value="us5725" data-code="US">North America (US)</option>
-                                                        <option value="br53" data-code="BR">South America (Brazil)</option>
-                                                        <option value="de1088" data-code="DE">Europe (Germany)</option>
-                                                        <option value="jp514" data-code="JP">Asia (Japan)</option>
-                                                        <option value="za147" data-code="ZA">Africa (South Africa)</option>
-                                                    </select>
-                                                </div>
+                                            {% if proxy_configured %}
+                                            <form action="{{ url_for('network.clear_proxy') }}" method="post">
+                                                <button type="submit" class="btn btn-outline-secondary mt-1">Clear Proxy</button>
                                             </form>
+                                            {% endif %}
                                         </div>
-                                        {% endif %}
 
                                         <div class="custom-card">
                                             <h4>Target Browser Settings</h4>
                                             <div class="form-group">
                                                 <label for="target-latitude">Latitude:</label>
                                                 <input type="text" id="target-latitude" class="form-control"
-                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[0] }}{% endif %}"
+                                                    value="{% if ip_info.loc is defined and ip_info.loc %}{{ ip_info.loc.split(',')[0] }}{% endif %}"
                                                     placeholder="0.000">
                                             </div>
                                             <div class="form-group mt-2">
                                                 <label for="target-longitude">Longitude:</label>
                                                 <input type="text" id="target-longitude" class="form-control"
-                                                    value="{% if vpn_running %}{{ ip_info.loc.split(',')[1] }}{% endif %}"
+                                                    value="{% if ip_info.loc is defined and ip_info.loc %}{{ ip_info.loc.split(',')[1] }}{% endif %}"
                                                     placeholder="0.000">
                                             </div>
                                             <button id="set-geolocation" class="btn btn-secondary mt-2">Set Geolocation</button>
@@ -423,11 +389,11 @@
                                             // Initialize the markers layer as a global variable
                                             window.markersLayer = L.layerGroup().addTo(window.map);
                                             
-                                            {% if vpn_running %}
-                                            // Add the initial VPN location marker
+                                            {% if ip_info.loc is defined and ip_info.loc %}
+                                            // Add the initial location marker
                                             L.marker([{{ ip_info.loc.split(',')[0] }}, {{ ip_info.loc.split(',')[1] }}])
                                                 .addTo(window.markersLayer)
-                                                .bindPopup('<b>{{ ip_info.city }}</b><br>{{ ip_info.region }}, {{ ip_info.country }}')
+                                                .bindPopup('<b>{{ ip_info.city|default("Unknown") }}</b><br>{{ ip_info.region|default("") }}, {{ ip_info.country|default("") }}')
                                                 .openPopup();
                                             {% endif %}
                                         </script>

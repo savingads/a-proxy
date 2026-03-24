@@ -11,33 +11,23 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
-    gnupg \
-    unzip \
-    chromium \
-    openvpn \
-    nodejs \
-    npm \
     python3-dev \
     build-essential \
-    file \
     pkg-config \
     libffi-dev \
-    libbz2-dev \
     libssl-dev \
-    zlib1g-dev \
-    libncurses5-dev \
-    libreadline-dev \
-    liblzma-dev \
-    python3-tk \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create directories for persistent data and VPN config
-RUN mkdir -p /app/data /app/nordvpn/ovpn_udp /app/nordvpn/ovpn_tcp
+# Create directories for persistent data
+RUN mkdir -p /app/data
 
 # Copy requirements and install Python dependencies first (for better caching)
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
+
+# Install Playwright Chromium browser and its system dependencies
+RUN playwright install --with-deps chromium
 
 # Copy application code
 COPY . .

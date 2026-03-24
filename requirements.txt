@@ -1,12 +1,11 @@
-Flask==2.3.2
-Flask-WTF==1.1.1
-Flask-Login==0.6.3
-Werkzeug==2.3.6
+Flask>=3.0.0
+Flask-WTF>=1.2.0
+Flask-Login>=0.6.3
+Werkzeug>=3.0.0
 SQLAlchemy==2.0.20
 cryptography==41.0.3
 pycryptodome==3.18.0
-selenium==4.11.2
-openvpn-api==0.3.0
+playwright
 python-dotenv==1.0.0
 pyOpenSSL==23.2.0
 requests==2.31.0
@@ -22,7 +21,7 @@ google-generativeai>=0.7.2
 pillow
 
 # Context token counting
-tiktoken==0.5.2
+tiktoken>=0.5.2
 
 # Testing
 beautifulsoup4==4.12.2

@@ -8,7 +8,7 @@ from routes.auth import User, user_from_row
 
 # Import blueprints
 from routes.home import home_bp
-from routes.vpn import vpn_bp
+from routes.network import network_bp
 # Choose which persona implementation to use (API or direct DB access)
 from routes.persona_api_db import persona_bp  # Using direct database implementation
 from routes.browsing import browsing_bp
@@ -70,7 +70,7 @@ def create_app():
     
     # Register blueprints
     app.register_blueprint(home_bp)
-    app.register_blueprint(vpn_bp)
+    app.register_blueprint(network_bp)
     app.register_blueprint(persona_bp)
     app.register_blueprint(browsing_bp)
     app.register_blueprint(archives_bp)
@@ -86,17 +86,28 @@ def create_app():
     return app
 
 if __name__ == "__main__":
+    import atexit
+
     parser = argparse.ArgumentParser(description='Run the Flask application')
     parser.add_argument('--port', type=int, default=5002, help='Port to run the application on')
     parser.add_argument('--host', type=str, default='127.0.0.1', help='Host address to run the application on')
     args = parser.parse_args()
-    
+
     # Initialize default user if needed
     try:
         from init_default_user import init_default_user
         init_default_user()
     except Exception as e:
         logging.error(f"Failed to initialize default user: {e}")
-    
+
+    # Shut down Playwright browser on exit
+    def _shutdown_browser():
+        try:
+            from utils.browser import BrowserManager
+            BrowserManager.get_instance().shutdown()
+        except Exception:
+            pass
+    atexit.register(_shutdown_browser)
+
     app = create_app()
     app.run(debug=True, use_reloader=True, port=args.port, host=args.host)

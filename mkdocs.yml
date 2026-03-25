@@ -1,7 +1,7 @@
 site_name: A-Proxy Documentation
 site_description: User manual for A-Proxy - Persona-driven web archiving and LLM interaction tracking
 site_author: Christopher B. Rauch
-site_url: https://a-proxy.ontorealm.net/docs
+site_url: https://savingads.github.io/a-proxy/
 
 # Repository
 repo_url: https://github.com/savingads/a-proxy

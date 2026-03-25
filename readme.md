@@ -34,7 +34,7 @@ Open <http://localhost:5002> and log in with `admin@example.com` / `password`.
 
 For Docker: `docker-compose up --build`
 
-Full installation details: [Installation Guide](docs/getting-started/installation.md)
+Full installation details: [Installation Guide](https://savingads.github.io/a-proxy/getting-started/installation/)
 
 ## LLM Setup
 
@@ -53,13 +53,15 @@ OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
 OPENAI_COMPATIBLE_API_KEY=none
 ```
 
-Other options include cloud APIs (Anthropic Claude, OpenAI GPT) and HPC clusters via vLLM. See the **[LLM Setup Guide](docs/how-to/llm-setup.md)** for all providers, configuration details, and troubleshooting.
+Other options include cloud APIs (Anthropic Claude, OpenAI GPT) and HPC clusters via vLLM. See the **[LLM Setup Guide](https://savingads.github.io/a-proxy/how-to/llm-setup/)** for all providers, configuration details, and troubleshooting.
 
-**Drexel Picotte users:** See the **[Picotte HPC Guide](docs/how-to/picotte-vllm.md)** for automated vLLM setup with `picotte_vllm.py`.
+**Drexel Picotte users:** See the **[Picotte HPC Guide](https://savingads.github.io/a-proxy/how-to/picotte-vllm/)** for automated vLLM setup with `picotte_vllm.py`.
 
 ## Documentation
 
-Full documentation is in the [`docs/`](docs/) directory and can be served locally with [MkDocs](https://www.mkdocs.org/):
+Full documentation is hosted at **<https://savingads.github.io/a-proxy/>** and built from the `docs/` directory using [MkDocs Material](https://squidfunk.github.io/mkdocs-material/).
+
+To serve docs locally:
 
 ```bash
 pip install mkdocs-material
@@ -70,13 +72,13 @@ Key sections:
 
 | Section | What's covered |
 |---------|---------------|
-| [Installation](docs/getting-started/installation.md) | Docker and manual setup, environment variables, troubleshooting |
-| [First Login](docs/getting-started/first-login.md) | Default credentials, interface overview, creating your first persona |
-| [LLM Setup](docs/how-to/llm-setup.md) | Ollama, cloud APIs, HPC/vLLM configuration |
-| [Picotte HPC](docs/how-to/picotte-vllm.md) | Drexel Picotte cluster setup and automation script |
-| [Proxy & Geo-IP](docs/how-to/proxy-setup.md) | SOCKS5/HTTP proxy configuration for location emulation |
-| [API Reference](docs/reference/api-endpoints.md) | REST API endpoints |
-| [Architecture](docs/reference/architecture.md) | System design and database schema |
+| [Installation](https://savingads.github.io/a-proxy/getting-started/installation/) | Docker and manual setup, environment variables, troubleshooting |
+| [First Login](https://savingads.github.io/a-proxy/getting-started/first-login/) | Default credentials, interface overview, creating your first persona |
+| [LLM Setup](https://savingads.github.io/a-proxy/how-to/llm-setup/) | Ollama, cloud APIs, HPC/vLLM configuration |
+| [Picotte HPC](https://savingads.github.io/a-proxy/how-to/picotte-vllm/) | Drexel Picotte cluster setup and automation script |
+| [Proxy & Geo-IP](https://savingads.github.io/a-proxy/how-to/proxy-setup/) | SOCKS5/HTTP proxy configuration for location emulation |
+| [API Reference](https://savingads.github.io/a-proxy/reference/api-endpoints/) | REST API endpoints |
+| [Architecture](https://savingads.github.io/a-proxy/reference/architecture/) | System design and database schema |
 
 ## Project Structure
 

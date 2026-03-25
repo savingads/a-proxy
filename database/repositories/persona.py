@@ -210,7 +210,7 @@ class PersonaRepository(BaseRepository):
                 if psycho_data.get(field):
                     try:
                         psycho_data[field] = json.loads(psycho_data[field])
-                    except:
+                    except (json.JSONDecodeError, TypeError, ValueError):
                         psycho_data[field] = []
             data['psychographic'] = psycho_data
 
@@ -223,13 +223,13 @@ class PersonaRepository(BaseRepository):
                 if behav_data.get(field):
                     try:
                         behav_data[field] = json.loads(behav_data[field])
-                    except:
+                    except (json.JSONDecodeError, TypeError, ValueError):
                         behav_data[field] = []
             for field in ['device_usage', 'social_media_activity', 'content_consumption']:
                 if behav_data.get(field):
                     try:
                         behav_data[field] = json.loads(behav_data[field])
-                    except:
+                    except (json.JSONDecodeError, TypeError, ValueError):
                         behav_data[field] = {}
             data['behavioral'] = behav_data
 

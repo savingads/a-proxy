@@ -233,6 +233,3 @@ def flatten_persona_context(raw_context):
         "Behavioral": compact(behavioral),
         "Contextual": compact(contextual)
     }
-
-if __name__ == "__main__":
-    start_vpn("de1088")

@@ -35,7 +35,7 @@ def create_app():
         """Convert a JSON string to a Python object"""
         try:
             return json.loads(value)
-        except:
+        except Exception:
             return {}
     
     # --- Flask-Login setup ---

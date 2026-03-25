@@ -9,7 +9,6 @@ from utils.persona_client_db import get_db_persona_client
 import persona_field_config
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Blueprint definition

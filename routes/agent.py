@@ -69,7 +69,8 @@ def standalone_agent_message():
             from services import ContextManager, PersonaContextProvider, JourneyContextProvider
             
             # Initialize context manager
-            ctx_manager = ContextManager(max_tokens=8000)
+            from config import LLM_MAX_OUTPUT_TOKENS
+            ctx_manager = ContextManager(max_tokens=LLM_MAX_OUTPUT_TOKENS)
             
             # Add providers
             ctx_manager.add_provider(PersonaContextProvider())
@@ -372,7 +373,7 @@ def save_direct_chat(persona_id):
                             if title.replace(f"Chat {chat_mode} ", "") == existing_title.replace(f"Chat {other_mode} ", ""):
                                 existing_waypoint = wp
                                 break
-                        except:
+                        except Exception:
                             # If parsing fails, continue to next waypoint
                             pass
         

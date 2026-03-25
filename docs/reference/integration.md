@@ -1,4 +1,7 @@
-# Integration
+# Integration (Planned)
+
+!!! info "Future Work"
+    The integrations described on this page are **planned but not yet implemented**. A-Proxy currently operates as a standalone application. This page documents the design for future OntServe and ProEthica integration.
 
 A-Proxy is designed to integrate with OntServe (ontology management) and ProEthica (professional ethics analysis). This document describes the integration architecture and current implementation status.
 

@@ -26,20 +26,21 @@ class PersonaRepository(BaseRepository):
             Dictionary containing persona data or None if not found
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM personas WHERE id = ?", (id,))
-        persona_row = cursor.fetchone()
+            cursor.execute("SELECT * FROM personas WHERE id = ?", (id,))
+            persona_row = cursor.fetchone()
 
-        if not persona_row:
+            if not persona_row:
+                return None
+
+            persona = dict(persona_row)
+            persona.update(self._get_persona_data(cursor, id))
+
+            return persona
+        finally:
             conn.close()
-            return None
-
-        persona = dict(persona_row)
-        persona.update(self._get_persona_data(cursor, id))
-
-        conn.close()
-        return persona
 
     def get_all(self, page: int = 1, per_page: int = 100, **filters) -> Dict[str, Any]:
         """
@@ -54,36 +55,37 @@ class PersonaRepository(BaseRepository):
             Dictionary with 'personas' list and pagination info
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        offset = (page - 1) * per_page
+            offset = (page - 1) * per_page
 
-        # Get total count
-        cursor.execute("SELECT COUNT(*) FROM personas")
-        total = cursor.fetchone()[0]
+            # Get total count
+            cursor.execute("SELECT COUNT(*) FROM personas")
+            total = cursor.fetchone()[0]
 
-        # Get personas for this page
-        cursor.execute("""
-            SELECT p.* FROM personas p
-            ORDER BY p.updated_at DESC
-            LIMIT ? OFFSET ?
-        """, (per_page, offset))
+            # Get personas for this page
+            cursor.execute("""
+                SELECT p.* FROM personas p
+                ORDER BY p.updated_at DESC
+                LIMIT ? OFFSET ?
+            """, (per_page, offset))
 
-        personas = []
-        for row in cursor.fetchall():
-            persona = dict(row)
-            persona.update(self._get_persona_data(cursor, persona['id']))
-            personas.append(persona)
+            personas = []
+            for row in cursor.fetchall():
+                persona = dict(row)
+                persona.update(self._get_persona_data(cursor, persona['id']))
+                personas.append(persona)
 
-        conn.close()
-
-        return {
-            'personas': personas,
-            'total': total,
-            'page': page,
-            'per_page': per_page,
-            'pages': (total + per_page - 1) // per_page
-        }
+            return {
+                'personas': personas,
+                'total': total,
+                'page': page,
+                'per_page': per_page,
+                'pages': (total + per_page - 1) // per_page
+            }
+        finally:
+            conn.close()
 
     def save(self, persona_data: Dict[str, Any]) -> int:
         """

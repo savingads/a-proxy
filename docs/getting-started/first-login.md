@@ -55,7 +55,7 @@ The **Interact As** page allows you to:
 
 - Select a persona to embody
 - Browse the web as that persona
-- Chat with Claude AI from the persona's perspective
+- Chat with an LLM from the persona's perspective (requires an [LLM backend](../how-to/llm-setup.md) to be configured)
 - Archive pages during the session
 
 ### Settings
@@ -115,6 +115,7 @@ For detailed instructions, see [Manage Journeys](../how-to/manage-journeys.md).
 
 ## Next Steps
 
-- [Persona Model](../concepts/persona-model.md) - Understand the 4-dimensional persona framework
+- [LLM Setup](../how-to/llm-setup.md) - Configure an LLM backend (required for the Agent chat feature)
 - [Create Personas](../how-to/create-personas.md) - Detailed persona creation guide
+- [Persona Model](../concepts/persona-model.md) - Understand the 4-dimensional persona framework
 - [Manage Journeys](../how-to/manage-journeys.md) - Working with interaction records

@@ -16,7 +16,6 @@ Options:
 import argparse
 import os
 import re
-import signal
 import subprocess
 import sys
 import time
@@ -28,21 +27,32 @@ VLLM_PORT = 8000
 SLURM_SCRIPT = "~/vllm-serve.slurm"
 ENV_FILE = Path(__file__).parent / ".env"
 
-# .env values when using Picotte
-PICOTTE_ENV = {
-    "LLM_PROVIDER": "openai_compatible",
-    "OPENAI_COMPATIBLE_URL": f"http://localhost:{VLLM_PORT}/v1",
-    "OPENAI_COMPATIBLE_MODEL": "Qwen/Qwen2.5-7B-Instruct",
-    "OPENAI_COMPATIBLE_API_KEY": "none",
-}
+# .env blocks — the script swaps between these two states
+OLLAMA_BLOCK = """\
+# Local Ollama (for development/testing)
+LLM_PROVIDER=openai_compatible
+OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+OPENAI_COMPATIBLE_API_KEY=none
 
-# .env values when reverting to Ollama
-OLLAMA_ENV = {
-    "LLM_PROVIDER": "openai_compatible",
-    "OPENAI_COMPATIBLE_URL": "http://localhost:11434/v1",
-    "OPENAI_COMPATIBLE_MODEL": "qwen2.5:7b",
-    "OPENAI_COMPATIBLE_API_KEY": "none",
-}
+# Picotte vLLM (uncomment and comment out Ollama lines above)
+# Start tunnel: ssh -L 8000:<gpu-node>:8000 picotte -N
+# Or use: python picotte_vllm.py start
+# OPENAI_COMPATIBLE_URL=http://localhost:8000/v1
+# OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-7B-Instruct"""
+
+PICOTTE_BLOCK = """\
+# Local Ollama (comment out Picotte lines below to switch back)
+# LLM_PROVIDER=openai_compatible
+# OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+# OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+# OPENAI_COMPATIBLE_API_KEY=none
+
+# Picotte vLLM (active — managed by picotte_vllm.py)
+LLM_PROVIDER=openai_compatible
+OPENAI_COMPATIBLE_URL=http://localhost:{port}/v1
+OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-7B-Instruct
+OPENAI_COMPATIBLE_API_KEY=none""".format(port=VLLM_PORT)
 
 
 def ssh(host, command, timeout=30):
@@ -214,22 +224,29 @@ def close_tunnel(port=VLLM_PORT):
         )
 
 
-def update_env_file(values):
-    """Update .env file with the given key-value pairs."""
+def update_env_file(target):
+    """Swap the LLM config block in .env between Ollama and Picotte.
+
+    target: "picotte" or "ollama"
+    """
     if not ENV_FILE.exists():
         print(f"Warning: {ENV_FILE} not found, skipping .env update")
         return
 
     content = ENV_FILE.read_text()
-    for key, value in values.items():
-        # Match both commented and uncommented versions
-        # Pattern: optional # and spaces, then KEY=VALUE
-        pattern = rf"^[#\s]*{re.escape(key)}=.*$"
-        replacement = f"{key}={value}"
-        if re.search(pattern, content, re.MULTILINE):
-            content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
-        else:
-            content += f"\n{replacement}\n"
+
+    if target == "picotte":
+        if OLLAMA_BLOCK in content:
+            content = content.replace(OLLAMA_BLOCK, PICOTTE_BLOCK)
+        elif PICOTTE_BLOCK not in content:
+            print("Warning: could not find LLM config block in .env, skipping update")
+            return
+    else:
+        if PICOTTE_BLOCK in content:
+            content = content.replace(PICOTTE_BLOCK, OLLAMA_BLOCK)
+        elif OLLAMA_BLOCK not in content:
+            print("Warning: could not find LLM config block in .env, skipping update")
+            return
 
     ENV_FILE.write_text(content)
 
@@ -270,14 +287,14 @@ def cmd_start(args):
 
     # Update .env
     if not args.no_env_update:
-        update_env_file(PICOTTE_ENV)
+        update_env_file("picotte")
         print(f"Updated {ENV_FILE} for Picotte backend.")
 
     print()
     print("=" * 50)
     print("  vLLM is running and a-proxy is configured.")
-    print(f"  Model: {PICOTTE_ENV['OPENAI_COMPATIBLE_MODEL']}")
-    print(f"  Endpoint: {PICOTTE_ENV['OPENAI_COMPATIBLE_URL']}")
+    print(f"  Model: Qwen/Qwen2.5-7B-Instruct")
+    print(f"  Endpoint: http://localhost:{VLLM_PORT}/v1")
     print(f"  SLURM job: {job_id} on {node}")
     print()
     print("  Start a-proxy:  python app.py --port 5002")
@@ -294,7 +311,7 @@ def cmd_start(args):
         tunnel.wait(timeout=5)
 
         if not args.no_env_update:
-            update_env_file(OLLAMA_ENV)
+            update_env_file("ollama")
             print(f"Reverted {ENV_FILE} to Ollama backend.")
 
         print(f"Tunnel closed. SLURM job {job_id} is still running on Picotte.")
@@ -353,7 +370,7 @@ def cmd_stop(args):
         print("No vLLM job found to cancel.")
 
     if ENV_FILE.exists() and not args.no_env_update:
-        update_env_file(OLLAMA_ENV)
+        update_env_file("ollama")
         print(f"Reverted {ENV_FILE} to Ollama backend.")
 
 

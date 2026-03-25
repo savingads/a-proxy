@@ -4,8 +4,8 @@ import requests
 import json
 from abc import ABC, abstractmethod
 import tiktoken  # For token counting
+from config import LLM_MAX_OUTPUT_TOKENS
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Context management system
@@ -100,7 +100,7 @@ class JourneyContextProvider(ContextProvider):
 class ContextManager:
     """Manages multiple context providers and handles token limits"""
     
-    def __init__(self, max_tokens=8000):
+    def __init__(self, max_tokens=LLM_MAX_OUTPUT_TOKENS):
         self.providers = []
         self.max_tokens = max_tokens
         

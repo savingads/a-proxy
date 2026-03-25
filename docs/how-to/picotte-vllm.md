@@ -6,6 +6,7 @@ This guide covers running a-proxy's LLM backend on Drexel's Picotte HPC cluster 
 
 - [LLM Setup Guide](llm-setup.md) -- General LLM configuration (Ollama, cloud APIs, generic HPC)
 - [Installation](../getting-started/installation.md) -- Setting up a-proxy itself
+- [Picotte Cluster Documentation](https://docs.urcf.drexel.edu/clusters/picotte/) -- Official URCF docs (partitions, policies, software)
 
 ## Prerequisites
 
@@ -59,7 +60,9 @@ mkdir -p $HF_HOME
 python -c "from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen2.5-7B-Instruct')"
 ```
 
-On Picotte, `~/data` is a symlink to `/ifs/groups/kellyGrp`. The setgid bit is set, so files inherit the `kellyGrp` group automatically. If you're in `kellyGrp` and the model has already been downloaded by another group member, you can skip this step — just point `HF_HOME` to the same path.
+On Picotte, `~/data` is a symlink to `/ifs/groups/kellyGrp` — the shared storage for the Kelly research group. The setgid bit is set, so files inherit the `kellyGrp` group automatically. If you're in `kellyGrp` and the model has already been downloaded by another group member, you can skip this step — just point `HF_HOME` to the same path.
+
+If you're **not** in `kellyGrp`, replace `~/data/huggingface` throughout this guide with a path on a filesystem that has at least 20 GB free (home directories on Picotte are limited). Ask your group admin or URCF support about your group's shared storage path.
 
 ### 3. Install the SLURM job script
 
@@ -71,7 +74,7 @@ cat > ~/vllm-serve.slurm << 'EOF'
 #SBATCH --gres=gpu:v100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=48G
-#SBATCH --time=08:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 
@@ -161,7 +164,7 @@ ssh picotte "squeue -u \$USER"
 
 ### 3. Wait for vLLM to finish loading
 
-The model takes 3-5 minutes to load on a V100 (first run is slower due to CUDA kernel compilation). Check the logs:
+The model takes 3-5 minutes to load on a V100. The very first run after submitting a job takes longer (5-8 minutes) because vLLM compiles CUDA kernels; these are cached for subsequent runs on the same node. Check the logs:
 
 ```bash
 ssh picotte "tail -5 ~/vllm-server-*.out"
@@ -205,12 +208,53 @@ The model weights at `/ifs/groups/kellyGrp/huggingface` are group-readable. Any 
 
 To set up a new kellyGrp member, they should follow the [One-Time Cluster Setup](#one-time-cluster-setup) above, but can skip the model download if it's already present at `~/data/huggingface`.
 
-## Performance Notes
+## Cost and Usage
 
-- **First startup** on a fresh job takes 5-8 minutes (CUDA kernel compilation + model loading). Subsequent starts on the same node are faster (~3 minutes) because compiled kernels are cached.
+Picotte charges based on **allocated resources for the actual elapsed time** of a job — not the requested time limit. If you request 4 hours but cancel after 1 hour, you're only charged for 1 hour.
+
+| Resource | Rate | Example |
+|----------|------|---------|
+| GPU (V100) | 43 SU/device-hour ($0.43/hr) | 1 GPU × 4 hrs = 172 SU ($1.72) |
+| CPU | 1 SU/core-hour ($0.01/hr) | 8 cores × 4 hrs = 32 SU ($0.32) |
+| Storage | 1,000 SU/TiB-month ($10) | First 500 GiB free per group |
+
+1 SU = $0.01. Full rates: [Picotte Usage Rates](https://docs.urcf.drexel.edu/clusters/picotte/usage-rates/)
+
+**Practical guidance:**
+
+- **Always cancel when done** — `python picotte_vllm.py stop` or `ssh picotte "scancel <JOB_ID>"`. Idle jobs still burn allocation.
+- The default time limit is **4 hours** (`--time=04:00:00`). Adjust in `~/vllm-serve.slurm` if needed.
+- Shorter requests get scheduled faster (`PriorityFavorSmall` is enabled).
+- Fairshare usage resets monthly, so heavy use in one week won't affect you the next month.
+
+**Suggested time limits:**
+
+| Session type | `--time` | Cost (1 GPU) |
+|---|---|---|
+| Quick test | `02:00:00` | ~86 SU ($0.86) max |
+| Normal work session | `04:00:00` | ~172 SU ($1.72) max |
+| Extended session | `08:00:00` | ~344 SU ($3.44) max |
+
+## Startup Time and Performance
+
+vLLM is not instant — expect a warmup period before the server is ready to take requests:
+
+| Scenario | Typical wait | What's happening |
+|----------|-------------|------------------|
+| First run on a new node | 5-8 minutes | CUDA kernel compilation (Triton attention) + model weight loading |
+| Subsequent runs on same node | 3-5 minutes | Kernels cached, only model loading |
+| `picotte_vllm.py start` | Handles this automatically | Polls logs and reports progress |
+
+The warmup is dominated by two steps:
+
+1. **CUDA kernel compilation** — vLLM compiles optimized GPU kernels on first use. These are cached in `/local/scratch/` on the GPU node, so subsequent SLURM jobs on the same node skip this step. A different node means recompilation.
+2. **Model weight loading** — The Qwen2.5-7B model has 4 safetensor shards (~15 GB total) loaded from the network filesystem into GPU memory.
+
+Other performance notes:
+
 - **V100 (32 GB)** comfortably serves Qwen2.5-7B-Instruct in float16 (~15 GB VRAM), leaving room for KV cache.
-- **Flash Attention 2** is not supported on V100 (compute capability 7.0). vLLM automatically falls back to Triton attention, which works fine but is slightly slower.
-- The SLURM job has an **8-hour time limit** by default. Adjust `--time` in the SLURM script if you need longer sessions.
+- **Flash Attention 2** is not supported on V100 (compute capability 7.0). vLLM automatically falls back to Triton attention, which works correctly but is slightly slower than FA2.
+- Inference throughput is roughly **40-50 tokens/s prompt, 5-10 tokens/s generation** on a single V100.
 
 ## Troubleshooting
 

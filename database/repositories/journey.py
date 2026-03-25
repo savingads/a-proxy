@@ -25,21 +25,22 @@ class JourneyRepository(BaseRepository):
             Dictionary containing journey data or None if not found
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("SELECT j.* FROM journeys j WHERE j.id = ?", (id,))
-        journey = cursor.fetchone()
+            cursor.execute("SELECT j.* FROM journeys j WHERE j.id = ?", (id,))
+            journey = cursor.fetchone()
 
-        if not journey:
+            if not journey:
+                return None
+
+            result = dict(journey)
+            # Add placeholder for persona_name for compatibility
+            result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
+
+            return result
+        finally:
             conn.close()
-            return None
-
-        result = dict(journey)
-        # Add placeholder for persona_name for compatibility
-        result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
-
-        conn.close()
-        return result
 
     def get_all(self, **filters) -> List[Dict[str, Any]]:
         """
@@ -49,21 +50,23 @@ class JourneyRepository(BaseRepository):
             List of dictionaries containing journey data
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT j.*
-            FROM journeys j
-            ORDER BY j.updated_at DESC
-        """)
+            cursor.execute("""
+                SELECT j.*
+                FROM journeys j
+                ORDER BY j.updated_at DESC
+            """)
 
-        journeys = [dict(row) for row in cursor.fetchall()]
+            journeys = [dict(row) for row in cursor.fetchall()]
 
-        for journey in journeys:
-            journey['persona_name'] = None if journey['persona_id'] is None else f"Persona #{journey['persona_id']}"
+            for journey in journeys:
+                journey['persona_name'] = None if journey['persona_id'] is None else f"Persona #{journey['persona_id']}"
 
-        conn.close()
-        return journeys
+            return journeys
+        finally:
+            conn.close()
 
     def save(self, journey_data: Dict[str, Any]) -> int:
         """
@@ -233,30 +236,32 @@ class JourneyRepository(BaseRepository):
             List of dictionaries containing waypoint data
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM waypoints
-            WHERE journey_id = ?
-            ORDER BY sequence_number ASC
-        """, (journey_id,))
+            cursor.execute("""
+                SELECT *
+                FROM waypoints
+                WHERE journey_id = ?
+                ORDER BY sequence_number ASC
+            """, (journey_id,))
 
-        waypoints = [dict(row) for row in cursor.fetchall()]
+            waypoints = [dict(row) for row in cursor.fetchall()]
 
-        for waypoint in waypoints:
-            if waypoint['metadata']:
-                waypoint['metadata'] = json.loads(waypoint['metadata'])
-            if waypoint['timestamp'] and isinstance(waypoint['timestamp'], str):
-                try:
-                    waypoint['timestamp'] = datetime.fromisoformat(
-                        waypoint['timestamp'].replace('Z', '+00:00')
-                    )
-                except ValueError:
-                    pass
+            for waypoint in waypoints:
+                if waypoint['metadata']:
+                    waypoint['metadata'] = json.loads(waypoint['metadata'])
+                if waypoint['timestamp'] and isinstance(waypoint['timestamp'], str):
+                    try:
+                        waypoint['timestamp'] = datetime.fromisoformat(
+                            waypoint['timestamp'].replace('Z', '+00:00')
+                        )
+                    except ValueError:
+                        pass
 
-        conn.close()
-        return waypoints
+            return waypoints
+        finally:
+            conn.close()
 
     def get_waypoint(self, waypoint_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -269,26 +274,27 @@ class JourneyRepository(BaseRepository):
             Dictionary containing waypoint data or None if not found
         """
         conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT w.*, j.name as journey_name
-            FROM waypoints w
-            JOIN journeys j ON w.journey_id = j.id
-            WHERE w.id = ?
-        """, (waypoint_id,))
+            cursor.execute("""
+                SELECT w.*, j.name as journey_name
+                FROM waypoints w
+                JOIN journeys j ON w.journey_id = j.id
+                WHERE w.id = ?
+            """, (waypoint_id,))
 
-        waypoint = cursor.fetchone()
-        if not waypoint:
+            waypoint = cursor.fetchone()
+            if not waypoint:
+                return None
+
+            result = dict(waypoint)
+            if result['metadata']:
+                result['metadata'] = json.loads(result['metadata'])
+
+            return result
+        finally:
             conn.close()
-            return None
-
-        result = dict(waypoint)
-        if result['metadata']:
-            result['metadata'] = json.loads(result['metadata'])
-
-        conn.close()
-        return result
 
     def update_waypoint(self, waypoint_id: int, **updates) -> bool:
         """

@@ -78,9 +78,10 @@ docker-compose down
 5. Initialize the data directory:
    ```bash
    mkdir -p data
-   python create_sample_personas_simple.py  # Optional: Add sample data
-   python init_default_user.py              # Initialize default user
+   python init_default_user.py              # Creates the admin@example.com login account
+   python create_sample_personas_simple.py  # Optional: populates a few demo personas
    ```
+   The default user is created automatically on first startup, but running `init_default_user.py` explicitly ensures it exists. Sample personas are optional — you can create your own from the web UI.
 
 6. Start the application:
    ```bash
@@ -130,7 +131,7 @@ The proxy can also be set per-session via the web UI. See [Proxy & Geo-IP](../ho
 
 ## Environment Variables
 
-All environment variables and their defaults are documented in the [LLM Setup Guide](../how-to/llm-setup.md). The key ones for installation:
+If multiple providers are configured, auto-detection priority is: **local (OpenAI-compatible) > Anthropic > OpenAI**. Set `LLM_PROVIDER` explicitly to override. All environment variables and their defaults are documented in the [LLM Setup Guide](../how-to/llm-setup.md). The key ones for installation:
 
 | Variable | Description | Required |
 |----------|-------------|----------|
@@ -174,4 +175,6 @@ python -m playwright install chromium
 
 ## Next Steps
 
-After installation, proceed to [First Login](first-login.md) to access the application.
+1. [First Login](first-login.md) — log in and explore the interface
+2. [LLM Setup](../how-to/llm-setup.md) — configure an LLM backend for the Agent chat feature
+3. [Create Personas](../how-to/create-personas.md) — start building personas

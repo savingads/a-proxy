@@ -186,7 +186,7 @@ Create a file like `~/vllm-serve.slurm`:
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=48G
-#SBATCH --time=08:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 
@@ -282,6 +282,7 @@ For a complete Picotte-specific guide with an automation script, see [Running A-
 - **GPU partition:** 12 nodes with 4x NVIDIA V100 each, request via `--partition=gpu --gres=gpu:v100:1`
 - **CUDA:** Available as `cuda12.3/toolkit/12.3.2`
 - **Storage:** Use your group data directory for model storage (home directories have limited space)
+- **Official docs:** [Picotte Cluster Documentation](https://docs.urcf.drexel.edu/clusters/picotte/)
 
 ---
 

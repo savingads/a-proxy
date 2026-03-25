@@ -99,48 +99,28 @@ python app.py --port 5003
 
 ## LLM Configuration
 
-A-Proxy supports three LLM provider types. Configure one or more in `.env`:
-
-### Local / Self-Hosted (recommended for HPC)
-
-Any OpenAI-compatible endpoint works -- vLLM, Ollama, text-generation-webui, LiteLLM, etc.
+A-Proxy requires at least one LLM provider. The quickest option is [Ollama](https://ollama.com) (free, local, no API key):
 
 ```bash
-OPENAI_COMPATIBLE_URL=http://your-host:8000/v1
-OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-72B-Instruct
-OPENAI_COMPATIBLE_API_KEY=none
-```
-
-For quick local testing with [Ollama](https://ollama.com):
-
-```bash
-ollama serve
 ollama pull qwen2.5:7b
 ```
 
-Then set:
+Then set in `.env`:
+
 ```bash
+LLM_PROVIDER=openai_compatible
 OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
 OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+OPENAI_COMPATIBLE_API_KEY=none
 ```
 
-### Anthropic (Claude)
+For all LLM options (cloud APIs, HPC clusters, model recommendations, troubleshooting), see the **[LLM Setup Guide](../how-to/llm-setup.md)**.
 
-```bash
-ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
-```
-
-### OpenAI (GPT)
-
-```bash
-OPENAI_API_KEY=sk-YOUR_KEY_HERE
-```
-
-If multiple providers are configured, auto-detection priority is: local > Anthropic > OpenAI. Set `LLM_PROVIDER` to override.
+For Drexel Picotte HPC users, see the **[Picotte HPC Guide](../how-to/picotte-vllm.md)**.
 
 ## Proxy Configuration (Optional)
 
-For geo-IP shifting, configure a SOCKS5 or HTTP proxy:
+For geo-IP shifting, configure a SOCKS5 or HTTP proxy in `.env`:
 
 ```bash
 PROXY_URL=socks5://user:pass@host:port
@@ -150,17 +130,15 @@ The proxy can also be set per-session via the web UI. See [Proxy & Geo-IP](../ho
 
 ## Environment Variables
 
+All environment variables and their defaults are documented in the [LLM Setup Guide](../how-to/llm-setup.md). The key ones for installation:
+
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `OPENAI_COMPATIBLE_URL` | Local LLM endpoint URL | No |
-| `OPENAI_COMPATIBLE_MODEL` | Model on local endpoint | No |
-| `ANTHROPIC_API_KEY` | Claude API key | No |
-| `OPENAI_API_KEY` | OpenAI API key | No |
-| `LLM_PROVIDER` | Force provider selection | No |
-| `SECRET_KEY` | Flask session security key | Recommended |
-| `DEBUG` | Enable debug mode | No |
+| `LLM_PROVIDER` | Force provider selection (`openai_compatible`, `anthropic`, `openai`) | No (auto-detected) |
+| `OPENAI_COMPATIBLE_URL` | Local LLM endpoint URL | Yes, if using local models |
+| `OPENAI_COMPATIBLE_MODEL` | Model name on local endpoint | Yes, if using local models |
+| `SECRET_KEY` | Flask session security key | Recommended for production |
 | `PROXY_URL` | Default proxy URL for geo-IP | No |
-| `BROWSER_HEADLESS` | Run browser headless (default: True) | No |
 
 ## Troubleshooting
 

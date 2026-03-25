@@ -12,104 +12,78 @@ A Flask-based web application for persona-driven web browsing, archiving, and LL
 - **Geo-IP Shifting** -- Route traffic through SOCKS5/HTTP proxies for location emulation (no VPN required)
 - **Cross-Platform** -- Runs natively on Windows, macOS, and Linux
 
-## Prerequisites
-
-- Python 3.10+ (3.12+ recommended)
-- [Playwright](https://playwright.dev/python/) Chromium browser
-- An LLM endpoint: local (vLLM, Ollama) or cloud API key (Anthropic, OpenAI)
-
 ## Quick Start
 
 ```bash
-# Clone the repository
 git clone https://github.com/savingads/a-proxy.git
 cd a-proxy
-
-# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate        # Linux/macOS
-venv\Scripts\activate           # Windows
+# venv\Scripts\activate         # Windows
 
-# Install dependencies
 pip install -r requirements.txt
 python -m playwright install chromium
 
-# Configure environment
 cp .env.example .env
-# Edit .env -- see "LLM Configuration" below
+# Edit .env -- configure an LLM provider (see below)
 
-# Initialize data directory
-mkdir -p data
-
-# Start the application
 python app.py --port 5002
 ```
 
 Open <http://localhost:5002> and log in with `admin@example.com` / `password`.
 
-## Docker
+For Docker: `docker-compose up --build`
+
+Full installation details: [Installation Guide](docs/getting-started/installation.md)
+
+## LLM Setup
+
+A-Proxy needs an LLM backend. The fastest option is [Ollama](https://ollama.com) (free, local, no API key):
 
 ```bash
-docker-compose up --build
-```
-
-The app will be available at <http://localhost:5002>.
-
-## Configuration
-
-### LLM Configuration
-
-The fastest way to get started is with [Ollama](https://ollama.com) (free, local, no API key needed):
-
-```bash
-# Install Ollama (see ollama.com for your platform)
 ollama pull qwen2.5:7b
 ```
 
-Then set in `.env`:
+Then in `.env`:
 
 ```bash
+LLM_PROVIDER=openai_compatible
 OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
 OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
 OPENAI_COMPATIBLE_API_KEY=none
 ```
 
-A-Proxy also supports **Anthropic (Claude)** and **OpenAI (GPT)** via API keys, as well as **vLLM on HPC clusters** for larger models. See the full [LLM Setup Guide](docs/how-to/llm-setup.md) for all options, including HPC/SLURM instructions.
+Other options include cloud APIs (Anthropic Claude, OpenAI GPT) and HPC clusters via vLLM. See the **[LLM Setup Guide](docs/how-to/llm-setup.md)** for all providers, configuration details, and troubleshooting.
 
-If multiple providers are configured, auto-detection priority is: local > Anthropic > OpenAI. Set `LLM_PROVIDER` to override (values: `openai_compatible`, `anthropic`, `openai`).
+**Drexel Picotte users:** See the **[Picotte HPC Guide](docs/how-to/picotte-vllm.md)** for automated vLLM setup with `picotte_vllm.py`.
 
-### All Environment Variables
+## Documentation
 
-| Variable | Description | Default |
-| -------- | ----------- | ------- |
-| `OPENAI_COMPATIBLE_URL` | Local LLM endpoint URL | -- |
-| `OPENAI_COMPATIBLE_MODEL` | Model name on local endpoint | `Qwen/Qwen2.5-72B-Instruct` |
-| `OPENAI_COMPATIBLE_API_KEY` | API key for local endpoint | `none` |
-| `ANTHROPIC_API_KEY` | Anthropic (Claude) API key | -- |
-| `ANTHROPIC_MODEL` | Claude model name | `claude-sonnet-4-20250514` |
-| `OPENAI_API_KEY` | OpenAI API key | -- |
-| `OPENAI_MODEL` | GPT model name | `gpt-4o-mini` |
-| `LLM_PROVIDER` | Force provider selection | auto-detect |
-| `LLM_MAX_OUTPUT_TOKENS` | Max response tokens | `4096` |
-| `SECRET_KEY` | Flask session secret key | dev default |
-| `DEBUG` | Enable debug mode | `False` |
-| `PROXY_URL` | Default proxy URL (e.g. `socks5://host:port`) | -- |
-| `BROWSER_HEADLESS` | Run browser headless | `True` |
+Full documentation is in the [`docs/`](docs/) directory and can be served locally with [MkDocs](https://www.mkdocs.org/):
 
-### Proxy Setup
+```bash
+pip install mkdocs-material
+mkdocs serve
+```
 
-A-Proxy supports optional SOCKS5/HTTP proxies for geo-IP shifting. No VPN software is required.
+Key sections:
 
-- Set `PROXY_URL` in `.env` for a default proxy, or
-- Configure per-session via the proxy controls in the web UI
-
-The proxy is applied per browser context through Playwright, so each persona session can use a different proxy.
+| Section | What's covered |
+|---------|---------------|
+| [Installation](docs/getting-started/installation.md) | Docker and manual setup, environment variables, troubleshooting |
+| [First Login](docs/getting-started/first-login.md) | Default credentials, interface overview, creating your first persona |
+| [LLM Setup](docs/how-to/llm-setup.md) | Ollama, cloud APIs, HPC/vLLM configuration |
+| [Picotte HPC](docs/how-to/picotte-vllm.md) | Drexel Picotte cluster setup and automation script |
+| [Proxy & Geo-IP](docs/how-to/proxy-setup.md) | SOCKS5/HTTP proxy configuration for location emulation |
+| [API Reference](docs/reference/api-endpoints.md) | REST API endpoints |
+| [Architecture](docs/reference/architecture.md) | System design and database schema |
 
 ## Project Structure
 
 ```
 app.py                     # Flask app, blueprint registration
 config.py                  # Configuration (API keys, regions, proxy)
+picotte_vllm.py            # Picotte HPC vLLM management script
 services.py                # Persona context management, token counting
 database/                  # SQLite database layer (repository pattern)
 routes/                    # Flask blueprints (browsing, persona, network, agent, etc.)
@@ -122,37 +96,16 @@ templates/                 # Jinja2 HTML templates
 static/                    # CSS, JS (Bootstrap, Leaflet, agent chat)
 demo/                      # Python Playwright demo scripts
 tests/                     # Unit/integration tests
+docs/                      # MkDocs documentation source
 ```
 
 ## Development
 
-### Running Tests
-
 ```bash
-python -m pytest tests/
+python -m pytest tests/                    # Run tests
+python create_sample_personas_simple.py    # Create sample personas
+python demo/demo_script.py                 # Browse and screenshot demo
 ```
-
-### Sample Data
-
-```bash
-python create_sample_personas_simple.py   # Create sample personas
-python init_default_user.py               # Initialize default user
-```
-
-### Demo Scripts
-
-```bash
-python demo/demo_script.py            # Browse and screenshot demo
-python demo/create_pdf_report.py      # PDF report generation demo
-```
-
-## Tech Stack
-
-- **Backend**: Python, Flask, SQLite
-- **Browser Automation**: Playwright (sync API) with per-context geolocation, locale, timezone, and proxy emulation
-- **LLM Integration**: OpenAI-compatible endpoints (vLLM, Ollama), Anthropic (Claude), OpenAI (GPT)
-- **Frontend**: Jinja2, Bootstrap, Leaflet.js, vanilla JS
-- **Deployment**: Docker / docker-compose or local Python venv
 
 ## License
 

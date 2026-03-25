@@ -85,4 +85,6 @@ A-Proxy serves two primary archival objectives:
 - [Persona Model](concepts/persona-model.md) - Understanding the 4-dimensional persona framework
 - [Journeys and Waypoints](concepts/journeys-waypoints.md) - Tracking user interactions
 - [Create Personas](how-to/create-personas.md) - Step-by-step persona creation
+- [LLM Setup](how-to/llm-setup.md) - Configure Ollama, cloud APIs, or HPC backends
+- [Picotte HPC](how-to/picotte-vllm.md) - Drexel Picotte vLLM setup and automation
 - [API Reference](reference/api-endpoints.md) - Complete API documentation

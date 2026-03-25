@@ -275,6 +275,8 @@ tail -f ~/vllm-server-*.out
 
 ### Notes for Drexel Picotte Users
 
+For a complete Picotte-specific guide with an automation script, see [Running A-Proxy with vLLM on Drexel Picotte](picotte-vllm.md).
+
 - **VPN required:** You must be connected to Drexel VPN (Cisco AnyConnect) to reach Picotte
 - **SSH host:** `picotte001.urcf.drexel.edu`, username is your Drexel ID (e.g., `abc123`)
 - **GPU partition:** 12 nodes with 4x NVIDIA V100 each, request via `--partition=gpu --gres=gpu:v100:1`
@@ -282,6 +284,20 @@ tail -f ~/vllm-server-*.out
 - **Storage:** Use your group data directory for model storage (home directories have limited space)
 
 ---
+
+## All LLM Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LLM_PROVIDER` | Force provider selection (`openai_compatible`, `anthropic`, `openai`) | auto-detect |
+| `OPENAI_COMPATIBLE_URL` | Local/self-hosted LLM endpoint URL | -- |
+| `OPENAI_COMPATIBLE_MODEL` | Model name on local endpoint | `Qwen/Qwen2.5-72B-Instruct` |
+| `OPENAI_COMPATIBLE_API_KEY` | API key for local endpoint | `none` |
+| `ANTHROPIC_API_KEY` | Anthropic (Claude) API key | -- |
+| `ANTHROPIC_MODEL` | Claude model name | `claude-sonnet-4-20250514` |
+| `OPENAI_API_KEY` | OpenAI API key | -- |
+| `OPENAI_MODEL` | GPT model name | `gpt-4o-mini` |
+| `LLM_MAX_OUTPUT_TOKENS` | Max response tokens | `4096` |
 
 ## How A-Proxy Connects to the LLM
 

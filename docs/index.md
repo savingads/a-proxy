@@ -68,7 +68,7 @@ A-Proxy serves two primary archival objectives:
 
     Set up A-Proxy on your local machine or server
 
-    [:octicons-arrow-right-24: Installation Guide](getting-started/installation.md)
+    [Installation Guide &rarr;](getting-started/installation.md)
 
 -   **First Login**
 
@@ -76,7 +76,7 @@ A-Proxy serves two primary archival objectives:
 
     Log in and explore the interface
 
-    [:octicons-arrow-right-24: First Login](getting-started/first-login.md)
+    [First Login &rarr;](getting-started/first-login.md)
 
 </div>
 

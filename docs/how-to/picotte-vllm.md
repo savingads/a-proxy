@@ -52,17 +52,16 @@ pip install vllm --no-build-isolation
 
 ### 2. Download the model
 
-The model is stored in the kellyGrp shared directory so all group members can use it:
+Store the model in your group's shared directory so all members can reuse it. On Picotte, each research group has shared storage (e.g., `~/data` may symlink to `/ifs/groups/<your-group>/`). Home directories have limited space, so use group storage for large model files.
 
 ```bash
+# Point HF_HOME to your group's shared storage (at least 20 GB free)
 export HF_HOME=~/data/huggingface
 mkdir -p $HF_HOME
 python -c "from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen2.5-7B-Instruct')"
 ```
 
-On Picotte, `~/data` is a symlink to `/ifs/groups/kellyGrp` — the shared storage for the Kelly research group. The setgid bit is set, so files inherit the `kellyGrp` group automatically. If you're in `kellyGrp` and the model has already been downloaded by another group member, you can skip this step — just point `HF_HOME` to the same path.
-
-If you're **not** in `kellyGrp`, replace `~/data/huggingface` throughout this guide with a path on a filesystem that has at least 20 GB free (home directories on Picotte are limited). Ask your group admin or URCF support about your group's shared storage path.
+If another group member has already downloaded the model, you can skip this step -- just point `HF_HOME` to the same path. Check with your group or ask URCF support if you're unsure where your group storage is.
 
 ### 3. Install the SLURM job script
 
@@ -198,42 +197,41 @@ curl http://localhost:8000/v1/models
 
 You should see `Qwen/Qwen2.5-7B-Instruct` in the response.
 
-## Sharing Across kellyGrp
+## Sharing Within Your Research Group
 
-The model weights at `/ifs/groups/kellyGrp/huggingface` are group-readable. Any `kellyGrp` member can use them without re-downloading. Each user needs their own:
+The model weights in your group's shared storage are group-readable. Any group member can use them without re-downloading. Each user needs their own:
 
 - **SSH key** registered on Picotte
 - **conda environment** (conda envs live in the user's home directory and can't be shared)
-- **SLURM script** (`~/vllm-serve.slurm` — copy from above or from another group member)
+- **SLURM script** (`~/vllm-serve.slurm` -- copy from above or from another group member)
 
-To set up a new kellyGrp member, they should follow the [One-Time Cluster Setup](#one-time-cluster-setup) above, but can skip the model download if it's already present at `~/data/huggingface`.
+New group members should follow the [One-Time Cluster Setup](#one-time-cluster-setup) above, but can skip the model download if it's already present in the group's shared `huggingface` directory.
 
 ## Cost and Usage
 
-Picotte charges based on **allocated resources for the actual elapsed time** of a job — not the requested time limit. If you request 4 hours but cancel after 1 hour, you're only charged for 1 hour.
+Picotte charges based on **all allocated (reserved) resources for the actual elapsed time** of a job. Two things to understand:
 
-| Resource | Rate | Example |
-|----------|------|---------|
-| GPU (V100) | 43 SU/device-hour ($0.43/hr) | 1 GPU × 4 hrs = 172 SU ($1.72) |
-| CPU | 1 SU/core-hour ($0.01/hr) | 8 cores × 4 hrs = 32 SU ($0.32) |
-| Storage | 1,000 SU/TiB-month ($10) | First 500 GiB free per group |
+- **Time:** You're charged for elapsed time, not the requested time limit. Cancel early and you pay less.
+- **Resources:** You're charged for everything you *reserved*, not what you used. Don't request more GPUs or memory than you need.
 
-1 SU = $0.01. Full rates: [Picotte Usage Rates](https://docs.urcf.drexel.edu/clusters/picotte/usage-rates/)
+For current rates and billing examples, see the [Picotte Usage Rates](https://docs.urcf.drexel.edu/clusters/picotte/usage-rates/) page.
+
+Our SLURM script requests 1 GPU, 8 CPUs, and 48 GB RAM. This is the minimum for serving Qwen2.5-7B -- don't increase these unless you have a specific reason.
 
 **Practical guidance:**
 
-- **Always cancel when done** — `python picotte_vllm.py stop` or `ssh picotte "scancel <JOB_ID>"`. Idle jobs still burn allocation.
+- **Always cancel when done** -- `python picotte_vllm.py stop` or `ssh picotte "scancel <JOB_ID>"`. Idle jobs still burn allocation.
 - The default time limit is **4 hours** (`--time=04:00:00`). Adjust in `~/vllm-serve.slurm` if needed.
 - Shorter requests get scheduled faster (`PriorityFavorSmall` is enabled).
-- Fairshare usage resets monthly, so heavy use in one week won't affect you the next month.
+- Fairshare usage resets monthly.
 
 **Suggested time limits:**
 
-| Session type | `--time` | Cost (1 GPU) |
-|---|---|---|
-| Quick test | `02:00:00` | ~86 SU ($0.86) max |
-| Normal work session | `04:00:00` | ~172 SU ($1.72) max |
-| Extended session | `08:00:00` | ~344 SU ($3.44) max |
+| Session type | `--time` |
+|---|---|
+| Quick test | `02:00:00` |
+| Normal work session | `04:00:00` |
+| Extended session | `08:00:00` |
 
 ## Startup Time and Performance
 

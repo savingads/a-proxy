@@ -8,7 +8,12 @@ services:
       - ./data:/app/data
       - ./archives:/app/archives
     environment:
+      - OPENAI_COMPATIBLE_URL=${OPENAI_COMPATIBLE_URL:-}
+      - OPENAI_COMPATIBLE_MODEL=${OPENAI_COMPATIBLE_MODEL:-}
+      - OPENAI_COMPATIBLE_API_KEY=${OPENAI_COMPATIBLE_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-}
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - DEBUG=${DEBUG:-false}
       - PROXY_URL=${PROXY_URL:-}

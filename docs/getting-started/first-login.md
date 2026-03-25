@@ -62,7 +62,7 @@ The **Interact As** page allows you to:
 
 The **Settings** page provides configuration options for:
 
-- VPN connection settings
+- Proxy and network settings
 - API key management
 - Application preferences
 

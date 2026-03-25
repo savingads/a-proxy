@@ -100,6 +100,13 @@ if __name__ == "__main__":
     except Exception as e:
         logging.error(f"Failed to initialize default user: {e}")
 
+    # Create sample personas if none exist
+    try:
+        from create_sample_personas_simple import create_sample_personas
+        create_sample_personas()
+    except Exception as e:
+        logging.error(f"Failed to create sample personas: {e}")
+
     # Shut down Playwright browser on exit
     def _shutdown_browser():
         try:

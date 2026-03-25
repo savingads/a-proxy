@@ -1,6 +1,6 @@
 # Installation
 
-A-Proxy can be installed using Docker (recommended) or through manual installation.
+A-Proxy can be installed using Docker or through manual installation.
 
 ## Prerequisites
 
@@ -8,18 +8,15 @@ A-Proxy can be installed using Docker (recommended) or through manual installati
 
     - [Docker](https://docs.docker.com/get-docker/) installed on your system
     - [Docker Compose](https://docs.docker.com/compose/install/) installed on your system
-    - NordVPN credentials (optional, for VPN features)
 
 === "Manual Installation"
 
-    - Python 3.8+ with pip
-    - Node.js with npm
+    - Python 3.10+ (3.12+ recommended)
     - Git for version control
-    - Chromium browser (for web archiving features)
 
-## Docker Installation (Recommended)
+## Docker Installation
 
-Docker provides the easiest setup experience by handling all dependencies and environment configuration automatically.
+Docker provides the easiest setup experience by handling all dependencies automatically.
 
 ### Quick Start
 
@@ -29,56 +26,24 @@ Docker provides the easiest setup experience by handling all dependencies and en
    cd a-proxy
    ```
 
-2. Run the helper script:
+2. Configure environment:
    ```bash
-   ./start-a-proxy.sh
+   cp .env.example .env
+   ```
+   Edit `.env` and configure at least one LLM provider (see [LLM Configuration](#llm-configuration) below).
+
+3. Build and start:
+   ```bash
+   docker-compose up --build
    ```
 
-   This script will:
+4. Access the application at `http://localhost:5002`
 
-   - Check for Docker permissions and use sudo if needed
-   - Create necessary directories
-   - Set up placeholder VPN credentials if needed
-   - Build and start the container
-   - Provide status information
+### Stop the Container
 
-3. Access the application at `http://localhost:5002`
-
-### Manual Docker Setup
-
-If you prefer manual setup:
-
-1. Create required directories:
-   ```bash
-   mkdir -p data nordvpn/ovpn_udp nordvpn/ovpn_tcp archives
-   ```
-
-2. Build and start the container:
-   ```bash
-   docker-compose build --no-cache
-   docker-compose up -d
-   ```
-
-3. Access the application at `http://localhost:5002`
-
-4. Stop the container when done:
-   ```bash
-   docker-compose down
-   ```
-
-### VPN Configuration (Optional)
-
-For VPN functionality:
-
-1. Create a credentials file:
-   ```bash
-   echo "your_nordvpn_username" > nordvpn/auth.txt
-   echo "your_nordvpn_password" >> nordvpn/auth.txt
-   ```
-
-2. Download OpenVPN configuration files from [NordVPN](https://nordvpn.com/ovpn/):
-   - Place UDP files in `nordvpn/ovpn_udp/`
-   - Place TCP files in `nordvpn/ovpn_tcp/`
+```bash
+docker-compose down
+```
 
 ## Manual Installation
 
@@ -95,32 +60,31 @@ For VPN functionality:
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    # or
-   .\venv\Scripts\activate   # Windows
+   venv\Scripts\activate     # Windows
    ```
 
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   npm install
+   python -m playwright install chromium
    ```
 
 4. Set up environment:
    ```bash
    cp .env.example .env
    ```
+   Edit `.env` and configure at least one LLM provider (see below).
 
-   Edit `.env` and add your `ANTHROPIC_API_KEY` for Claude AI integration.
-
-5. Initialize the database:
+5. Initialize the data directory:
    ```bash
    mkdir -p data
-   python database.py
    python create_sample_personas_simple.py  # Optional: Add sample data
+   python init_default_user.py              # Initialize default user
    ```
 
 6. Start the application:
    ```bash
-   python app.py
+   python app.py --port 5002
    ```
 
 The application will be available at `http://localhost:5002`
@@ -133,32 +97,70 @@ If port 5002 is in use, specify a different port:
 python app.py --port 5003
 ```
 
-## Windows WSL Users
+## LLM Configuration
 
-If using Docker with WSL:
+A-Proxy supports three LLM provider types. Configure one or more in `.env`:
 
-1. Add your user to the docker group:
-   ```bash
-   sudo usermod -aG docker $USER
-   ```
+### Local / Self-Hosted (recommended for HPC)
 
-2. Log out and log back in, or run:
-   ```bash
-   newgrp docker
-   ```
+Any OpenAI-compatible endpoint works -- vLLM, Ollama, text-generation-webui, LiteLLM, etc.
 
-3. Verify Docker access:
-   ```bash
-   docker ps
-   ```
+```bash
+OPENAI_COMPATIBLE_URL=http://your-host:8000/v1
+OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-72B-Instruct
+OPENAI_COMPATIBLE_API_KEY=none
+```
+
+For quick local testing with [Ollama](https://ollama.com):
+
+```bash
+ollama serve
+ollama pull qwen2.5:7b
+```
+
+Then set:
+```bash
+OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+```
+
+### Anthropic (Claude)
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
+```
+
+### OpenAI (GPT)
+
+```bash
+OPENAI_API_KEY=sk-YOUR_KEY_HERE
+```
+
+If multiple providers are configured, auto-detection priority is: local > Anthropic > OpenAI. Set `LLM_PROVIDER` to override.
+
+## Proxy Configuration (Optional)
+
+For geo-IP shifting, configure a SOCKS5 or HTTP proxy:
+
+```bash
+PROXY_URL=socks5://user:pass@host:port
+```
+
+The proxy can also be set per-session via the web UI. See [Proxy & Geo-IP](../how-to/proxy-setup.md) for details.
 
 ## Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `ANTHROPIC_API_KEY` | API key for Claude AI integration | Yes (for chat features) |
+| `OPENAI_COMPATIBLE_URL` | Local LLM endpoint URL | No |
+| `OPENAI_COMPATIBLE_MODEL` | Model on local endpoint | No |
+| `ANTHROPIC_API_KEY` | Claude API key | No |
+| `OPENAI_API_KEY` | OpenAI API key | No |
+| `LLM_PROVIDER` | Force provider selection | No |
 | `SECRET_KEY` | Flask session security key | Recommended |
-| `DEBUG` | Enable debug mode | No (default: False) |
+| `DEBUG` | Enable debug mode | No |
+| `PROXY_URL` | Default proxy URL for geo-IP | No |
+| `BROWSER_HEADLESS` | Run browser headless (default: True) | No |
 
 ## Troubleshooting
 
@@ -174,7 +176,7 @@ python app.py --port 5003
 Remove the database and reinitialize:
 ```bash
 rm -f data/personas.db
-python database.py
+python init_default_user.py
 ```
 
 ### Missing Dependencies
@@ -183,6 +185,13 @@ Ensure your virtual environment is activated:
 ```bash
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Playwright Browser Issues
+
+If Playwright can't find Chromium:
+```bash
+python -m playwright install chromium
 ```
 
 ## Next Steps

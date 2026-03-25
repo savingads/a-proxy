@@ -1,8 +1,8 @@
 """
-Agent service module for Claude AI integration.
+Agent service module for LLM-powered conversations.
 
-This module provides a high-level interface for interacting with Claude
-via the Anthropic API, including conversation management and context handling.
+Provides a high-level interface for interacting with LLMs (local or cloud)
+via the LLMClient, including conversation management and context handling.
 """
 import logging
 import json
@@ -12,92 +12,54 @@ logger = logging.getLogger(__name__)
 
 
 class AgentService:
-    """Service to handle interactions with Claude via Anthropic API."""
+    """Service to handle interactions with LLMs via LLMClient."""
 
     def __init__(self, config=None):
-        """Initialize the agent service with configuration."""
         self.config = config or {}
-        self._client = None
+        self._llm = None
         logger.info("AgentService initialized")
 
     @property
-    def client(self):
-        """Get or initialize the Anthropic client."""
-        if self._client is None:
-            try:
-                import anthropic
-                from config import ANTHROPIC_API_KEY
-
-                if not ANTHROPIC_API_KEY:
-                    logger.error("ANTHROPIC_API_KEY is not set in the environment or config")
-                    raise ValueError("ANTHROPIC_API_KEY is required to initialize Claude client")
-
-                logger.info("Initializing Anthropic client")
-                self._client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-                logger.info("Anthropic client initialized successfully")
-            except Exception as e:
-                logger.error(f"Error initializing Anthropic client: {e}", exc_info=True)
-                raise
-        return self._client
+    def llm(self):
+        if self._llm is None:
+            from utils.llm_client import LLMClient
+            self._llm = LLMClient()
+            logger.info("LLMClient initialized for AgentService")
+        return self._llm
 
     def send_message(self, message, context=None):
-        """
-        Send a message to Claude and get a response.
-
-        Args:
-            message: The message to send
-            context: Optional context information (journey, persona, etc.)
-                Can also include model selection and system prompt
-
-        Returns:
-            Response dict with 'role' and 'content' keys
-        """
         try:
-            logger.info(f"Sending message to Claude: {message[:50]}...")
+            logger.info(f"Sending message: {message[:50]}...")
 
-            # Get model from context or use default
-            model = self.config.get('claude_model', 'claude-3-opus-20240229')
+            model = self.config.get('model')
             if context and 'model' in context:
                 model = context['model']
-                logger.info(f"Using specified model: {model}")
 
-            # Build system prompt
             system_prompt = self._build_system_prompt(context)
 
-            # Build messages array
             messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
 
-            # Add conversation history if provided
             if context and 'history' in context:
-                for msg in context['history'][-10:]:  # Limit history
+                for msg in context['history'][-10:]:
                     role = msg.get('role', '')
                     content = msg.get('content', '')
 
-                    # Map roles to Claude's expected format
-                    claude_role = 'user'
+                    llm_role = 'user'
                     if role in ['agent', 'assistant', 'target']:
-                        claude_role = 'assistant'
+                        llm_role = 'assistant'
                     elif role in ['user', 'persona']:
-                        claude_role = 'user'
+                        llm_role = 'user'
 
                     if content and role:
-                        messages.append({"role": claude_role, "content": content})
+                        messages.append({"role": llm_role, "content": content})
 
-            # Add current message
             messages.append({"role": "user", "content": message})
 
-            # Send to Claude
-            logger.info(f"Calling Claude API with model: {model} and {len(messages)} messages")
-            response = self.client.messages.create(
-                model=model,
-                system=system_prompt,
-                messages=messages,
-                max_tokens=4096
-            )
-
-            # Extract content from response
-            response_content = response.content[0].text
-            logger.info(f"Received response from Claude: {response_content[:50]}...")
+            logger.info(f"Calling LLM with {len(messages)} messages")
+            response_content = self.llm.chat(messages, model_hint=model)
+            logger.info(f"Received response: {response_content[:50]}...")
 
             return {
                 "role": "assistant",
@@ -105,30 +67,25 @@ class AgentService:
             }
 
         except Exception as e:
-            logger.error(f"Error sending message to Claude: {e}", exc_info=True)
+            logger.error(f"Error sending message: {e}", exc_info=True)
             return {
                 "role": "assistant",
                 "content": f"I'm sorry, but I encountered an error: {str(e)}"
             }
 
     def _build_system_prompt(self, context):
-        """Build the system prompt from context."""
         if not context:
             return "You are a helpful assistant."
 
-        # Use custom system prompt if provided
         if 'system_prompt' in context:
             return context['system_prompt']
 
-        # Build from persona and journey context
         parts = []
 
-        # Add persona context
         if 'persona' in context and context['persona']:
             persona = context['persona']
             parts.append(f"You are {persona.get('name', 'a persona')}.")
 
-            # Add demographic info
             if 'demographic' in persona:
                 demo = persona['demographic']
                 if demo.get('occupation'):
@@ -136,7 +93,6 @@ class AgentService:
                 if demo.get('age'):
                     parts.append(f"Age: {demo['age']}")
 
-        # Add journey context
         if 'journey' in context and context['journey']:
             journey = context['journey']
             parts.append(f"\nJourney: {journey.get('name', 'Unnamed')}")
@@ -149,7 +105,6 @@ class AgentService:
         return "You are a helpful assistant."
 
     def save_conversation(self, journey_id, conversation_data):
-        """Save agent conversation data to the waypoint."""
         from database import add_waypoint
 
         try:
@@ -172,7 +127,6 @@ class AgentService:
             raise
 
     def get_conversation(self, waypoint_id):
-        """Get agent conversation data from a waypoint."""
         from database import get_waypoint
 
         try:
@@ -189,23 +143,11 @@ class AgentService:
 
 
 def get_agent_service():
-    """Get the current agent service instance."""
     if not hasattr(current_app, 'agent_service'):
         config = {
             'require_auth': current_app.config.get('AGENT_REQUIRE_AUTH', False),
-            'api_key': current_app.config.get('AGENT_API_KEY', ''),
-            'anthropic_api_key': current_app.config.get('ANTHROPIC_API_KEY', ''),
-            'claude_model': current_app.config.get('CLAUDE_MODEL', 'claude-3-opus-20240229'),
         }
-
-        # Log configuration (without API key)
-        safe_config = config.copy()
-        if 'anthropic_api_key' in safe_config:
-            safe_config['anthropic_api_key'] = 'REDACTED' if safe_config['anthropic_api_key'] else 'NOT SET'
-        if 'api_key' in safe_config:
-            safe_config['api_key'] = 'REDACTED' if safe_config['api_key'] else 'NOT SET'
-
-        logger.info(f"Initializing AgentService with config: {safe_config}")
+        logger.info(f"Initializing AgentService")
         current_app.agent_service = AgentService(config)
 
     return current_app.agent_service

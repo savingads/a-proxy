@@ -105,12 +105,11 @@ A-Proxy translates persona attributes into browser configuration:
 
 | Persona Attribute | Browser Configuration |
 |-------------------|----------------------|
-| Geographic location | VPN exit node, GeoIP headers |
-| Language | Accept-Language header |
-| Device type | User-Agent string |
-| Browser type | Browser executable |
+| Geographic location | Proxy exit IP, Playwright geolocation emulation |
+| Language | Playwright locale (Accept-Language + UI) |
+| Timezone | Playwright timezone emulation |
+| Device type | Viewport dimensions |
 | Screen size | Viewport dimensions |
-| Connection type | Network throttling |
 
 This allows web crawling that authentically represents how a persona would experience the web.
 

@@ -166,7 +166,7 @@ Returns HTML page with archive details and content.
 POST /agent/message
 ```
 
-Send a message to Claude AI in persona context.
+Send a message to the configured LLM in persona context.
 
 **Request Body (JSON):**
 
@@ -174,7 +174,9 @@ Send a message to Claude AI in persona context.
 {
     "message": "User message text",
     "persona_id": 1,
-    "conversation_history": []
+    "model": "optional-model-override",
+    "system_prompt": "optional-custom-prompt",
+    "chat_history": []
 }
 ```
 
@@ -182,8 +184,10 @@ Send a message to Claude AI in persona context.
 
 ```json
 {
-    "response": "Claude's response text",
-    "conversation_id": "uuid"
+    "success": true,
+    "response": "LLM response text",
+    "conversation_id": "uuid",
+    "context_depth": {}
 }
 ```
 
@@ -227,47 +231,71 @@ Navigate to a URL as the selected persona.
 | url | string | Target URL |
 | persona_id | int | Persona to use |
 
-## VPN Endpoints
+## Network Endpoints
 
-### VPN Status
+### Network Status
 
 ```
-GET /vpn/status
+GET /network-status
 ```
 
-Returns current VPN connection status.
+Returns current proxy and IP information.
 
 **Response:**
 
 ```json
 {
-    "connected": true,
-    "server": "us1234.nordvpn.com",
-    "region": "US",
-    "ip": "xxx.xxx.xxx.xxx"
+    "proxy_configured": true,
+    "proxy_url": "socks5://host:port",
+    "ip_info": {
+        "ip": "203.0.113.1",
+        "city": "New York",
+        "region": "NY",
+        "country": "US"
+    }
 }
 ```
 
-### Connect VPN
+### Set Proxy
 
 ```
-POST /vpn/connect
+POST /set-proxy
 ```
+
+Sets a proxy URL for the current session.
 
 **Form Fields:**
 
 | Field | Type | Description |
 |-------|------|-------------|
-| server | string | Server identifier |
-| protocol | string | udp or tcp |
+| proxy_url | string | Proxy URL (e.g., socks5://host:port) |
 
-### Disconnect VPN
+### Clear Proxy
 
 ```
-POST /vpn/disconnect
+POST /clear-proxy
 ```
 
-Terminates VPN connection.
+Removes the session proxy override.
+
+### Get Region Geolocation
+
+```
+GET /get-region-geolocation/<code>
+```
+
+Returns geolocation data for a region code.
+
+**Response:**
+
+```json
+{
+    "geolocation": "37.7749,-122.4194",
+    "language": "en-US",
+    "name": "United States",
+    "timezone": "America/New_York"
+}
+```
 
 ## Authentication Endpoints
 

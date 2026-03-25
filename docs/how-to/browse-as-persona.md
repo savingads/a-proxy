@@ -4,13 +4,12 @@ A-Proxy allows you to browse the web from a persona's perspective, with browser 
 
 ## Overview
 
-When browsing as a persona, the system configures:
+When browsing as a persona, the system configures via Playwright:
 
-- Geographic location (via VPN if enabled)
-- Browser language settings
-- User-agent string
+- Geographic location (via proxy if configured, plus geolocation emulation)
+- Browser language and locale
+- Timezone
 - Viewport/screen size
-- Other contextual parameters
 
 This enables capturing web content as it would appear to that specific user type.
 
@@ -41,25 +40,36 @@ This enables capturing web content as it would appear to that specific user type
 
 ### Automatic Settings
 
-The following are configured based on persona attributes:
+Playwright configures the following based on persona attributes:
 
 | Persona Attribute | Browser Setting |
 |-------------------|-----------------|
-| Language | Accept-Language header |
-| Device Type | User-Agent string |
-| Browser Type | User-Agent string |
-| Screen Size | Viewport dimensions |
+| Language | Locale (Accept-Language + UI language) |
+| Latitude/Longitude | Geolocation emulation |
+| Country/Region | Timezone emulation |
+| Device Type | Viewport dimensions |
 
-### VPN Integration
+### Proxy Integration
 
-If VPN is configured and the persona has geographic attributes:
+If a proxy is configured and the persona has geographic attributes:
 
-| Persona Attribute | VPN Setting |
-|-------------------|-------------|
-| Country | VPN exit node region |
-| City | Closest available server |
+| Persona Attribute | Proxy Setting |
+|-------------------|---------------|
+| Country | Proxy exit node region |
+| City | Closest available proxy server |
 
-See [VPN Integration](vpn-integration.md) for setup details.
+See [Proxy & Geo-IP](proxy-setup.md) for setup details.
+
+### What Playwright Emulates Natively
+
+Unlike the previous Selenium-based approach, Playwright provides native emulation for:
+
+- **Geolocation** -- precise lat/lng coordinates reported to the browser
+- **Locale** -- language and regional formatting
+- **Timezone** -- `Intl.DateTimeFormat` and related APIs
+- **Proxy** -- per-context traffic routing
+
+No JavaScript injection or CDP commands needed.
 
 ## Browsing Interface
 
@@ -121,39 +131,13 @@ Cookies affect personalization and tracking:
 
 - Created during browsing
 - Persist within the browsing session
-- Cleared when session ends
+- Cleared when session ends (Playwright contexts are isolated)
 
 ### Cookie Limitations
 
 - No persistent cookie profiles per persona
 - Each session starts fresh
 - Cookie-based personalization requires building history within a session
-
-## Browser Fingerprinting
-
-Some websites use browser fingerprinting beyond cookies.
-
-### What A-Proxy Configures
-
-A-Proxy sets these basic browser attributes:
-
-- User-Agent string (based on device/browser type)
-- Accept-Language header
-- Viewport dimensions
-
-### Not Configured
-
-A-Proxy does not spoof these fingerprint elements:
-
-- Canvas fingerprinting
-- WebGL fingerprinting
-- Audio fingerprinting
-- Timezone
-- Installed fonts
-- Hardware concurrency
-
-!!! warning "Fingerprint Limitations"
-    A-Proxy provides basic browser configuration, not full fingerprint spoofing. Websites using advanced fingerprinting may still identify the browser environment.
 
 ## Best Practices
 
@@ -162,7 +146,7 @@ A-Proxy does not spoof these fingerprint elements:
 Before browsing:
 
 1. Review the persona's attributes
-2. Ensure VPN is configured if needed
+2. Ensure proxy is configured if needed
 3. Determine target websites
 4. Create or select an appropriate journey
 
@@ -178,23 +162,23 @@ During browsing:
 
 For clean captures:
 
-1. Start with fresh session (no cookies)
-2. Or load persona-specific cookie profile
-3. Avoid mixing persona sessions
+1. Start with fresh session (each Playwright context is isolated)
+2. Avoid mixing persona sessions
+3. Use different proxies for different geographic personas
 
 ## Troubleshooting
 
 ### Pages Not Loading
 
 1. Check internet connectivity
-2. Verify VPN connection (if using)
-3. Try without VPN to isolate issue
+2. Verify proxy connection (if using)
+3. Try without proxy to isolate issue
 
 ### Wrong Location Detected
 
-1. Confirm VPN is connected
-2. Check VPN exit node matches persona location
-3. Some sites use multiple detection methods
+1. Confirm proxy is active (check dashboard IP info)
+2. Check proxy exit node matches persona location
+3. Some sites use multiple detection methods beyond GeoIP
 
 ### Missing Personalization
 
@@ -204,6 +188,6 @@ For clean captures:
 
 ## Related Guides
 
-- [VPN Integration](vpn-integration.md) - Geographic spoofing setup
+- [Proxy & Geo-IP](proxy-setup.md) - Geographic shifting setup
 - [Archive Web Pages](archive-pages.md) - Saving captured content
 - [Manage Journeys](manage-journeys.md) - Organizing browsing sessions

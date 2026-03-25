@@ -813,11 +813,11 @@
                         }
                     }
                 } else {
-                    addMessage('[Error: ' + (data.error || 'No response from Claude') + ']', 'agent');
+                    addMessage('[Error: ' + (data.error || 'No response from LLM') + ']', 'agent');
                 }
             } catch (err) {
                 removeTypingIndicator();
-                addMessage('[Error: Could not reach Claude API]', 'agent');
+                addMessage('[Error: Could not reach LLM API]', 'agent');
             }
         });
 

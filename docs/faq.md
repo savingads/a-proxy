@@ -24,23 +24,17 @@ Integration with these systems is planned but not yet implemented.
 
 ### What are the system requirements?
 
-- Python 3.8 or higher
-- Node.js (for frontend dependencies)
-- Docker (recommended for full functionality)
-- Chromium browser (for web archiving)
+- Python 3.10 or higher (3.12+ recommended)
+- Playwright Chromium browser (installed via `python -m playwright install chromium`)
+- An LLM endpoint: local (vLLM, Ollama) or cloud API key (Anthropic, OpenAI)
 
-### Why is Docker recommended?
+### Do I need Docker?
 
-Docker provides:
+No. A-Proxy runs natively on Windows, macOS, and Linux. Docker is available as a deployment option but is not required.
 
-- Consistent environment across systems
-- Simplified VPN integration
-- Isolated browser instances
-- Easier dependency management
+### Can I run A-Proxy without an LLM?
 
-### Can I run A-Proxy without Docker?
-
-Yes. Manual installation is supported. See [Installation](getting-started/installation.md) for both methods.
+The core features (persona management, browsing, archiving) work without an LLM. Chat features require at least one LLM provider configured.
 
 ## Personas
 
@@ -55,16 +49,16 @@ See [Persona Model](concepts/persona-model.md) for details.
 
 ### How do personas affect web browsing?
 
-Persona attributes configure browser settings:
+Persona attributes configure browser settings via Playwright:
 
-- Geographic location via VPN
-- Language via Accept-Language header
-- Device via User-Agent string
+- Geographic location via proxy + geolocation emulation
+- Language via locale setting
+- Timezone via timezone emulation
 - Screen size via viewport settings
 
 ### Can personas be developed through conversation?
 
-Yes. Chat with Claude AI as or about a persona to develop attributes organically. The system can extract information from conversations to update persona profiles.
+Yes. Chat with an LLM as or about a persona to develop attributes organically. The system can extract information from conversations to update persona profiles.
 
 ## Journeys and Waypoints
 
@@ -77,30 +71,25 @@ A journey is a named collection of interactions performed as a specific persona.
 A waypoint is a single interaction within a journey. Types include:
 
 - **Browse waypoints**: Web page visits
-- **Agent waypoints**: Chat conversations with Claude
+- **Agent waypoints**: Chat conversations with an LLM
 
 ### How are waypoints ordered?
 
 Waypoints have sequence numbers assigned automatically based on creation order within a journey.
 
-## VPN Integration
+## Proxy & Geo-IP
 
-### Which VPN services are supported?
+### Do I need a VPN?
 
-Currently, NordVPN is supported via OpenVPN configuration files.
+No. A-Proxy uses SOCKS5/HTTP proxies instead of VPN software. Proxies are configured per browser context through Playwright, so no system-wide VPN is needed.
 
-### Why might VPN not work?
+### What proxy services work?
 
-Common causes:
+Any SOCKS5 or HTTP proxy works. Options include residential proxy services, datacenter proxies, SSH tunnels, or self-hosted proxies.
 
-- Invalid credentials in `nordvpn/auth.txt`
-- Missing OpenVPN configuration files
-- Target site blocking VPN traffic
-- Firewall restrictions
+### Can I use A-Proxy without a proxy?
 
-### Can I use A-Proxy without VPN?
-
-Yes. VPN is optional. Without VPN, browsing uses your actual network location.
+Yes. Proxy is optional. Without a proxy, browsing uses your actual network location. Playwright still emulates geolocation coordinates, locale, and timezone regardless.
 
 ## Web Archiving
 
@@ -108,30 +97,33 @@ Yes. VPN is optional. Without VPN, browsing uses your actual network location.
 
 - HTML source
 - Screenshot of rendered page
-- HTTP headers
 - Metadata (persona context, timestamps)
 
 ### Where are archives stored?
 
-In the `archives/` directory, organized by date.
+In the `archives/` directory, organized by URL hash and timestamp.
 
 ### Does A-Proxy interact with the Internet Archive?
 
 Integration with the Internet Archive is configurable but separate from local archiving.
 
-## Claude AI Integration
+## LLM Integration
 
-### How is Claude used in A-Proxy?
+### Which LLM providers are supported?
 
-Claude AI enables:
+- **Local/self-hosted**: Any OpenAI-compatible endpoint (vLLM, Ollama, text-generation-webui, LiteLLM)
+- **Anthropic**: Claude
+- **OpenAI**: GPT
 
-- Conversational persona development
-- Browsing-related queries as a persona
-- Research assistance from persona perspective
+### How do I use a local model?
 
-### What API key is required?
+Install [Ollama](https://ollama.com) and set:
+```bash
+OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+```
 
-An Anthropic API key (`ANTHROPIC_API_KEY`) is required for Claude integration.
+For HPC deployments (e.g., vLLM on a GPU cluster), point to the vLLM endpoint.
 
 ### Are conversations stored?
 
@@ -144,8 +136,8 @@ Yes. Agent waypoints store conversation history as JSON for research purposes.
 Try removing and reinitializing:
 
 ```bash
-rm data/personas.db
-python -c "from database import initialize_database; initialize_database()"
+rm -f data/personas.db
+python init_default_user.py
 ```
 
 ### Port 5002 already in use
@@ -161,17 +153,20 @@ python app.py --port 5003
 Check:
 
 1. Internet connectivity
-2. VPN connection status (if enabled)
+2. Proxy connection status (if enabled)
 3. Target site accessibility
+
+### Playwright browser not found
+
+Install the Chromium browser:
+
+```bash
+python -m playwright install chromium
+```
 
 ### Missing persona data after update
 
-Ensure all dimension tables exist. Run database initialization:
-
-```python
-from database import create_persona_tables
-create_persona_tables()
-```
+Ensure all dimension tables exist. The database auto-initializes on import of the `database` package.
 
 ## Data and Privacy
 
@@ -181,7 +176,6 @@ All data is stored locally:
 
 - Database: `data/personas.db`
 - Archives: `archives/`
-- VPN credentials: `nordvpn/auth.txt`
 
 ### Is data encrypted?
 
@@ -196,7 +190,7 @@ Journey and persona data can be exported as JSON through the interface.
 ### How do I run tests?
 
 ```bash
-python tests/test_runner.py
+python -m pytest tests/
 ```
 
 ### What is the repository pattern?
@@ -219,8 +213,4 @@ persona = repo.get(1)
 
 ### Where can I report issues?
 
-Report issues at the project repository.
-
-### Is there a community forum?
-
-Not currently. For questions, open an issue on the repository.
+Report issues at the [project repository](https://github.com/savingads/a-proxy/issues).

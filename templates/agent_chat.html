@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Claude AI Agent{% endblock %}
+{% block title %}AI Agent{% endblock %}
 
 {% block extra_style %}
 <style>
@@ -97,7 +97,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Claude AI Agent</h1>
+    <h1 class="h2">AI Agent</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
             <a href="{{ url_for('home.index') }}" class="btn btn-sm btn-outline-secondary">
@@ -119,9 +119,12 @@
                     <div class="form-group">
                         <label for="llmModel">LLM Model</label>
                         <select class="form-control" id="llmModel">
-                            <option value="claude-3-opus-20240229" selected>Claude 3 Opus</option>
-                            <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
-                            <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+                            {% for m in models %}
+                            <option value="{{ m.value }}" {% if m.value == default_model %}selected{% endif %}>{{ m.label }}</option>
+                            {% endfor %}
+                            {% if not models %}
+                            <option value="" disabled selected>No LLM configured</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -141,7 +144,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="agent-header">
-                    <h5 class="mb-0"><i class="bi bi-robot"></i> Claude Chat</h5>
+                    <h5 class="mb-0"><i class="bi bi-robot"></i> Chat</h5>
                     <div>
                         <button id="resetChat" class="btn btn-sm btn-outline-warning">
                             <i class="bi bi-arrow-clockwise"></i> Reset Chat
@@ -154,7 +157,7 @@
                     <div id="messageContainer" class="message-container">
                         <!-- Messages will be added here dynamically -->
                         <div class="message agent-message">
-                            <p>Hello! I'm Claude, an AI assistant. How can I help you today?</p>
+                            <p>Hello! I'm an AI assistant. How can I help you today?</p>
                         </div>
                         <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
                             <strong>Error:</strong> <span id="errorText"></span>
@@ -165,7 +168,7 @@
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <p class="mt-2 text-muted">Claude is thinking...</p>
+                        <p class="mt-2 text-muted">Thinking...</p>
                     </div>
 
                     <div class="input-group">
@@ -185,15 +188,15 @@
         <div class="card">
             <div class="card-header">
                 <div class="guidelines-header">
-                    <h5 class="mb-0">About Claude</h5>
+                    <h5 class="mb-0">About</h5>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="guidelines-panel" id="guidelinesPanel">
-                    <h6>About Claude</h6>
-                    <p>Claude is an AI assistant created by Anthropic to be helpful, harmless, and honest.</p>
+                    <h6>AI Agent</h6>
+                    <p>Chat with an LLM directly. The model is selected from configured providers (local or cloud).</p>
 
-                    <h6>Claude can help with:</h6>
+                    <h6>The agent can help with:</h6>
                     <ul>
                         <li>Answering questions on a wide range of topics</li>
                         <li>Providing explanations and summaries</li>
@@ -202,18 +205,17 @@
                         <li>Helping with problem-solving and analysis</li>
                     </ul>
 
-                    <h6>Tips for better interactions:</h6>
+                    <h6>Tips:</h6>
                     <ul>
                         <li>Be specific with your questions</li>
                         <li>Provide context when needed</li>
-                        <li>Ask for clarification if Claude's response is unclear</li>
                         <li>You can reset the conversation at any time</li>
+                        <li>Switch models in the settings above</li>
                     </ul>
 
                     <div class="alert alert-info mt-4">
                         <h6>Note:</h6>
-                        <p>This is a direct integration with Claude. Each session starts fresh with no persistent memory
-                            between sessions.</p>
+                        <p>Each session starts fresh with no persistent memory between sessions.</p>
                     </div>
                 </div>
             </div>

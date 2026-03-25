@@ -125,7 +125,7 @@ To compare archives, manually open multiple archive views or use external diff t
 For reproducible research:
 
 1. Document exact persona configuration
-2. Record VPN/network settings if used
+2. Record proxy/network settings if used
 3. Note capture timing
 4. Version the capture methodology
 

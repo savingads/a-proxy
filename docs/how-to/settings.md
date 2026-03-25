@@ -8,35 +8,26 @@ Navigate to **Settings** in the main navigation menu.
 
 ## Configuration Categories
 
-### API Keys
+### LLM Provider
+
+A-Proxy supports multiple LLM providers. Configure via environment variables:
 
 | Setting | Description |
 |---------|-------------|
-| Anthropic API Key | Required for Claude AI chat functionality |
+| Local endpoint (vLLM/Ollama) | Recommended for self-hosted models |
+| Anthropic API Key | For Claude AI chat functionality |
+| OpenAI API Key | For GPT chat functionality |
 
-API keys can also be set via environment variables (recommended for production).
+See [Installation - LLM Configuration](../getting-started/installation.md#llm-configuration) for setup details.
 
-#### Setting via Environment
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
-
-Or in `.env` file:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-### VPN Configuration
+### Proxy Configuration
 
 | Setting | Description |
 |---------|-------------|
-| VPN Enabled | Toggle VPN functionality |
-| Default Protocol | UDP or TCP |
-| Server Selection | Automatic or manual |
+| Proxy URL | SOCKS5/HTTP proxy for geo-IP shifting |
+| Per-session override | Set via dashboard proxy controls |
 
-See [VPN Integration](vpn-integration.md) for detailed configuration.
+See [Proxy & Geo-IP](proxy-setup.md) for detailed configuration.
 
 ### Browser Settings
 
@@ -46,6 +37,7 @@ See [VPN Integration](vpn-integration.md) for detailed configuration.
 | JavaScript Enabled | Execute JS during browsing | true |
 | Image Loading | Load images during browsing | true |
 | Timeout | Page load timeout (seconds) | 30 |
+| Headless Mode | Run browser without UI | true |
 
 ### Archive Settings
 
@@ -62,26 +54,36 @@ See [VPN Integration](vpn-integration.md) for detailed configuration.
 |---------|-------------|---------|
 | Session Timeout | Inactivity timeout (minutes) | 30 |
 | Auto-save Journeys | Save journey progress automatically | true |
-| Cookie Persistence | Retain cookies between sessions | per-persona |
 
 ## Environment Variables
 
-Settings can be configured via environment variables:
+All settings can be configured via environment variables:
 
 | Variable | Setting | Example |
 |----------|---------|---------|
-| `ANTHROPIC_API_KEY` | Claude API key | sk-ant-... |
+| `OPENAI_COMPATIBLE_URL` | Local LLM endpoint | `http://localhost:11434/v1` |
+| `OPENAI_COMPATIBLE_MODEL` | Local model name | `qwen2.5:7b` |
+| `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-...` |
+| `OPENAI_API_KEY` | OpenAI API key | `sk-...` |
+| `LLM_PROVIDER` | Force provider | `openai_compatible` |
 | `SECRET_KEY` | Flask session key | random-string |
 | `DEBUG` | Debug mode | true/false |
-| `PORT` | Server port | 5002 |
+| `PROXY_URL` | Default proxy | `socks5://host:port` |
+| `BROWSER_HEADLESS` | Headless browser | true/false |
 
 ### Example .env File
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-api03-...
+# Local LLM (Ollama)
+OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+
+# Flask
 SECRET_KEY=your-secret-key-here
 DEBUG=false
-PORT=5002
+
+# Optional proxy
+# PROXY_URL=socks5://host:port
 ```
 
 ## Database Location
@@ -113,7 +115,7 @@ To reset the database:
 
 ```bash
 rm data/personas.db
-python database.py
+python init_default_user.py
 ```
 
 ## User Management
@@ -147,13 +149,6 @@ export LOG_LEVEL=DEBUG  # DEBUG, INFO, WARNING, ERROR
 
 ## Performance Settings
 
-### Concurrent Sessions
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Max Concurrent Browsers | Simultaneous browser instances | 3 |
-| Queue Size | Pending archive requests | 100 |
-
 ### Resource Limits
 
 Docker deployments can configure resource limits in `docker-compose.yml`:
@@ -173,9 +168,9 @@ services:
 
 | Problem | Setting to Check |
 |---------|------------------|
-| API calls fail | Anthropic API Key |
-| Pages don't load | Browser timeout, JavaScript enabled |
-| VPN not working | VPN enabled, credentials |
+| LLM calls fail | LLM provider configuration |
+| Pages don't load | Browser timeout, proxy settings |
+| Proxy not working | Proxy URL format and reachability |
 | Archives incomplete | Archive location permissions |
 
 ### Diagnostic Information
@@ -189,4 +184,4 @@ View system status:
 ## Related Guides
 
 - [Installation](../getting-started/installation.md) - Initial configuration
-- [VPN Integration](vpn-integration.md) - VPN-specific settings
+- [Proxy & Geo-IP](proxy-setup.md) - Proxy-specific settings

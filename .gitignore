@@ -61,6 +61,9 @@ _src/*/
 # Development documentation
 CLAUDE.md
 
+# Local sync script
+sync_to_onedrive.sh
+
 # Claude Code configuration
 .claude/
 

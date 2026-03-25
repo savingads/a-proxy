@@ -10,8 +10,8 @@ A-Proxy is a Flask-based web application that combines persona management, web b
 
 ```
 +-------------------+     +-------------------+
-|   Web Browser     |     |   Claude API      |
-|   (User)          |     |   (Anthropic)     |
+|   Web Browser     |     |   LLM Provider    |
+|   (User)          |     | (Local/Cloud API) |
 +--------+----------+     +--------+----------+
          |                         |
          v                         v
@@ -19,15 +19,16 @@ A-Proxy is a Flask-based web application that combines persona management, web b
 |                Flask Application            |
 |  +-------------+  +-------------+           |
 |  |   Routes    |  |  Services   |           |
-|  | - persona   |  | - agent     |           |
-|  | - journey   |  | - browsing  |           |
-|  | - archives  |  | - vpn       |           |
+|  | - persona   |  | - llm_client|           |
+|  | - journey   |  | - agent     |           |
+|  | - archives  |  | - browsing  |           |
 |  | - agent     |  +-------------+           |
+|  | - network   |                            |
 |  +------+------+                            |
 |         |                                   |
 |  +------v------+  +-------------+           |
-|  | Database    |  |  Selenium   |           |
-|  | Repository  |  |  WebDriver  |           |
+|  | Database    |  | Playwright  |           |
+|  | Repository  |  | BrowserMgr  |           |
 |  +------+------+  +------+------+           |
 +---------+----------------+------------------+
           |                |
@@ -38,8 +39,9 @@ A-Proxy is a Flask-based web application that combines persona management, web b
    +-------------+  +------+------+
                            |
                     +------v------+
-                    |   OpenVPN   |
-                    |   (NordVPN) |
+                    | SOCKS5/HTTP |
+                    |    Proxy    |
+                    | (optional)  |
                     +-------------+
 ```
 
@@ -76,32 +78,34 @@ database/
 
 ### Browser Automation
 
-Selenium WebDriver controls Chromium for web browsing:
+Playwright controls Chromium for web browsing with per-context isolation:
 
 | Component | Purpose |
 |-----------|---------|
-| Selenium | Browser automation framework |
+| Playwright | Browser automation framework (sync API) |
+| BrowserManager | Singleton manager in `utils/browser.py` |
+| BrowserContext | Per-request isolated context (locale, geolocation, timezone, proxy) |
 | Chromium | Headless browser execution |
-| WebDriver | Browser control interface |
 
-### VPN Integration
+### Network / Proxy
 
-OpenVPN client for geographic simulation:
+Optional proxy support for geographic simulation:
 
 | Component | Purpose |
 |-----------|---------|
-| OpenVPN | VPN client |
-| NordVPN configs | Server configuration files |
-| VPN routes | Connection management endpoints |
+| Proxy config | `utils/network.py` -- proxy URL, IP info |
+| Network routes | `routes/network.py` -- status, set/clear proxy |
+| Per-context proxy | Playwright routes each context through configured proxy |
 
 ### LLM Integration
 
-Claude API integration for persona conversations:
+Provider-agnostic LLM client supporting local and cloud models:
 
 | Component | File | Purpose |
 |-----------|------|---------|
+| LLM Client | `utils/llm_client.py` | Multi-provider adapter (local, Anthropic, OpenAI) |
+| Agent Service | `utils/agent.py` | High-level chat service |
 | Agent Routes | `routes/agent.py` | Chat endpoints |
-| Agent Service | `utils/agent.py` | API wrapper |
 
 ## Data Flow
 
@@ -109,15 +113,15 @@ Claude API integration for persona conversations:
 
 ```
 1. User selects persona
-2. System configures browser context:
-   - User-Agent based on device_type
-   - Accept-Language based on language
-   - Viewport based on screen_size
-3. If VPN enabled:
-   - Connect to regional server
+2. System configures Playwright browser context:
+   - locale based on language
+   - geolocation based on lat/lng
+   - timezone based on region
+3. If proxy configured:
+   - Route context through proxy
    - Verify exit IP
-4. Navigate to URL via Selenium
-5. Capture page content
+4. Navigate to URL via Playwright
+5. Capture page content and screenshot
 6. Create waypoint record
 7. Return rendered page to user
 ```
@@ -127,9 +131,9 @@ Claude API integration for persona conversations:
 ```
 1. User sends message
 2. System builds context:
-   - Persona attributes
+   - Persona attributes (system prompt)
    - Conversation history
-3. Send to Claude API
+3. Send to LLM via LLMClient (auto-detects provider)
 4. Receive response
 5. Create waypoint record (type: agent)
 6. Return response to user
@@ -143,22 +147,24 @@ a-proxy/
 ├── config.py                 # Configuration
 ├── database/                 # Data layer
 ├── routes/                   # HTTP handlers
-│   ├── agent.py             # Claude integration
+│   ├── agent.py             # LLM chat integration
 │   ├── persona_api_db.py    # Persona CRUD
 │   ├── journey.py           # Journey management
-│   ├── browsing.py          # Web browsing
+│   ├── browsing.py          # Web browsing (Playwright)
 │   ├── archives.py          # Archive management
-│   ├── vpn.py               # VPN control
+│   ├── network.py           # Proxy/network control
 │   └── auth.py              # Authentication
 ├── services.py              # Business logic
 ├── utils/                   # Utilities
-│   ├── agent.py            # Agent service wrapper
+│   ├── browser.py           # Playwright BrowserManager
+│   ├── network.py           # Proxy config, IP info
+│   ├── agent.py             # Agent service (LLM chat)
+│   ├── llm_client.py        # Multi-provider LLM client
 │   └── persona_client_db.py # DB client adapter
 ├── templates/               # HTML templates
 ├── static/                  # Static assets
 ├── data/                    # SQLite database
 ├── archives/                # Archived pages
-├── nordvpn/                 # VPN configuration
 └── tests/                   # Test suite
 ```
 
@@ -167,9 +173,11 @@ a-proxy/
 ### Local Development
 
 ```
-Python 3.8+ → Flask dev server → SQLite
+Python 3.10+ → Flask dev server → SQLite
                     ↓
-              Chromium (local)
+              Playwright + Chromium
+                    ↓ (optional)
+              SOCKS5/HTTP Proxy
 ```
 
 ### Docker Deployment
@@ -177,14 +185,12 @@ Python 3.8+ → Flask dev server → SQLite
 ```
 Docker Container
 ├── Flask Application
-├── Chromium Browser
-├── OpenVPN Client
+├── Playwright + Chromium
 └── SQLite Database
     ↓
 Volume Mounts:
 ├── ./data → /app/data
-├── ./archives → /app/archives
-└── ./nordvpn → /app/nordvpn
+└── ./archives → /app/archives
 ```
 
 ## Security Considerations
@@ -198,13 +204,12 @@ Volume Mounts:
 ### Data Storage
 
 - SQLite database in `data/` directory
-- VPN credentials in `nordvpn/auth.txt`
 - No encryption at rest (local deployment assumption)
 
 ### Network
 
-- VPN traffic routed through OpenVPN
-- Local API keys stored in environment variables
+- Proxy traffic routed through Playwright per-context
+- API keys stored in environment variables
 - HTTPS recommended for production deployment
 
 ## Extensibility
@@ -220,6 +225,12 @@ Volume Mounts:
 1. Create class in `database/repositories/`
 2. Export from `database/__init__.py`
 3. Add backward-compatible functions if needed
+
+### Adding New LLM Providers
+
+1. Create adapter class in `utils/llm_client.py` extending `BaseAdapter`
+2. Add provider detection in `LLMClient._initialize_adapter()` and `_auto_detect_provider()`
+3. Add config variables in `config.py`
 
 ## Related Documentation
 

@@ -16,20 +16,25 @@ PROXY_URL = os.environ.get('PROXY_URL')  # e.g. socks5://user:pass@host:port
 BROWSER_HEADLESS = os.environ.get('BROWSER_HEADLESS', 'True') == 'True'
 
 # LLM provider configuration
+# Supported: "openai_compatible" (vLLM, Ollama, etc.), "anthropic", "openai"
 LLM_PROVIDER = os.environ.get('LLM_PROVIDER')
 
-# API keys
+# OpenAI-compatible endpoint (vLLM, Ollama, text-generation-webui, LiteLLM, etc.)
+# This is the recommended setup for local/self-hosted models (e.g. Qwen on HPC)
+OPENAI_COMPATIBLE_URL = os.environ.get('OPENAI_COMPATIBLE_URL')  # e.g. http://picotte-host:8000/v1
+OPENAI_COMPATIBLE_MODEL = os.environ.get('OPENAI_COMPATIBLE_MODEL', 'Qwen/Qwen2.5-72B-Instruct')
+OPENAI_COMPATIBLE_API_KEY = os.environ.get('OPENAI_COMPATIBLE_API_KEY', 'none')  # vLLM default
+
+# Commercial API keys (optional)
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 
 # Default models
-ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022')
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
-GOOGLE_MODEL = os.environ.get('GOOGLE_MODEL', 'gemini-1.5-pro')
 
 # Token limits
-LLM_MAX_OUTPUT_TOKENS = int(os.environ.get('LLM_MAX_OUTPUT_TOKENS', '1024'))
+LLM_MAX_OUTPUT_TOKENS = int(os.environ.get('LLM_MAX_OUTPUT_TOKENS', '4096'))
 
 # Region to language/geolocation/timezone mapping
 REGION_LANGUAGE_MAP = {

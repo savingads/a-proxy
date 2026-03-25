@@ -6,11 +6,17 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import save_persona
+from database import save_persona, get_all_personas
 
 def create_sample_personas():
-    """Create sample personas for testing"""
-    
+    """Create sample personas for testing. Skips if personas already exist."""
+
+    # Check if any personas already exist
+    existing = get_all_personas(page=1, per_page=1)
+    if existing and existing.get('personas'):
+        print("Personas already exist, skipping sample creation.")
+        return
+
     # Sample personas for different regions
     personas = [
         # North America (US) Persona

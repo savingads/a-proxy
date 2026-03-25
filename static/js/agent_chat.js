@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to send message to agent
     async function sendToAgent(message) {
         try {
-            console.log("Sending message to Claude:", message);
+            console.log("Sending message:", message);
             loadingIndicator.style.display = 'block';
 
             // Get current settings
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide any displayed error
             document.getElementById('errorMessage').style.display = 'none';
             // Add initial message
-            addMessage('Hello! I\'m Claude, an AI assistant. How can I help you today?', 'agent');
+            addMessage('Hello! I\'m an AI assistant. How can I help you today?', 'agent');
             // Reset history and ID
             conversationHistory = [];
             conversationId = Date.now().toString();
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize with first message already in the history
     conversationHistory.push({
         sender: 'agent',
-        message: 'Hello! I\'m Claude, an AI assistant. How can I help you today?',
+        message: 'Hello! I\'m an AI assistant. How can I help you today?',
         timestamp: new Date().toISOString()
     });
 });

@@ -14,8 +14,24 @@ logger = logging.getLogger(__name__)
 @agent_bp.route("/agent")
 @login_required
 def agent_chat():
-    """Show the standalone Claude agent interface."""
-    return render_template("agent_chat.html")
+    """Show the standalone agent chat interface."""
+    from config import (
+        LLM_PROVIDER, OPENAI_COMPATIBLE_URL, OPENAI_COMPATIBLE_MODEL,
+        ANTHROPIC_API_KEY, ANTHROPIC_MODEL, OPENAI_API_KEY, OPENAI_MODEL,
+    )
+    # Build list of available models based on configured providers
+    models = []
+    if OPENAI_COMPATIBLE_URL:
+        models.append({"value": OPENAI_COMPATIBLE_MODEL, "label": f"{OPENAI_COMPATIBLE_MODEL} (local)", "provider": "openai_compatible"})
+    if ANTHROPIC_API_KEY:
+        models.append({"value": ANTHROPIC_MODEL, "label": f"Claude ({ANTHROPIC_MODEL})", "provider": "anthropic"})
+    if OPENAI_API_KEY:
+        models.append({"value": OPENAI_MODEL, "label": f"GPT ({OPENAI_MODEL})", "provider": "openai"})
+    # Determine default
+    default_model = None
+    if models:
+        default_model = models[0]["value"]
+    return render_template("agent_chat.html", models=models, default_model=default_model)
 
 from services import fetch_persona_context, flatten_persona_context, persona_context_to_system_prompt
 
@@ -34,21 +50,12 @@ def standalone_agent_message():
         
         message = data.get('message')
         conversation_id = data.get('conversation_id')
-        model = data.get('model', 'claude-3-opus-20240229')
+        model = data.get('model')
         system_prompt = data.get('system_prompt')
         
         if not message:
             logger.error("No message provided in request data")
             return jsonify({"success": False, "error": "No message provided"}), 400
-        
-        # Check for API key
-        from config import ANTHROPIC_API_KEY
-        if not ANTHROPIC_API_KEY:
-            logger.error("ANTHROPIC_API_KEY is not set. Please set it in the environment or config.py")
-            return jsonify({
-                "success": False, 
-                "error": "Claude API key is not configured. Please set ANTHROPIC_API_KEY in your environment or config.py."
-            }), 500
         
         # Get persona_id, journey_id and chat_mode
         persona_id = data.get('persona_id')
@@ -79,62 +86,44 @@ def standalone_agent_message():
         if not system_prompt:
             system_prompt = 'You are a helpful assistant. Answer questions concisely and accurately.'
         
-        # DIRECT IMPLEMENTATION: Use Anthropic client directly instead of agent_module
+        # Build messages for LLMClient
         try:
-            import anthropic
-            
-            # Create Anthropic client
-            logger.info(f"Creating Anthropic client with API key: {'*' * len(ANTHROPIC_API_KEY)}")
-            client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-            
-            # Prepare messages array 
+            from utils.llm_client import LLMClient
+
             messages = []
-            
-            # First add any chat history if provided
+
+            # Add system prompt
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+
+            # Add chat history if provided
             if chat_history and isinstance(chat_history, list):
-                # Limit history to prevent token overflow
-                max_history_messages = 10  # Adjust based on typical message length
-                
-                # Only use the most recent messages if history is too long
+                max_history_messages = 10
                 history_to_use = chat_history[-max_history_messages:] if len(chat_history) > max_history_messages else chat_history
-                
+
                 for msg in history_to_use:
                     role = msg.get('role', '')
                     content = msg.get('content', '')
-                    
-                    # Map roles to Claude's expected format
-                    claude_role = 'user'  # Default
-                    if role == 'agent' or role == 'target':
-                        claude_role = 'assistant'
-                    elif role in ['user', 'persona']:
-                        claude_role = 'user'
-                        
+
+                    llm_role = 'user'
+                    if role in ('agent', 'assistant', 'target'):
+                        llm_role = 'assistant'
+                    elif role in ('user', 'persona'):
+                        llm_role = 'user'
+
                     if content and role:
-                        messages.append({"role": claude_role, "content": content})
-            
-            # Then add the current message
+                        messages.append({"role": llm_role, "content": content})
+
+            # Add current message
             messages.append({"role": "user", "content": message})
-            
-            # Send message to Claude
-            logger.info(f"Sending message to Claude with model: {model} and {len(messages)} messages")
-            
-            # Add context depth info to logs
-            context_tokens = len(system_prompt.split()) * 1.3  # Rough estimate
-            logger.info(f"System prompt size estimate: ~{int(context_tokens)} tokens")
-            
-            response = client.messages.create(
-                model=model,
-                system=system_prompt,
-                messages=messages,
-                max_tokens=4096
-            )
-            
-            # Extract content from response
-            logger.info(f"Received response from Claude")
-            response_content = response.content[0].text
-            
-            logger.info(f"Response content: {response_content[:200]}...")
-            
+
+            logger.info(f"Sending message via LLMClient with {len(messages)} messages")
+
+            llm = LLMClient()
+            response_content = llm.chat(messages, model_hint=model if model else None)
+
+            logger.info(f"Received LLM response: {response_content[:200]}...")
+
             # Calculate context depth for returning to client
             context_depth = {}
             if persona_id:
@@ -143,7 +132,7 @@ def standalone_agent_message():
                 context_depth["journey"] = True
             if chat_history and len(chat_history) > 0:
                 context_depth["history"] = len(chat_history)
-            
+
             return jsonify({
                 "success": True,
                 "response": response_content,
@@ -151,7 +140,7 @@ def standalone_agent_message():
                 "context_depth": context_depth
             })
         except Exception as e:
-            logger.error(f"Error calling Claude API directly: {e}", exc_info=True)
+            logger.error(f"Error calling LLM: {e}", exc_info=True)
             raise
     
     except Exception as e:

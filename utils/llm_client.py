@@ -2,19 +2,16 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-import anthropic
-import google.generativeai as genai
-from openai import OpenAI
-
 from config import (
     ANTHROPIC_API_KEY,
     ANTHROPIC_MODEL,
-    GOOGLE_API_KEY,
-    GOOGLE_MODEL,
     LLM_MAX_OUTPUT_TOKENS,
     LLM_PROVIDER,
     OPENAI_API_KEY,
     OPENAI_MODEL,
+    OPENAI_COMPATIBLE_URL,
+    OPENAI_COMPATIBLE_MODEL,
+    OPENAI_COMPATIBLE_API_KEY,
 )
 
 
@@ -52,6 +49,58 @@ class BaseAdapter:
         return requested_tokens
 
 
+class OpenAICompatibleAdapter(BaseAdapter):
+    """Adapter for OpenAI-compatible APIs (vLLM, Ollama, text-generation-webui, LiteLLM, etc.)."""
+
+    provider_name = "openai_compatible"
+    default_model = OPENAI_COMPATIBLE_MODEL
+
+    def __init__(self, max_output_tokens: int):
+        super().__init__(max_output_tokens)
+        if not OPENAI_COMPATIBLE_URL:
+            raise ProviderNotConfiguredError("OPENAI_COMPATIBLE_URL is not set")
+        from openai import OpenAI
+
+        logger.info("Initializing OpenAI-compatible client at %s", OPENAI_COMPATIBLE_URL)
+        self.client = OpenAI(
+            base_url=OPENAI_COMPATIBLE_URL,
+            api_key=OPENAI_COMPATIBLE_API_KEY,
+        )
+
+    def chat(self, messages: List[Dict[str, str]], model_hint: Optional[str] = None) -> str:
+        model = model_hint or self.default_model
+        logger.debug(
+            "Sending chat to OpenAI-compatible endpoint",
+            extra={"model": model, "message_count": len(messages)},
+        )
+        completion = self.client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=self._validate_tokens(None),
+        )
+        return completion.choices[0].message.content or ""
+
+    def generate_structured(
+        self, prompt: str, schema: Dict[str, Any], model_hint: Optional[str] = None
+    ) -> Dict[str, Any]:
+        model = model_hint or self.default_model
+        augmented_prompt = (
+            f"{prompt}\n\nRespond ONLY with valid JSON that matches this schema: {json.dumps(schema)}"
+        )
+        logger.debug("Generating structured response via OpenAI-compatible endpoint", extra={"model": model})
+        completion = self.client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": augmented_prompt}],
+            max_tokens=self._validate_tokens(None),
+        )
+        content = completion.choices[0].message.content or "{}"
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError as exc:
+            logger.error("Failed to parse JSON from OpenAI-compatible response", exc_info=True)
+            raise ValueError("Structured response could not be parsed as JSON") from exc
+
+
 class AnthropicAdapter(BaseAdapter):
     provider_name = "anthropic"
     default_model = ANTHROPIC_MODEL
@@ -60,6 +109,8 @@ class AnthropicAdapter(BaseAdapter):
         super().__init__(max_output_tokens)
         if not ANTHROPIC_API_KEY:
             raise ProviderNotConfiguredError("ANTHROPIC_API_KEY is not set")
+        import anthropic
+
         logger.info("Initializing Anthropic client")
         self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -121,6 +172,8 @@ class OpenAIAdapter(BaseAdapter):
         super().__init__(max_output_tokens)
         if not OPENAI_API_KEY:
             raise ProviderNotConfiguredError("OPENAI_API_KEY is not set")
+        from openai import OpenAI
+
         logger.info("Initializing OpenAI client")
         self.client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -152,54 +205,6 @@ class OpenAIAdapter(BaseAdapter):
         )
         content = completion.choices[0].message.content or "{}"
         return json.loads(content)
-
-
-class GoogleAdapter(BaseAdapter):
-    provider_name = "google"
-    default_model = GOOGLE_MODEL
-
-    def __init__(self, max_output_tokens: int):
-        super().__init__(max_output_tokens)
-        if not GOOGLE_API_KEY:
-            raise ProviderNotConfiguredError("GOOGLE_API_KEY is not set")
-        logger.info("Initializing Google Generative AI client")
-        genai.configure(api_key=GOOGLE_API_KEY)
-        self.model = genai.GenerativeModel(self.default_model)
-
-    def chat(self, messages: List[Dict[str, str]], model_hint: Optional[str] = None) -> str:
-        model_name = model_hint or self.default_model
-        if model_name != self.model.model_name:
-            self.model = genai.GenerativeModel(model_name)
-        prompt = "\n".join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in messages])
-        logger.debug(
-            "Sending chat to Google", extra={"model": model_name, "message_count": len(messages)}
-        )
-        result = self.model.generate_content(
-            prompt,
-            generation_config={"max_output_tokens": self._validate_tokens(None)},
-        )
-        return result.text or ""
-
-    def generate_structured(
-        self, prompt: str, schema: Dict[str, Any], model_hint: Optional[str] = None
-    ) -> Dict[str, Any]:
-        model_name = model_hint or self.default_model
-        if model_name != self.model.model_name:
-            self.model = genai.GenerativeModel(model_name)
-
-        augmented_prompt = (
-            f"{prompt}\n\nReturn JSON only that fits this schema: {json.dumps(schema)}"
-        )
-        logger.debug("Generating structured response with Google", extra={"model": model_name})
-        result = self.model.generate_content(
-            augmented_prompt,
-            generation_config={"max_output_tokens": self._validate_tokens(None)},
-        )
-        try:
-            return json.loads(result.text or "{}")
-        except json.JSONDecodeError as exc:
-            logger.error("Failed to parse JSON from Google response", exc_info=True)
-            raise ValueError("Structured response could not be parsed as JSON") from exc
 
 
 class LLMClient:
@@ -236,20 +241,19 @@ class LLMClient:
 
     def _initialize_adapter(self) -> BaseAdapter:
         provider = self.provider_name or self._auto_detect_provider()
+        if provider == "openai_compatible":
+            return OpenAICompatibleAdapter(self.max_output_tokens)
         if provider == "anthropic":
             return AnthropicAdapter(self.max_output_tokens)
         if provider == "openai":
             return OpenAIAdapter(self.max_output_tokens)
-        if provider == "google":
-            return GoogleAdapter(self.max_output_tokens)
-        raise ProviderNotConfiguredError("No supported LLM provider is configured")
+        raise ProviderNotConfiguredError(f"Unknown LLM provider: {provider!r}")
 
     def _auto_detect_provider(self) -> str:
+        if OPENAI_COMPATIBLE_URL:
+            return "openai_compatible"
         if ANTHROPIC_API_KEY:
             return "anthropic"
         if OPENAI_API_KEY:
             return "openai"
-        if GOOGLE_API_KEY:
-            return "google"
-        raise ProviderNotConfiguredError("No API key found for any LLM provider")
-
+        raise ProviderNotConfiguredError("No LLM provider is configured")

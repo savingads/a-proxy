@@ -16,9 +16,9 @@ A-Proxy serves two primary archival objectives:
 
 1. **Persona Creation**: Archivists create personas with four attribute categories (demographic, psychographic, behavioral, contextual) through the web interface.
 
-2. **Chat-Assisted Development**: Optional conversations with Claude AI help explore persona characteristics. Archivists then manually update persona profiles based on insights from the conversation.
+2. **Chat-Assisted Development**: Optional conversations with an LLM help explore persona characteristics. Archivists then manually update persona profiles based on insights from the conversation.
 
-3. **Targeted Browsing**: Browse websites with browser variables configured to reflect persona characteristics (location via VPN, language, user-agent).
+3. **Targeted Browsing**: Browse websites with browser variables configured to reflect persona characteristics (location via proxy, language, geolocation, timezone) using Playwright.
 
 4. **Archiving**: Capture web pages as they appear to the configured persona, preserving both content and context.
 
@@ -31,8 +31,8 @@ A-Proxy serves two primary archival objectives:
 | Persona Management | Create and manage user personas with 4-dimensional attributes |
 | Journey Tracking | Record sequences of web interactions as "journeys" with "waypoints" |
 | Web Archiving | Archive webpages with persona-specific context (language, geolocation) |
-| Claude AI Chat | Chat with Claude AI as or about a persona |
-| VPN Integration | Browse from different geographic regions using NordVPN |
+| LLM Chat | Chat with local or cloud LLMs as or about a persona |
+| Proxy-Based Geo-IP | Browse from different geographic regions using SOCKS5/HTTP proxies |
 
 ## Current Capabilities
 
@@ -40,10 +40,11 @@ A-Proxy serves two primary archival objectives:
 
 - Full CRUD for personas with all 4 dimensions
 - Journey and waypoint management
-- Claude AI chat (requires API key)
-- VPN integration (requires NordVPN setup)
-- Web page archiving with screenshots
+- LLM chat (local models via vLLM/Ollama, or cloud APIs: Claude, GPT)
+- Proxy-based geo-IP shifting (no VPN required)
+- Web page archiving with screenshots via Playwright
 - Internet Archive submission
+- Cross-platform: Windows, macOS, Linux
 
 **Manual processes:**
 

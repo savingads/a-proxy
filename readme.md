@@ -59,31 +59,22 @@ The app will be available at <http://localhost:5002>.
 
 ### LLM Configuration
 
-A-Proxy supports three LLM provider types. Configure one or more in `.env`:
-
-**Local / Self-hosted (recommended for HPC)**
-
-Any OpenAI-compatible endpoint works -- vLLM, Ollama, text-generation-webui, LiteLLM, etc.
+The fastest way to get started is with [Ollama](https://ollama.com) (free, local, no API key needed):
 
 ```bash
-OPENAI_COMPATIBLE_URL=http://picotte-host:8000/v1
-OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-72B-Instruct
-OPENAI_COMPATIBLE_API_KEY=none    # vLLM default
+# Install Ollama (see ollama.com for your platform)
+ollama pull qwen2.5:7b
 ```
 
-**Anthropic (Claude)**
+Then set in `.env`:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
-# ANTHROPIC_MODEL=claude-sonnet-4-20250514  # optional override
+OPENAI_COMPATIBLE_URL=http://localhost:11434/v1
+OPENAI_COMPATIBLE_MODEL=qwen2.5:7b
+OPENAI_COMPATIBLE_API_KEY=none
 ```
 
-**OpenAI (GPT)**
-
-```bash
-OPENAI_API_KEY=sk-YOUR_KEY_HERE
-# OPENAI_MODEL=gpt-4o-mini  # optional override
-```
+A-Proxy also supports **Anthropic (Claude)** and **OpenAI (GPT)** via API keys, as well as **vLLM on HPC clusters** for larger models. See the full [LLM Setup Guide](docs/how-to/llm-setup.md) for all options, including HPC/SLURM instructions.
 
 If multiple providers are configured, auto-detection priority is: local > Anthropic > OpenAI. Set `LLM_PROVIDER` to override (values: `openai_compatible`, `anthropic`, `openai`).
 

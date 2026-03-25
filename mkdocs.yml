@@ -76,6 +76,7 @@ nav:
       - Manage Journeys: how-to/manage-journeys.md
       - Browse as Persona: how-to/browse-as-persona.md
       - Archive Web Pages: how-to/archive-pages.md
+      - LLM Setup: how-to/llm-setup.md
       - Proxy & Geo-IP: how-to/proxy-setup.md
       - Settings: how-to/settings.md
   - Reference:

@@ -1,544 +1,375 @@
-<!doctype html>
-<html lang="en" data-bs-theme="dark">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Direct Browse - A-Proxy</title>
+{% block title %}Browse as {{ persona.name }} - A-Proxy{% endblock %}
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/persona.css') }}" rel="stylesheet">
+{% endblock %}
 
-    <style>
-        /* Main browser container */
-        .browser-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 56px);
-            /* Adjust for the header height */
-            border: 1px solid #495057;
-            border-radius: 0 0 8px 8px;
-            overflow: hidden;
-        }
+{% block extra_style %}
+<style>
+    .session-card {
+        background-color: #1E1E1E;
+        border-radius: 8px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .persona-summary .detail-item {
+        margin-right: 24px;
+        display: inline-block;
+    }
+    .persona-summary .detail-label {
+        font-weight: bold;
+        color: #adb5bd;
+        font-size: 0.85rem;
+    }
+    .history-entry {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+    }
+    .history-entry .history-url {
+        font-size: 0.85rem;
+        word-break: break-all;
+        color: #6ea8fe;
+    }
+    .history-entry .history-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .history-entry .history-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+    .status-active { color: #4CAF50; }
+    .status-inactive { color: #6c757d; }
+</style>
+{% endblock %}
 
-        /* Header with all controls in a single row */
-        .browser-header {
-            background-color: #343a40;
-            padding: 8px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #495057;
-        }
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h3><i class="bi bi-globe2 me-2"></i>Browse as {{ persona.name }}</h3>
+    <a href="{{ url_for('persona.view_persona', persona_id=persona.id) }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-person me-1"></i>View Persona
+    </a>
+</div>
 
-        /* Left section of header */
-        .browser-controls {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-        }
+<!-- Persona summary -->
+<div class="session-card persona-summary">
+    <div class="mb-2">
+        <div class="detail-item">
+            <span class="detail-label">Location:</span>
+            {{ persona.demographic.city or '—' }}{% if persona.demographic.country %}, {{ persona.demographic.country }}{% endif %}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Language:</span>
+            {{ persona.demographic.language or 'en-US' }}
+        </div>
+        {% if persona.demographic.occupation %}
+        <div class="detail-item">
+            <span class="detail-label">Occupation:</span>
+            {{ persona.demographic.occupation }}
+        </div>
+        {% endif %}
+        {% if persona.demographic.age %}
+        <div class="detail-item">
+            <span class="detail-label">Age:</span>
+            {{ persona.demographic.age }}
+        </div>
+        {% endif %}
+    </div>
+    <div class="text-muted small">
+        The browser window will be configured with this persona's locale, geolocation, and timezone.
+        {% if journey_id %}
+        <span class="badge bg-info ms-2">Journey #{{ journey_id }}</span>
+        {% endif %}
+    </div>
+</div>
 
-        /* Right section of header with persona info */
-        .persona-info {
-            display: flex;
-            align-items: center;
-            margin-left: 16px;
-        }
+<div class="row">
+    <!-- Session control -->
+    <div class="col-md-7">
+        <div class="session-card">
+            <h5 class="mb-3">
+                <span id="status-indicator" class="me-2">
+                    {% if session_status.active and session_status.persona_id == persona.id %}
+                    <i class="bi bi-circle-fill status-active"></i>
+                    {% else %}
+                    <i class="bi bi-circle-fill status-inactive"></i>
+                    {% endif %}
+                </span>
+                Browsing Session
+            </h5>
 
-        /* Persona badge styling */
-        .persona-badge {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.25rem;
-            background-color: #0d6efd;
-            margin-right: 8px;
-            white-space: nowrap;
-        }
+            <!-- Inactive state -->
+            <div id="session-inactive" {% if session_status.active and session_status.persona_id == persona.id %}style="display:none"{% endif %}>
+                <div class="input-group mb-3">
+                    <input type="url" id="start-url" class="form-control" placeholder="Starting URL (default: google.com)" value="">
+                    <button id="start-btn" class="btn btn-success" type="button">
+                        <i class="bi bi-play-fill me-1"></i>Start Browsing
+                    </button>
+                </div>
+                <p class="text-muted small mb-0">
+                    Opens a Chromium window configured as {{ persona.name }}. Browse naturally — your navigation is tracked here.
+                </p>
+            </div>
 
-        /* Browser iframe container */
-        .browser-content {
-            flex-grow: 1;
-            background-color: #fff;
-            position: relative;
-        }
+            <!-- Active state -->
+            <div id="session-active" {% if not (session_status.active and session_status.persona_id == persona.id) %}style="display:none"{% endif %}>
+                <div class="mb-3">
+                    <span class="detail-label">Current page:</span>
+                    <span id="current-url" class="ms-1">{{ session_status.current_url if session_status.active else '' }}</span>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button id="archive-btn" class="btn btn-primary" type="button">
+                        <i class="bi bi-archive me-1"></i>Archive Page
+                    </button>
+                    <button id="screenshot-btn" class="btn btn-outline-light" type="button">
+                        <i class="bi bi-camera me-1"></i>Screenshot
+                    </button>
+                    <button id="waypoint-btn" class="btn btn-outline-light" type="button" data-bs-toggle="modal" data-bs-target="#saveWaypointModal">
+                        <i class="bi bi-bookmark-plus me-1"></i>Save Waypoint
+                    </button>
+                    <button id="stop-btn" class="btn btn-outline-danger ms-auto" type="button">
+                        <i class="bi bi-stop-fill me-1"></i>Stop
+                    </button>
+                </div>
+                <div id="action-feedback" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
 
-        /* Browser iframe */
-        .browser-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+    <!-- Navigation history -->
+    <div class="col-md-5">
+        <div class="session-card">
+            <h5 class="mb-3"><i class="bi bi-clock-history me-2"></i>Navigation History</h5>
+            <div id="history-list">
+                {% if session_status.active and session_status.history %}
+                    {% for entry in session_status.history|reverse %}
+                    <div class="history-entry">
+                        <div class="history-title">{{ entry.title or 'Untitled' }}</div>
+                        <div class="history-url">{{ entry.url }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted small">Pages you visit will appear here.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
-        /* URL input styling */
-        .url-input-container {
-            flex-grow: 1;
-            margin: 0 8px;
-        }
-
-        /* History sidebar */
-        .history-sidebar {
-            position: fixed;
-            top: 56px;
-            right: -300px;
-            width: 300px;
-            height: calc(100vh - 56px);
-            background-color: #343a40;
-            transition: right 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 16px;
-            color: white;
-        }
-
-        .history-sidebar.open {
-            right: 0;
-        }
-
-        .history-toggle {
-            opacity: 0.7;
-        }
-
-        .history-toggle:hover {
-            opacity: 1;
-        }
-
-        .history-url {
-            padding: 8px;
-            margin-bottom: 8px;
-            background-color: #495057;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            word-break: break-all;
-        }
-
-        /* Save waypoint button */
-        .save-waypoint-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            z-index: 1050;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Prevent overflow in form controls */
-        .browser-toolbar form {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Modal size adjustment */
-        .modal-dialog.modal-lg {
-            max-width: 800px;
-        }
-
-        /* Persona details section */
-        .persona-details-section {
-            margin-bottom: 1.5rem;
-        }
-    </style>
-
-    <!-- Custom styles for this template -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-</head>
-
-<body>
-    <!-- Single-row header with all controls -->
-    <div class="browser-header">
-        <!-- Left section: navigation controls -->
-        <div class="browser-controls">
-            <button type="button" class="btn btn-sm btn-outline-light me-2" id="back-button">
-                <i class="bi bi-arrow-left"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-light me-2" id="forward-button">
-                <i class="bi bi-arrow-right"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-light me-2" id="refresh-button">
-                <i class="bi bi-arrow-clockwise"></i>
-            </button>
-
-            <!-- URL form -->
-            <form id="browser-navigation" class="url-input-container" method="POST"
-                action="{{ url_for('journey.direct_browse', persona_id=persona.id) }}">
-                <div class="input-group">
-                    <input type="url" name="url" id="url-input" class="form-control"
-                        placeholder="Enter URL (e.g., https://www.google.com)" required value="{{ visited_url or '' }}"
-                        pattern="https?://.+">
-                    <button type="submit" class="btn btn-primary">Go</button>
+<!-- Save Waypoint Modal -->
+<div class="modal fade" id="saveWaypointModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Save as Waypoint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="save-waypoint-form" action="{{ url_for('journey.save_page_as_waypoint', persona_id=persona.id) }}" method="POST">
+                {% set is_direct_browse = not journey_id %}
+                {% set with_screenshot = False %}
+                {% include 'partials/waypoint_form.html' %}
+                {% if journey_id %}
+                <input type="hidden" name="journey_option" value="existing">
+                <input type="hidden" name="journey_id" value="{{ journey_id }}">
+                {% endif %}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Waypoint</button>
                 </div>
             </form>
-
-            <!-- History button -->
-            <button class="btn btn-sm btn-outline-light ms-2 history-toggle" id="history-toggle"
-                title="Browsing History">
-                <i class="bi bi-clock-history"></i>
-            </button>
-
-            <!-- Add waypoint button -->
-            <button type="button" class="btn btn-sm btn-outline-light ms-2" data-bs-toggle="modal"
-                data-bs-target="#saveWaypointModal" title="Add Waypoint">
-                <i class="bi bi-bookmark-plus"></i>
-            </button>
-        </div>
-
-        <!-- Right sections -->
-        <div class="d-flex align-items-center">
-            <!-- Header status area (Login/User) -->
-            {% include 'partials/_header_status.html' %}
-
-            <!-- Persona info -->
-            <div class="persona-info ms-3">
-                <div class="persona-badge">
-                    <i class="bi bi-person-fill me-1"></i> {{ persona.name }}
-                </div>
-
-                {% if persona.demographic.city and persona.demographic.country %}
-                <div class="text-light small me-3">
-                    <i class="bi bi-geo-alt-fill me-1"></i> {{ persona.demographic.city }}, {{
-                    persona.demographic.country
-                    }}
-                </div>
-                {% endif %}
-
-                {% if persona.demographic.language %}
-                <div class="text-light small me-3">
-                    <i class="bi bi-translate me-1"></i> {{ persona.demographic.language }}
-                </div>
-                {% endif %}
-
-                <!-- Persona details button -->
-                <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal"
-                    data-bs-target="#personaDetailsModal" title="View Persona Details">
-                    <i class="bi bi-person-badge"></i>
-                </button>
-            </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Browser container -->
-    <div class="browser-container">
-        <!-- Browser content -->
-        <div class="browser-content">
-            {% if url_content %}
-            <div class="p-4 bg-white">
-                <h3>Content Placeholder</h3>
-                <p>{{ url_content }}</p>
-                <hr>
-                <div class="alert alert-info">
-                    <strong>Browsing Info:</strong><br>
-                    <ul>
-                        <li><strong>Persona:</strong> {{ persona.name }}</li>
-                        <li><strong>Language:</strong> {{ persona.demographic.language or 'en-US' }}</li>
-                        {% if persona.demographic.latitude and persona.demographic.longitude %}
-                        <li><strong>Geolocation:</strong> {{ persona.demographic.latitude }},{{
-                            persona.demographic.longitude }}</li>
-                        {% endif %}
-                        <li><strong>Browser Type:</strong> {{ persona.contextual.browser_type or 'Not specified' }}
-                            (from persona)</li>
-                        <li><strong>Device Type:</strong> {{ persona.contextual.device_type or 'Not specified' }} (from
-                            persona)</li>
-                    </ul>
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const personaId = {{ persona.id }};
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const archiveBtn = document.getElementById('archive-btn');
+    const screenshotBtn = document.getElementById('screenshot-btn');
+    const startUrlInput = document.getElementById('start-url');
+    const sessionActive = document.getElementById('session-active');
+    const sessionInactive = document.getElementById('session-inactive');
+    const statusIndicator = document.getElementById('status-indicator');
+    const currentUrlEl = document.getElementById('current-url');
+    const historyList = document.getElementById('history-list');
+    const actionFeedback = document.getElementById('action-feedback');
+    const waypointUrlInput = document.getElementById('waypoint-url');
+    const waypointTitleInput = document.getElementById('waypoint-title');
+    const saveWaypointModal = document.getElementById('saveWaypointModal');
+
+    let polling = null;
+    let lastHistoryLength = 0;
+
+    function showFeedback(msg, type) {
+        actionFeedback.innerHTML = `<div class="alert alert-${type} py-1 px-2 small mb-0">${msg}</div>`;
+        setTimeout(() => { actionFeedback.innerHTML = ''; }, 4000);
+    }
+
+    function setActive(active) {
+        sessionActive.style.display = active ? '' : 'none';
+        sessionInactive.style.display = active ? 'none' : '';
+        statusIndicator.innerHTML = active
+            ? '<i class="bi bi-circle-fill status-active"></i>'
+            : '<i class="bi bi-circle-fill status-inactive"></i>';
+        if (active && !polling) {
+            polling = setInterval(pollStatus, 3000);
+        } else if (!active && polling) {
+            clearInterval(polling);
+            polling = null;
+        }
+    }
+
+    function renderHistory(history) {
+        if (!history || history.length === 0) {
+            historyList.innerHTML = '<p class="text-muted small">Pages you visit will appear here.</p>';
+            return;
+        }
+        // Show newest first
+        const reversed = [...history].reverse();
+        historyList.innerHTML = reversed.map(e => `
+            <div class="history-entry">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="history-title">${e.title || 'Untitled'}</div>
+                        <div class="history-url">${e.url}</div>
+                    </div>
+                    <div class="history-time">${new Date(e.timestamp).toLocaleTimeString()}</div>
                 </div>
             </div>
-            {% else %}
-            <div class="d-flex justify-content-center align-items-center h-100 bg-white">
-                <div class="welcome text-center p-5">
-                    <h1 class="text-primary mb-4">Browse as {{ persona.name }}</h1>
-                    <p class="mb-3">Enter a URL in the address bar above and click "Go" to begin browsing.</p>
-                    <div class="arrow fs-1 text-secondary my-3">↑</div>
-                    <p class="mb-3">Use the bookmark button to save important pages as journey waypoints.</p>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+        `).join('');
+    }
 
-    <!-- Recently visited URLs sidebar -->
-    <div class="history-sidebar" id="history-sidebar">
-        <h6 class="mb-3">Recently Visited URLs</h6>
-        <div class="small mb-3 text-warning">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> URLs will be discarded unless saved as waypoints
-        </div>
-        <div id="history-list">
-            <!-- Will be populated by JavaScript -->
-        </div>
-    </div>
+    function pollStatus() {
+        fetch('/session-status')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.active || data.persona_id !== personaId) {
+                    setActive(false);
+                    renderHistory([]);
+                    return;
+                }
+                currentUrlEl.textContent = data.current_url || '';
+                if (data.history && data.history.length !== lastHistoryLength) {
+                    renderHistory(data.history);
+                    lastHistoryLength = data.history.length;
+                }
+            })
+            .catch(() => {});
+    }
 
-    <!-- Add Waypoint Button (Fixed) -->
-    <button type="button" class="btn btn-primary save-waypoint-btn" data-bs-toggle="modal"
-        data-bs-target="#saveWaypointModal">
-        <i class="bi bi-bookmark-plus fs-4"></i>
-    </button>
+    // Start browsing
+    startBtn.addEventListener('click', function() {
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Launching...';
+        const body = { persona_id: personaId };
+        const url = startUrlInput.value.trim();
+        if (url) body.start_url = url;
 
-    <!-- Save Waypoint Modal -->
-    <div class="modal fade" id="saveWaypointModal" tabindex="-1" aria-labelledby="saveWaypointModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="saveWaypointModalLabel">Save Current Page as Waypoint</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="save-waypoint-form"
-                    action="{{ url_for('journey.save_page_as_waypoint', persona_id=persona.id) }}" method="POST">
-                    <!-- Set variables to be used in the included template -->
-                    {% set is_direct_browse = True %}
-                    {% set with_screenshot = True %}
-                    <!-- Include the waypoint form partial -->
-                    {% include 'partials/waypoint_form.html' %}
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Waypoint</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Persona Details Modal -->
-    <div class="modal fade" id="personaDetailsModal" tabindex="-1" aria-labelledby="personaDetailsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="personaDetailsModalLabel">
-                        <i class="bi bi-person-badge me-2"></i> {{ persona.name }} - Persona Details
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Demographic Information -->
-                    <div class="persona-details-section">
-                        <h6 class="border-bottom pb-2 mb-3">Demographics</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Age:</strong> {{ persona.demographic.age or 'Not specified' }}</p>
-                                <p><strong>Gender:</strong> {{ persona.demographic.gender or 'Not specified' }}</p>
-                                <p><strong>Location:</strong>
-                                    {% if persona.demographic.city and persona.demographic.country %}
-                                    {{ persona.demographic.city }}, {{ persona.demographic.country }}
-                                    {% else %}
-                                    Not specified
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Language:</strong> {{ persona.demographic.language or 'Not specified' }}</p>
-                                <p><strong>Education:</strong> {{ persona.demographic.education or 'Not specified' }}
-                                </p>
-                                <p><strong>Occupation:</strong> {{ persona.demographic.occupation or 'Not specified' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contextual Information -->
-                    {% if persona.contextual %}
-                    <div class="persona-details-section">
-                        <h6 class="border-bottom pb-2 mb-3">Contextual Information</h6>
-                        <div class="row">
-                            {% for key, value in persona.contextual.items() %}
-                            <div class="col-md-6 mb-2">
-                                <p><strong>{{ key|replace('_', ' ')|capitalize }}:</strong> {{ value }}</p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Psychographic Information -->
-                    {% if persona.psychographic %}
-                    <div class="persona-details-section">
-                        <h6 class="border-bottom pb-2 mb-3">Psychographic Profile</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Lifestyle:</strong> {{ persona.psychographic.lifestyle or 'Not specified' }}
-                                </p>
-                                <p><strong>Personality:</strong> {{ persona.psychographic.personality or 'Not specified'
-                                    }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                {% if persona.psychographic.personal_values %}
-                                <p><strong>Personal Values:</strong>
-                                    {{ persona.psychographic.personal_values|join(', ') }}
-                                </p>
-                                {% endif %}
-                                {% if persona.psychographic.interests %}
-                                <p><strong>Interests:</strong>
-                                    {{ persona.psychographic.interests|join(', ') }}
-                                </p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Behavioral Information -->
-                    {% if persona.behavioral %}
-                    <div class="persona-details-section">
-                        <h6 class="border-bottom pb-2 mb-3">Behavioral Profile</h6>
-                        <div class="row">
-                            {% if persona.behavioral.browsing_habits %}
-                            <div class="col-md-6 mb-2">
-                                <p><strong>Browsing habits:</strong>
-                                    {{ persona.behavioral.browsing_habits|join(', ') }}
-                                </p>
-                            </div>
-                            {% endif %}
-                            {% if persona.behavioral.device_usage %}
-                            <div class="col-md-6 mb-2">
-                                <p><strong>Device usage:</strong></p>
-                                <ul>
-                                    {% for device, usage in persona.behavioral.device_usage.items() %}
-                                    <li>{{ device }}: {{ usage }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Additional Information -->
-                    {% if persona.description %}
-                    <div class="persona-details-section">
-                        <h6 class="border-bottom pb-2 mb-3">Description</h6>
-                        <p>{{ persona.description }}</p>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlInput = document.getElementById('url-input');
-            const backButton = document.getElementById('back-button');
-            const forwardButton = document.getElementById('forward-button');
-            const refreshButton = document.getElementById('refresh-button');
-            const waypointUrlInput = document.getElementById('waypoint-url');
-            const waypointTitleInput = document.getElementById('waypoint-title');
-            const historyToggle = document.getElementById('history-toggle');
-            const historySidebar = document.getElementById('history-sidebar');
-            const historyList = document.getElementById('history-list');
-            const saveWaypointModal = document.getElementById('saveWaypointModal');
-
-            // Browser history - stored in session storage for this demo
-            let browserHistory = JSON.parse(sessionStorage.getItem('browserHistory') || '[]');
-
-            // Set up URL history sidebar toggle
-            historyToggle.addEventListener('click', function () {
-                historySidebar.classList.toggle('open');
-            });
-
-            // Function to update history sidebar
-            function updateHistorySidebar() {
-                historyList.innerHTML = '';
-                browserHistory.forEach(item => {
-                    const urlElement = document.createElement('div');
-                    urlElement.className = 'history-url';
-
-                    urlElement.innerHTML = `
-                        <div class="mb-1 fw-bold">${item.title || 'Untitled'}</div>
-                        <div class="text-truncate">${item.url}</div>
-                        <form method="POST" action="{{ url_for('journey.direct_browse', persona_id=persona.id) }}">
-                            <input type="hidden" name="url" value="${item.url}">
-                            <button type="submit" class="btn btn-sm btn-outline-light mt-1">
-                                <i class="bi bi-box-arrow-up-right"></i> Load
-                            </button>
-                        </form>
-                    `;
-
-                    historyList.appendChild(urlElement);
-                });
+        fetch('/start-session', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+        })
+        .then(r => r.json())
+        .then(data => {
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i>Start Browsing';
+            if (data.success) {
+                setActive(true);
+                lastHistoryLength = 0;
+                pollStatus();
+            } else {
+                showFeedback(data.error || 'Failed to start session', 'danger');
             }
-
-            // Initialize history sidebar
-            updateHistorySidebar();
-
-            // Set up navigation buttons
-            backButton.addEventListener('click', function () {
-                window.history.back();
-            });
-
-            forwardButton.addEventListener('click', function () {
-                window.history.forward();
-            });
-
-            refreshButton.addEventListener('click', function () {
-                window.location.reload();
-            });
-
-            // URL form submission
-            const urlForm = document.getElementById('browser-navigation');
-            urlForm.addEventListener('submit', function () {
-                const url = urlInput.value;
-
-                // Add to browsing history if not already present
-                if (url && !browserHistory.some(item => item.url === url)) {
-                    browserHistory.unshift({
-                        url: url,
-                        title: 'Visit to ' + url,
-                        timestamp: new Date().toISOString()
-                    });
-
-                    // Keep only the last 10 items
-                    if (browserHistory.length > 10) {
-                        browserHistory = browserHistory.slice(0, 10);
-                    }
-
-                    // Save to session storage
-                    sessionStorage.setItem('browserHistory', JSON.stringify(browserHistory));
-
-                    // Update history sidebar
-                    updateHistorySidebar();
-                }
-            });
-
-            // Prepare waypoint data when opening the modal
-            saveWaypointModal.addEventListener('show.bs.modal', function (event) {
-                // Get the current URL 
-                waypointUrlInput.value = urlInput.value || '';
-
-                // Set a default title
-                waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
-
-                // Add any journeys this user already has
-                if (document.getElementById('journey-existing')) {
-                    // Set up the journey selection toggle
-                    const journeyNew = document.getElementById('journey-new');
-                    const journeyExisting = document.getElementById('journey-existing');
-                    const newJourneyForm = document.getElementById('new-journey-form');
-                    const existingJourneySelect = document.getElementById('existing-journey-select');
-
-                    journeyNew.addEventListener('change', function () {
-                        if (this.checked) {
-                            newJourneyForm.style.display = 'block';
-                            existingJourneySelect.style.display = 'none';
-                        }
-                    });
-
-                    journeyExisting.addEventListener('change', function () {
-                        if (this.checked) {
-                            newJourneyForm.style.display = 'none';
-                            existingJourneySelect.style.display = 'block';
-                        }
-                    });
-                }
-            });
+        })
+        .catch(e => {
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i>Start Browsing';
+            showFeedback('Error starting session', 'danger');
         });
-    </script>
-</body>
+    });
 
-</html>
+    // Stop browsing
+    stopBtn.addEventListener('click', function() {
+        fetch('/stop-session', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                setActive(false);
+                renderHistory([]);
+            });
+    });
+
+    // Archive current page
+    archiveBtn.addEventListener('click', function() {
+        archiveBtn.disabled = true;
+        fetch('/archive-page-from-session', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                archiveBtn.disabled = false;
+                if (data.success) {
+                    showFeedback(`Archived: ${data.title || data.url}`, 'success');
+                } else {
+                    showFeedback(data.error || 'Archive failed', 'danger');
+                }
+            })
+            .catch(() => {
+                archiveBtn.disabled = false;
+                showFeedback('Archive request failed', 'danger');
+            });
+    });
+
+    // Screenshot
+    screenshotBtn.addEventListener('click', function() {
+        screenshotBtn.disabled = true;
+        fetch('/capture-page', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                screenshotBtn.disabled = false;
+                if (data.success) {
+                    showFeedback(`Screenshot saved: ${data.screenshot_path}`, 'success');
+                } else {
+                    showFeedback(data.error || 'Screenshot failed', 'danger');
+                }
+            })
+            .catch(() => {
+                screenshotBtn.disabled = false;
+                showFeedback('Screenshot request failed', 'danger');
+            });
+    });
+
+    // Prepare waypoint modal
+    saveWaypointModal.addEventListener('show.bs.modal', function() {
+        if (waypointUrlInput) waypointUrlInput.value = currentUrlEl.textContent || '';
+        if (waypointTitleInput) waypointTitleInput.value = 'Waypoint at ' + new Date().toLocaleTimeString();
+
+        // Journey toggle (only when not pre-set)
+        const journeyNew = document.getElementById('journey-new');
+        const journeyExisting = document.getElementById('journey-existing');
+        const newJourneyForm = document.getElementById('new-journey-form');
+        const existingJourneySelect = document.getElementById('existing-journey-select');
+        if (journeyNew && journeyExisting && newJourneyForm && existingJourneySelect) {
+            journeyNew.addEventListener('change', function() {
+                if (this.checked) { newJourneyForm.style.display = ''; existingJourneySelect.style.display = 'none'; }
+            });
+            journeyExisting.addEventListener('change', function() {
+                if (this.checked) { newJourneyForm.style.display = 'none'; existingJourneySelect.style.display = ''; }
+            });
+        }
+    });
+
+    // If session is already active for this persona, start polling
+    {% if session_status.active and session_status.persona_id == persona.id %}
+    setActive(true);
+    lastHistoryLength = {{ session_status.history|length if session_status.history else 0 }};
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -81,6 +81,39 @@ POST /delete-persona/<persona_id>
 
 Deletes the specified persona.
 
+### Export Persona (JSON)
+
+```
+GET /persona/<persona_id>/export
+```
+
+Downloads the persona as a JSON file with all four attribute categories. Internal database fields (`id`, `persona_id`) are stripped from the export.
+
+**Response:** JSON file download (`Content-Disposition: attachment`).
+
+### Use Persona
+
+```
+GET /use-persona/<persona_id>
+```
+
+Sets the persona as active in the current session, storing geolocation and language for browsing.
+
+### Field Configuration
+
+```
+GET /field-config
+```
+
+Returns persona field configuration as JSON (API endpoint).
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| category | string | Filter by category (psychographic, behavioral, contextual) |
+| field | string | Filter by specific field name |
+
 ## Journey Endpoints
 
 ### List Journeys
@@ -216,20 +249,122 @@ Returns HTML interface for browsing/chatting as a persona.
 | persona_id | int | Pre-select persona |
 | mode | string | browse or chat |
 
-### Browse Page
+### Direct Browse (Launch Page)
 
 ```
-POST /browse
+GET /direct-browse/<persona_id>
 ```
 
-Navigate to a URL as the selected persona.
+Returns the headful browsing launch/control page for a persona. Accepts optional `journey_id` query parameter to link waypoints to a specific journey.
+
+### Headful Session Endpoints (API)
+
+These JSON endpoints manage headful browsing sessions:
+
+#### Start Session
+
+```
+POST /start-session
+```
+
+Launches a visible Chromium window configured with the persona's locale, geolocation, timezone, and proxy.
+
+**Request Body (JSON):**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| persona_id | int | Yes | Persona to browse as |
+| start_url | string | No | Starting URL (default: google.com) |
+
+**Response:**
+
+```json
+{"success": true, "persona_id": 1}
+```
+
+#### Session Status
+
+```
+GET /session-status
+```
+
+Returns the current browsing session state including URL and navigation history.
+
+**Response:**
+
+```json
+{
+    "active": true,
+    "persona_id": 1,
+    "current_url": "https://example.com",
+    "current_title": "Example Domain",
+    "history": [
+        {"url": "https://google.com", "title": "Google", "timestamp": "..."},
+        {"url": "https://example.com", "title": "Example Domain", "timestamp": "..."}
+    ],
+    "started_at": "2026-03-26T04:30:00"
+}
+```
+
+#### Capture Page
+
+```
+POST /capture-page
+```
+
+Takes a screenshot of the current page in the active browsing session.
+
+#### Archive Page from Session
+
+```
+POST /archive-page-from-session
+```
+
+Archives the current page from the active session (saves HTML, screenshot, and metadata).
+
+#### Stop Session
+
+```
+POST /stop-session
+```
+
+Closes the headful browser and ends the session.
+
+### Headless Browsing Endpoints
+
+#### Visit Page
+
+```
+POST /visit-page
+```
+
+Visit a URL headlessly with persona settings. Used for programmatic automation.
 
 **Form Fields:**
 
 | Field | Type | Description |
 |-------|------|-------------|
 | url | string | Target URL |
-| persona_id | int | Persona to use |
+| language | string | Locale (e.g., "en-US") |
+| geolocation | string | "lat,lng" format |
+| take_screenshot | string | "true" to capture screenshot |
+
+#### Archive Page
+
+```
+POST /archive_page
+```
+
+Archive a URL headlessly (HTML, screenshot, metadata saved to filesystem and database).
+
+**Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| url | string | Target URL |
+| language | string | Locale |
+| geolocation | string | "lat,lng" format |
+| persona_id | int | Persona used for the archive |
 
 ## Network Endpoints
 

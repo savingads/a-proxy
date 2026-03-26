@@ -8,7 +8,8 @@ services:
       - ./data:/app/data
       - ./archives:/app/archives
     environment:
-      - OPENAI_COMPATIBLE_URL=${OPENAI_COMPATIBLE_URL:-http://ollama:11434/v1}
+      # Default to bundled Ollama; override via .env to use Picotte or cloud APIs
+      - OPENAI_COMPATIBLE_URL=${DOCKER_LLM_URL:-http://ollama:11434/v1}
       - OPENAI_COMPATIBLE_MODEL=${OPENAI_COMPATIBLE_MODEL:-qwen2.5:7b}
       - OPENAI_COMPATIBLE_API_KEY=${OPENAI_COMPATIBLE_API_KEY:-none}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}

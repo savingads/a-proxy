@@ -61,11 +61,11 @@ Picotte provides access to larger models (e.g., Qwen 2.5 72B) but requires:
 If you have a tunnel running (`ssh -L 8000:<gpu-node>:8000 picotte -N`), set in `.env`:
 
 ```bash
-OPENAI_COMPATIBLE_URL=http://host.docker.internal:8000/v1
+DOCKER_LLM_URL=http://host.docker.internal:8000/v1
 OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-72B-Instruct
 ```
 
-The `host.docker.internal` hostname lets the container reach services on the host machine. See the [Picotte HPC Guide](../how-to/picotte-vllm.md) for full setup instructions.
+The `DOCKER_LLM_URL` variable overrides the bundled Ollama URL for Docker only (it won't conflict with your local `OPENAI_COMPATIBLE_URL` setting). The `host.docker.internal` hostname lets the container reach services on the host machine. See the [Picotte HPC Guide](../how-to/picotte-vllm.md) for full setup instructions.
 
 ### Stop the Containers
 

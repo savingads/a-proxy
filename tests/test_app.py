@@ -222,24 +222,30 @@ class TestApp(unittest.TestCase):
             self.assertNotEqual(persona['id'], temp_persona_id)
     
     def test_journey_browse_page(self):
-        """Test that the journey browse page loads successfully"""
-        # Create a test journey
+        """Test that journey browse redirects appropriately"""
+        # Journey without persona redirects with warning
         test_journey = {
-            "name": "Test Browse Journey", 
-            "description": "Test journey for browsing", 
+            "name": "Test Browse Journey",
+            "description": "Test journey for browsing",
             "journey_type": "research"
         }
         journey_id = database.create_journey(**test_journey)
-        
-        # Access the journey browse page
-        response = self.client.get(f'/journey/{journey_id}/browse')
-        self.assertEqual(response.status_code, 200)
-        
-        # Check that the page contains the journey name
-        self.assertIn(b'Test Browse Journey', response.data)
-        
-        # Check that the page contains the browser iframe
-        self.assertIn(b'<iframe name="browser-frame" id="browser-frame"', response.data)
+
+        response = self.client.get(f'/journey/{journey_id}/browse', follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+        # Journey with persona redirects to direct-browse
+        journey_with_persona = {
+            "name": "Persona Browse Journey",
+            "description": "Test",
+            "journey_type": "research",
+            "persona_id": self.test_persona_id,
+        }
+        journey_id2 = database.create_journey(**journey_with_persona)
+
+        response2 = self.client.get(f'/journey/{journey_id2}/browse', follow_redirects=False)
+        self.assertEqual(response2.status_code, 302)
+        self.assertIn(f'/direct-browse/{self.test_persona_id}', response2.headers['Location'])
     
     def test_journey_edit_page(self):
         """Test that the journey edit page loads successfully"""

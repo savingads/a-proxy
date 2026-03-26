@@ -1,190 +1,147 @@
 # Browse as Persona
 
-A-Proxy allows you to browse the web from a persona's perspective, with browser configuration reflecting the persona's attributes.
+A-Proxy supports two browsing modes: **headful** (interactive) and **headless** (automated). Both use Playwright to configure the browser with persona-specific locale, geolocation, timezone, and proxy settings.
 
-## Overview
+## Headful Browsing (Interactive)
 
-When browsing as a persona, the system configures via Playwright:
+Headful browsing launches a visible Chromium window configured with the persona's attributes. You browse naturally in the real browser while A-Proxy tracks your navigation and provides controls to archive pages and save waypoints.
 
-- Geographic location (via proxy if configured, plus geolocation emulation)
-- Browser language and locale
-- Timezone
-- Viewport/screen size
+### Starting a Session
 
-This enables capturing web content as it would appear to that specific user type.
-
-## Starting a Browsing Session
-
-### Method 1: Interact As Page
+#### From the Interact As page
 
 1. Navigate to **Interact As**
-2. Select a persona from the dropdown
-3. Choose **Browse** mode
-4. Enter a URL or start exploring
+2. Click **Browse** on a persona card
+3. Optionally enter a starting URL (defaults to google.com)
+4. Click **Start Browsing**
+5. A Chromium window opens with the persona's settings applied
 
-### Method 2: Journey Browse
+#### From a Journey
 
 1. Navigate to **Journeys**
-2. Open an existing journey
-3. Click **Browse** to continue the journey
-4. The persona is automatically selected
+2. Open a journey that has a linked persona
+3. Click **Browse** — this opens the same launch page with the journey pre-selected
+4. Waypoints are automatically saved to that journey
 
-### Method 3: Persona Quick Action
-
-1. Navigate to **Personas**
-2. Click on a persona
-3. Click **Browse As** button
-4. Enter a starting URL
-
-## Browser Configuration
-
-### Automatic Settings
-
-Playwright configures the following based on persona attributes:
+### What the Browser Emulates
 
 | Persona Attribute | Browser Setting |
 |-------------------|-----------------|
-| Language | Locale (Accept-Language + UI language) |
-| Latitude/Longitude | Geolocation emulation |
-| Country/Region | Timezone emulation |
-| Device Type | Viewport dimensions |
+| Language (`demographic.language`) | Locale — Accept-Language header and UI language |
+| Latitude/Longitude | Geolocation — `navigator.geolocation` API |
+| Country | Timezone — via `REGION_LANGUAGE_MAP` lookup |
+| Proxy (session or env) | Per-context traffic routing |
 
-### Proxy Integration
+These are applied natively by Playwright — no JavaScript injection needed.
 
-If a proxy is configured and the persona has geographic attributes:
+### The Control Page
 
-| Persona Attribute | Proxy Setting |
-|-------------------|---------------|
-| Country | Proxy exit node region |
+While browsing, the `/direct-browse/<persona_id>` page shows:
+
+- **Session status** — active/inactive indicator, current URL
+- **Navigation history** — every page you visit is tracked automatically
+- **Actions:**
+    - **Archive Page** — saves HTML, screenshot, and metadata from the live browser page to the archive
+    - **Screenshot** — captures a full-page screenshot
+    - **Save Waypoint** — saves the current page as a waypoint (with optional journey assignment)
+    - **Stop** — closes the browser window and ends the session
+
+The control page polls the session status every 3 seconds, so your navigation history updates in near real-time.
+
+### Session Behavior
+
+- **One session at a time** — starting a new session closes any existing one
+- **Isolated contexts** — each session starts fresh with no cookies or history from previous sessions
+- **Persistent until stopped** — the browser stays open until you click Stop or the server shuts down
+
+## Headless Browsing (Automated)
+
+Headless browsing runs Playwright in the background without a visible window. This is used for programmatic page visits, archiving, and demo scripts.
+
+### Visit a Page
+
+```
+POST /visit-page
+```
+
+Visits a URL with persona settings and optionally takes a screenshot. The browser context is created, the page is loaded, and the context is immediately closed.
+
+**Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| url | string | Target URL |
+| language | string | Locale (e.g., "en-US") |
+| geolocation | string | "lat,lng" format |
+| take_screenshot | string | "true" to capture screenshot |
+
+### Archive a Page
+
+```
+POST /archive_page
+```
+
+Archives a URL by saving HTML, a full-page screenshot, and metadata to the filesystem and database. Used by the Archive button on persona detail pages.
+
+**Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| url | string | Target URL |
+| language | string | Locale |
+| geolocation | string | "lat,lng" format |
+| persona_id | int | Persona used for the archive |
+
+### Demo Scripts
+
+The `demo/` directory contains Playwright scripts that automate the app's UI for demonstrations:
+
+```bash
+python demo/demo_script.py          # Run the feature demo
+python demo/create_pdf_report.py    # Generate PDF from screenshots
+```
+
+## Proxy Integration
+
+If a proxy is configured (via `.env` or the session), all browser traffic routes through it:
+
+| Persona Attribute | Proxy Effect |
+|-------------------|--------------|
+| Country | Proxy exit node determines GeoIP |
 | City | Closest available proxy server |
 
-See [Proxy & Geo-IP](proxy-setup.md) for setup details.
+Both headful and headless modes support per-context proxies. See [Proxy & Geo-IP](proxy-setup.md) for configuration.
 
-### What Playwright Emulates Natively
+## Session API Endpoints
 
-Playwright provides native emulation for:
+These JSON endpoints power the headful browsing control page:
 
-- **Geolocation** -- precise lat/lng coordinates reported to the browser
-- **Locale** -- language and regional formatting
-- **Timezone** -- `Intl.DateTimeFormat` and related APIs
-- **Proxy** -- per-context traffic routing
-
-No JavaScript injection or CDP commands needed.
-
-## Browsing Interface
-
-### Navigation Bar
-
-The browsing interface includes:
-
-- **URL Bar**: Enter addresses directly
-- **Back/Forward**: Navigate history
-- **Refresh**: Reload current page
-- **Archive**: Save the current page
-
-### Persona Context Display
-
-A sidebar or header shows:
-
-- Current persona name
-- Active geographic settings
-- Browser configuration summary
-
-### Page Viewer
-
-The main area displays web content with:
-
-- Full page rendering
-- JavaScript execution
-- Cookie handling based on session
-
-## Recording Waypoints
-
-Each page visit is automatically recorded as a waypoint:
-
-1. Page URL is logged
-2. Page title is captured
-3. Timestamp is recorded
-4. Sequence number is assigned
-
-### Adding Notes
-
-While browsing:
-
-1. Click the **Notes** button
-2. Add observations about the current page
-3. Notes are attached to the waypoint
-
-### Taking Screenshots
-
-Manually capture the current view:
-
-1. Click the **Screenshot** button
-2. The image is saved to the waypoint
-3. Useful for capturing specific states
-
-## Managing Cookies
-
-Cookies affect personalization and tracking:
-
-### Session Cookies
-
-- Created during browsing
-- Persist within the browsing session
-- Cleared when session ends (Playwright contexts are isolated)
-
-### Cookie Limitations
-
-- No persistent cookie profiles per persona
-- Each session starts fresh
-- Cookie-based personalization requires building history within a session
-
-## Best Practices
-
-### Planning Sessions
-
-Before browsing:
-
-1. Review the persona's attributes
-2. Ensure proxy is configured if needed
-3. Determine target websites
-4. Create or select an appropriate journey
-
-### Documenting Observations
-
-During browsing:
-
-1. Note differences from expected content
-2. Capture screenshots of personalized elements
-3. Record any error states or blocking
-
-### Session Hygiene
-
-For clean captures:
-
-1. Start with fresh session (each Playwright context is isolated)
-2. Avoid mixing persona sessions
-3. Use different proxies for different geographic personas
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/start-session` | POST | Launch a headful session for a persona |
+| `/session-status` | GET | Get current URL, history, and session state |
+| `/capture-page` | POST | Screenshot the active page |
+| `/archive-page-from-session` | POST | Archive the active page (HTML + screenshot + metadata) |
+| `/stop-session` | POST | Close the browser and end the session |
 
 ## Troubleshooting
 
-### Pages Not Loading
+### Browser window doesn't open
 
-1. Check internet connectivity
-2. Verify proxy connection (if using)
-3. Try without proxy to isolate issue
+- Ensure `BROWSER_HEADLESS` is not set to `True` in `.env` (headful sessions always launch in headful mode regardless of this setting)
+- On Docker/headless servers, headful browsing requires a display (X11 or Wayland)
 
-### Wrong Location Detected
+### Wrong location detected by websites
 
-1. Confirm proxy is active (check dashboard IP info)
-2. Check proxy exit node matches persona location
+1. Check proxy is configured — GeoIP depends on the proxy exit node, not just geolocation emulation
+2. Geolocation emulation only affects the JavaScript API (`navigator.geolocation`), not the IP address
 3. Some sites use multiple detection methods beyond GeoIP
 
-### Missing Personalization
+### Pages not loading
 
-1. Personalization may require browsing history
-2. Build session history through repeated visits
-3. Some personalization requires login
+1. Check internet connectivity
+2. Verify proxy connection if using one (`/network-status` shows current IP info)
+3. Try without proxy to isolate the issue
 
 ## Related Guides
 

@@ -178,23 +178,14 @@ def browse_journey(journey_id):
     if not journey:
         flash("Journey not found", "danger")
         return redirect(url_for('journey.list_journeys'))
-    
-    # Get persona data if a persona is associated with this journey
-    persona = None
-    if journey['persona_id']:
-        # Import inside function to avoid circular imports
-        from utils.persona_client_db import get_db_persona_client
-        try:
-            client = get_db_persona_client()
-            persona = client.get_persona(journey['persona_id'])
-        except Exception as e:
-            logging.error(f"Error getting persona {journey['persona_id']}: {e}")
-            flash(f"Error loading persona: {str(e)}", "danger")
-    
-    # Get existing waypoints
-    waypoints = database.get_waypoints(journey_id)
-    
-    return render_template("journey_browse.html", journey=journey, persona=persona, waypoints=waypoints)
+
+    if journey.get('persona_id'):
+        return redirect(url_for('journey.direct_browse',
+                                persona_id=journey['persona_id'],
+                                journey_id=journey_id))
+
+    flash("This journey has no linked persona. Assign a persona to enable browsing.", "warning")
+    return redirect(url_for('journey.view_journey', journey_id=journey_id))
 
 @journey_bp.route("/journey/<int:journey_id>/add-waypoint", methods=["POST"])
 def add_waypoint(journey_id):
@@ -353,14 +344,12 @@ def complete_journey(journey_id):
         flash(f"Error completing journey: {str(e)}", "danger")
         return redirect(url_for('journey.view_journey', journey_id=journey_id))
 
-@journey_bp.route("/direct-browse/<int:persona_id>", methods=["GET", "POST"])
+@journey_bp.route("/direct-browse/<int:persona_id>")
 def direct_browse(persona_id):
-    """Start a lightweight browsing session with a persona."""
-    # Import inside function to avoid circular imports
+    """Launch page for headful browsing as a persona."""
     from utils.persona_client_db import get_db_persona_client
-    
-    # Get persona data
-    persona = None
+    from utils.browser import BrowserManager
+
     try:
         client = get_db_persona_client()
         persona = client.get_persona(persona_id)
@@ -371,42 +360,21 @@ def direct_browse(persona_id):
         logging.error(f"Error getting persona {persona_id}: {e}")
         flash(f"Error loading persona: {str(e)}", "danger")
         return redirect(url_for('journey.browse_as'))
-    
-    # Get existing journeys for this persona to show in the waypoint form
+
     try:
         existing_journeys = [j for j in database.get_all_journeys() if j['persona_id'] == persona_id]
     except Exception as e:
         logging.error(f"Error getting journeys for persona {persona_id}: {e}")
         existing_journeys = []
-    
-    # Handle URL submission
-    url_content = None
-    visited_url = None
-    
-    if request.method == "POST":
-        url = request.form.get("url", "")
-        if url:
-            visited_url = url
-            # For now, just display the URL that was entered
-            url_content = f"You entered: {url}"
-            
-            # Record that we're using this persona's language and location
-            language = persona.get('demographic', {}).get('language', 'en-US')
-            
-            # Get geolocation from persona if available
-            lat = persona.get('demographic', {}).get('latitude')
-            lng = persona.get('demographic', {}).get('longitude')
-            geolocation = f"{lat},{lng}" if lat and lng else None
-            
-            # Log the browsing for debugging purposes
-            logging.info(f"Browsing as {persona['name']} to {url} with language {language} and geolocation {geolocation}")
 
-    # Render the direct browsing template
-    return render_template("direct_browse.html", 
-                          persona=persona, 
-                          existing_journeys=existing_journeys,
-                          url_content=url_content,
-                          visited_url=visited_url)
+    journey_id = request.args.get("journey_id", type=int)
+    session_status = BrowserManager.get_instance().get_session_status()
+
+    return render_template("direct_browse.html",
+                           persona=persona,
+                           existing_journeys=existing_journeys,
+                           journey_id=journey_id,
+                           session_status=session_status)
 
 @journey_bp.route("/save-waypoint/<int:persona_id>", methods=["POST"])
 def save_page_as_waypoint(persona_id):

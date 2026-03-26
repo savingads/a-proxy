@@ -60,10 +60,6 @@
 .status-completed { color: #607D8B; }
 .status-paused { color: #FF9800; }
 
-/* VPN status indicators */
-.vpn-connected { color: #4CAF50; }
-.vpn-disconnected { color: #F44336; }
-.vpn-connecting { color: #FF9800; }
 
 /* Architecture diagram styling */
 .architecture-box {

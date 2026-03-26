@@ -16,7 +16,7 @@ A-Proxy serves two primary archival objectives:
 
 1. **Persona Creation**: Archivists create personas with four attribute categories (demographic, psychographic, behavioral, contextual) through the web interface.
 
-2. **Chat-Assisted Development**: Optional conversations with an LLM help explore persona characteristics. Archivists then manually update persona profiles based on insights from the conversation.
+2. **Chat-Assisted Development**: Conversations with an LLM help explore persona characteristics. When chats are saved as waypoints, A-Proxy automatically extracts attributes across all four categories using the configured LLM. Archivists can then review and refine the extracted data.
 
 3. **Targeted Browsing**: Browse websites with browser variables configured to reflect persona characteristics (location via proxy, language, geolocation, timezone) using Playwright.
 
@@ -48,7 +48,6 @@ A-Proxy serves two primary archival objectives:
 
 **Manual processes:**
 
-- Persona attribute updates after chat sessions
 - Archive comparison (no built-in diff tool)
 
 ## Use Cases

@@ -447,11 +447,13 @@ def save_direct_chat(persona_id):
 
             logger.info(f"Successfully added waypoint {waypoint_id} to journey {journey_id}")
 
-            try:
-                persona_updater = PersonaAttributeService()
-                persona_updater.process_waypoint(waypoint_id)
-            except Exception:
-                logger.error("Persona attribute extraction failed", exc_info=True)
+            import threading
+            def _extract_attributes(wp_id):
+                try:
+                    PersonaAttributeService().process_waypoint(wp_id)
+                except Exception:
+                    logger.error("Persona attribute extraction failed", exc_info=True)
+            threading.Thread(target=_extract_attributes, args=(waypoint_id,), daemon=True).start()
 
             # Success response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

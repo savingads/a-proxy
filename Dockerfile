@@ -39,6 +39,22 @@ set -e\n\
 \n\
 echo "A-Proxy Container Starting..."\n\
 \n\
+# Wait for LLM endpoint if configured (gives Ollama time to pull the model)\n\
+if [ -n "$OPENAI_COMPATIBLE_URL" ]; then\n\
+    BASE_URL=$(echo "$OPENAI_COMPATIBLE_URL" | sed "s|/v1$||")\n\
+    echo "Waiting for LLM endpoint at $BASE_URL ..."\n\
+    for i in $(seq 1 60); do\n\
+        if curl -sf "$BASE_URL/" > /dev/null 2>&1; then\n\
+            echo "LLM endpoint is ready."\n\
+            break\n\
+        fi\n\
+        if [ "$i" -eq 60 ]; then\n\
+            echo "Warning: LLM endpoint not reachable after 60s. Starting anyway."\n\
+        fi\n\
+        sleep 2\n\
+    done\n\
+fi\n\
+\n\
 # Create sample personas if database is empty\n\
 if [ ! -f "/app/data/personas.db" ]; then\n\
     echo "Creating sample personas..."\n\

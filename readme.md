@@ -32,7 +32,7 @@ python app.py --port 5002
 
 Open <http://localhost:5002> and log in with `admin@example.com` / `password`.
 
-For Docker: `docker-compose up --build`
+For Docker (includes Ollama + Qwen 2.5 7B, no API keys needed): `docker-compose up --build`
 
 Full installation details: [Installation Guide](https://savingads.github.io/a-proxy/getting-started/installation/)
 

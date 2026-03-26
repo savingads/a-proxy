@@ -3,8 +3,9 @@ Routes for persona API integration with dynamic field support and database clien
 """
 import json
 import logging
+import re
 import traceback
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session, Response
 from utils.persona_client_db import get_db_persona_client
 import persona_field_config
 
@@ -364,6 +365,38 @@ def use_persona(persona_id):
         logger.error(traceback.format_exc())
         flash(f"Error using persona: {str(e)}", 'danger')
         return redirect(url_for('persona.list_personas'))
+
+@persona_bp.route('/persona/<int:persona_id>/export')
+def export_persona(persona_id):
+    """Export persona data as a downloadable JSON file."""
+    try:
+        client = get_persona_client()
+        persona = client.get_persona(persona_id)
+
+        if not persona:
+            flash('Persona not found', 'danger')
+            return redirect(url_for('persona.list_personas'))
+
+        # Build export dict without internal DB fields
+        from services.persona_attribute_service import PERSONA_CATEGORIES
+        export_data = {k: v for k, v in persona.items() if k not in PERSONA_CATEGORIES}
+        for category in PERSONA_CATEGORIES:
+            cat_data = persona.get(category, {})
+            export_data[category] = {k: v for k, v in cat_data.items() if k not in ('id', 'persona_id')}
+
+        name_slug = re.sub(r'[^a-z0-9_-]', '', (persona.get('name') or 'persona').replace(' ', '_').lower())
+        filename = f"persona_{name_slug}_{persona_id}.json"
+
+        return Response(
+            json.dumps(export_data, indent=2, default=str),
+            mimetype='application/json',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+        )
+    except Exception as e:
+        logger.error(f"Error exporting persona {persona_id}: {str(e)}")
+        flash(f"Error exporting persona: {str(e)}", 'danger')
+        return redirect(url_for('persona.view_persona', persona_id=persona_id))
+
 
 @persona_bp.route('/field-config')
 def get_field_config():

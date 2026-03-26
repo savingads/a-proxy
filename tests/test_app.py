@@ -337,5 +337,147 @@ class TestApp(unittest.TestCase):
         self.assertEqual(updated_persona['contextual']['browser_type'], 'Chrome')
         self.assertEqual(updated_persona['contextual']['connection_type'], 'Wifi')
 
+    def test_export_persona_json(self):
+        """Test exporting a persona as a downloadable JSON file"""
+        # Add some data across all categories first
+        persona_data = {
+            "name": "Export Test Persona",
+            "demographic": {
+                "country": "France",
+                "city": "Paris",
+                "language": "fr-FR",
+                "age": 30,
+            },
+            "psychographic": {
+                "interests": ["art", "wine"],
+                "lifestyle": "urban",
+            },
+            "behavioral": {
+                "browsing_habits": ["news sites", "art galleries"],
+                "device_usage": {"mobile": "60%", "desktop": "40%"},
+            },
+            "contextual": {
+                "time_of_day": "evening",
+                "device_type": "laptop",
+            },
+        }
+        persona_id = database.save_persona(persona_data)
+
+        response = self.client.get(f'/persona/{persona_id}/export')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('application/json', response.content_type)
+        self.assertIn('attachment', response.headers.get('Content-Disposition', ''))
+
+        data = json.loads(response.data)
+        self.assertEqual(data['name'], 'Export Test Persona')
+        self.assertEqual(data['demographic']['country'], 'France')
+        self.assertEqual(data['psychographic']['interests'], ['art', 'wine'])
+        self.assertEqual(data['behavioral']['browsing_habits'], ['news sites', 'art galleries'])
+        self.assertEqual(data['contextual']['time_of_day'], 'evening')
+
+        # Internal DB fields should be stripped
+        self.assertNotIn('persona_id', data.get('demographic', {}))
+        self.assertNotIn('id', data.get('demographic', {}))
+
+    def test_export_persona_not_found(self):
+        """Test exporting a non-existent persona redirects"""
+        response = self.client.get('/persona/99999/export', follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+
+class TestPersonaAttributeService(unittest.TestCase):
+    """Test cases for the persona attribute extraction service"""
+
+    def test_merge_category_lists_are_additive(self):
+        """Test that list fields accumulate and deduplicate"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        existing = {"interests": ["cooking", "hiking"], "lifestyle": "urban"}
+        incoming = {"interests": ["hiking", "travel"], "lifestyle": "suburban"}
+
+        merged = PersonaAttributeService._merge_category(existing, incoming)
+
+        self.assertEqual(merged["interests"], ["cooking", "hiking", "travel"])
+        self.assertEqual(merged["lifestyle"], "suburban")
+
+    def test_merge_category_dicts_are_merged(self):
+        """Test that dict fields merge keys, with incoming overwriting conflicts"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        existing = {"device_usage": {"mobile": "70%", "tablet": "10%"}}
+        incoming = {"device_usage": {"mobile": "60%", "desktop": "40%"}}
+
+        merged = PersonaAttributeService._merge_category(existing, incoming)
+
+        self.assertEqual(merged["device_usage"]["mobile"], "60%")
+        self.assertEqual(merged["device_usage"]["desktop"], "40%")
+        self.assertEqual(merged["device_usage"]["tablet"], "10%")
+
+    def test_merge_category_nulls_preserved(self):
+        """Test that null incoming values don't overwrite existing data"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        existing = {"age": 30, "occupation": "chef"}
+        incoming = {"age": None, "occupation": "chef"}
+
+        merged = PersonaAttributeService._merge_category(existing, incoming)
+
+        self.assertEqual(merged["age"], 30)
+        self.assertEqual(merged["occupation"], "chef")
+
+    def test_merge_category_existing_keys_preserved(self):
+        """Test that existing keys not in incoming are kept"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        existing = {"country": "France", "city": "Paris"}
+        incoming = {"country": "Germany"}
+
+        merged = PersonaAttributeService._merge_category(existing, incoming)
+
+        self.assertEqual(merged["country"], "Germany")
+        self.assertEqual(merged["city"], "Paris")
+
+    def test_extraction_schema_has_all_four_categories(self):
+        """Test that the extraction schema includes all four attribute categories"""
+        from services.persona_attribute_service import EXTRACTION_SCHEMA
+
+        required = EXTRACTION_SCHEMA["required"]
+        self.assertIn("demographic", required)
+        self.assertIn("psychographic", required)
+        self.assertIn("behavioral", required)
+        self.assertIn("contextual", required)
+
+    def test_flatten_conversation_single_mode(self):
+        """Test flattening a single-mode conversation"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        agent_data = {
+            "history": [
+                {"role": "user", "content": "Hello"},
+                {"role": "assistant", "content": "Hi there"},
+                {"role": "user", "content": ""},
+            ]
+        }
+
+        result = PersonaAttributeService._flatten_conversation(agent_data)
+
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["content"], "Hello")
+
+    def test_flatten_conversation_dual_mode(self):
+        """Test flattening a dual-mode conversation"""
+        from services.persona_attribute_service import PersonaAttributeService
+
+        agent_data = {
+            "with_history": [{"role": "user", "content": "Hello"}],
+            "as_history": [{"role": "assistant", "content": "I am the persona"}],
+            "has_both_modes": True,
+        }
+
+        result = PersonaAttributeService._flatten_conversation(agent_data)
+
+        self.assertEqual(len(result), 2)
+
+
 if __name__ == '__main__':
     unittest.main()

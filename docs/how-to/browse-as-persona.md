@@ -62,7 +62,7 @@ See [Proxy & Geo-IP](proxy-setup.md) for setup details.
 
 ### What Playwright Emulates Natively
 
-Unlike the previous Selenium-based approach, Playwright provides native emulation for:
+Playwright provides native emulation for:
 
 - **Geolocation** -- precise lat/lng coordinates reported to the browser
 - **Locale** -- language and regional formatting

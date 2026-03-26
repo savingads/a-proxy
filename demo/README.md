@@ -1,96 +1,63 @@
 # A-Proxy Demonstration Script
 
-This project contains a Puppeteer script that automatically demonstrates the key features of the A-Proxy application, creating a guided tour with screenshots and video recording.
+Automated Playwright scripts that demonstrate key features of A-Proxy, capturing screenshots and video.
 
 ## Features Demonstrated
 
-The script showcases the following A-Proxy features:
-
-1. Dashboard and geolocation selection
-2. Persona selection and usage
-3. Journey creation and management 
-4. Adding waypoints to a journey
+1. Login and dashboard
+2. Persona list and selection
+3. Journey creation and management
+4. Waypoint navigation
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- A-Proxy application running on http://localhost:5002
+- Python 3.10+ with A-Proxy dependencies installed (`pip install -r requirements.txt`)
+- Playwright Chromium browser (`python -m playwright install chromium`)
+- A-Proxy running at http://localhost:5002
 
 ## Quick Start
-
-The easiest way to run the demonstration is using the provided shell script:
 
 ```bash
 cd demo
 ./run-demo.sh
 ```
 
-This script will:
-1. Check if A-Proxy is running and offer to start it if not
-2. Install dependencies if needed
-3. Run the demo script
-4. Offer to generate a PDF report from the screenshots
-5. Provide an option to open the recorded video
+The script will:
+
+1. Check if A-Proxy is running
+2. Run the demo (opens a visible browser window)
+3. Save screenshots to `./screenshots/`
+4. Save video to `./videos/`
+5. Optionally generate a PDF report
 
 ## Manual Usage
 
-### Installation
-
-1. Navigate to the demo directory
-2. Install dependencies:
+### Run the demo
 
 ```bash
-cd demo
-npm install
+python demo_script.py
 ```
 
-### Running the Demo
-
-Make sure A-Proxy is running first, then run:
+### Generate PDF report from screenshots
 
 ```bash
-npm run demo
+python create_pdf_report.py
 ```
 
-### Generating a PDF Report
+## Output
 
-After running the demo, you can create a PDF report from the screenshots:
+| Output | Location |
+|--------|----------|
+| Screenshots | `./screenshots/*.png` |
+| Video | `./videos/` |
+| PDF report | `./A-Proxy-Demo-Report.pdf` |
 
-```bash
-npm run report
-```
+## Configuration
 
-### Other Commands
+Edit the `CONFIG` dict at the top of `demo_script.py`:
 
-```bash
-# Clean up screenshots, videos, and PDFs
-npm run clean
-
-# Run a complete demo (clean, run demo, generate report)
-npm run full-demo
-```
-
-## Output Files
-
-The script produces the following outputs:
-
-1. **Screenshots**: Saved in the `./screenshots` directory, showing each step of the demonstration
-2. **Video**: A recording of the entire demonstration saved in `./videos/a-proxy-demo.mp4`
-3. **PDF Report**: A formatted document with all screenshots and explanations
-
-## Troubleshooting
-
-- **Application not running**: Make sure A-Proxy is running before starting the script
-- **Element not found errors**: The script includes fallback mechanisms for finding elements, but may need adjustments if the A-Proxy UI has changed
-- **Browser closes immediately**: Check the console output for errors
-
-## Customization
-
-You can modify the following settings in the `config` object at the top of the demo-script.js file:
-
-- `baseUrl`: The URL where A-Proxy is running
-- `viewport`: Browser window dimensions
-- `recordVideo`: Toggle video recording
-- `slowMotion`: Delay between actions (in milliseconds)
-- `waitTime`: Standard wait time between actions
+- `base_url` — where A-Proxy is running (default: `http://localhost:5002`)
+- `viewport` — browser window dimensions
+- `record_video` — enable/disable video recording
+- `slow_mo` — delay between actions in milliseconds
+- `wait_time` — pause after page loads in milliseconds

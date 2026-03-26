@@ -134,6 +134,37 @@ Professional ethics analysis system providing:
 
 URL: `https://proethica.org`
 
+## Browsing Profile Export (Planned)
+
+A-Proxy personas can be exported as JSON for use with external browsing profile generation scripts. The goal is a two-stage pipeline:
+
+```
+A-Proxy Persona ──► JSON Export ──► Profile Generation Scripts ──► Chrome Profile
+                                                                        │
+                                                                        ▼
+                                                        Browsertrix / ArchiveWeb.page
+                                                        (persona-driven archiving)
+```
+
+### Two Complementary Approaches
+
+| Approach | Purpose | Data Source | Output |
+|----------|---------|-------------|--------|
+| **A-Proxy attribute extraction** | Define *who* the persona is | LLM analysis of conversations | Structured persona attributes (JSON) |
+| **Browsing profile generation** | Make the browser *act as* the persona | Persona attributes + category-based seed URLs | Chrome profile with search/watch/browsing history |
+
+### Current State
+
+- **JSON export** is available from the persona detail page (Export > Download JSON)
+- **Chrome profile export** is a placeholder (Export > Export as Chrome Profile) pending integration with the browsing profile automation scripts
+- Profile generation scripts create browsing profiles using SimilarWeb categories mapped to Google ad topics, generating Google search history, YouTube watch history, and browsing history
+
+### Integration Requirements
+
+- Define a JSON schema contract between A-Proxy persona export and profile generation script input
+- Map A-Proxy behavioral attributes (browsing_habits, brand_interactions, content_consumption) to SimilarWeb categories
+- Support multiple archiving tools (Browsertrix Crawler, ArchiveWeb.page) as profile consumers
+
 ## Configuration
 
 Integration settings in `.env`:

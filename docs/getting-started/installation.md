@@ -16,7 +16,7 @@ A-Proxy can be installed using Docker or through manual installation.
 
 ## Docker Installation
 
-Docker provides the easiest setup experience by handling all dependencies automatically.
+Docker provides the easiest setup experience. The default `docker-compose.yml` bundles an Ollama service with Qwen 2.5 7B, so no API keys or external LLM setup is required.
 
 ### Quick Start
 
@@ -26,23 +26,57 @@ Docker provides the easiest setup experience by handling all dependencies automa
    cd a-proxy
    ```
 
-2. Configure environment:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and configure at least one LLM provider (see [LLM Configuration](#llm-configuration) below).
-
-3. Build and start:
+2. Build and start (includes Ollama + Qwen 2.5 7B):
    ```bash
    docker-compose up --build
    ```
 
-4. Access the application at `http://localhost:5002`
+   On first run, Ollama will download the Qwen model (~4.7 GB). A-Proxy waits for the model to be ready before starting.
 
-### Stop the Container
+3. Access the application at `http://localhost:5002`
+
+   Default login: `admin@example.com` / `password`
+
+!!! note "GPU Support"
+    Ollama automatically uses GPU acceleration if available. For NVIDIA GPUs, ensure [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is installed. CPU-only inference works but is slower.
+
+### Using a Different LLM Provider
+
+To use a cloud API or external endpoint instead of the bundled Ollama, create a `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Then set your preferred provider. See [LLM Configuration](#llm-configuration) below.
+
+### Using Drexel Picotte HPC
+
+Picotte provides access to larger models (e.g., Qwen 2.5 72B) but requires:
+
+- Drexel VPN (Cisco AnyConnect) connected
+- An active vLLM SLURM job on the cluster
+- SSH tunnel forwarding the vLLM port to localhost
+
+If you have a tunnel running (`ssh -L 8000:<gpu-node>:8000 picotte -N`), set in `.env`:
+
+```bash
+OPENAI_COMPATIBLE_URL=http://host.docker.internal:8000/v1
+OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-72B-Instruct
+```
+
+The `host.docker.internal` hostname lets the container reach services on the host machine. See the [Picotte HPC Guide](../how-to/picotte-vllm.md) for full setup instructions.
+
+### Stop the Containers
 
 ```bash
 docker-compose down
+```
+
+To also remove the downloaded model data:
+
+```bash
+docker-compose down -v
 ```
 
 ## Manual Installation

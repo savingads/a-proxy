@@ -1,13 +1,13 @@
 # Develop Personas via Chat
 
-A-Proxy allows personas to be developed through conversations with Claude AI. Archivists chat with or about personas, then manually update the persona profile based on insights from the conversation.
+A-Proxy allows personas to be developed through conversations with an LLM. When conversations are saved as waypoints, A-Proxy automatically extracts persona attributes across all four categories. Archivists can then review and refine the extracted data.
 
 ## Overview
 
-The chat interface provides a space to explore persona characteristics through dialogue. Claude responds in context, helping archivists think through persona attributes. After conversations, archivists manually update persona profiles with relevant information.
+The chat interface provides a space to explore persona characteristics through dialogue. The LLM responds in context, helping archivists think through persona attributes. When conversations are saved, attributes are automatically extracted and merged into the persona profile.
 
-!!! note "Manual Update Required"
-    A-Proxy does not automatically extract attributes from conversations. After chatting, navigate to the persona edit page to add or update attributes based on the conversation.
+!!! note "Automatic + Manual Updates"
+    When a conversation is saved as a waypoint, A-Proxy automatically extracts persona attributes across all four categories (demographic, psychographic, behavioral, contextual) using the configured LLM. Archivists can also manually update persona profiles to refine or correct extracted data.
 
 ## Starting a Persona Chat
 
@@ -65,11 +65,11 @@ Claude: "That's right, I work at a small Italian place in Park Slope.
 The morning prep is my favorite part of the day..."
 ```
 
-After this conversation, you would manually update:
+When saved, A-Proxy automatically extracts:
 
-- Occupation field: Chef
-- City field: Brooklyn
-- Add to interests: Italian cuisine, cooking
+- Occupation: Chef
+- City: Brooklyn
+- Interests: Italian cuisine, cooking
 
 ### Exploratory Questions
 
@@ -82,10 +82,10 @@ Claude: "I spend a lot of time on Serious Eats - Kenji Lopez-Alt's
 scientific approach to cooking really appeals to me..."
 ```
 
-After this conversation, you would manually update:
+When saved, A-Proxy automatically extracts:
 
-- Browsing habits: Add "recipe sites", "food blogs"
-- Interests: Add "scientific cooking"
+- Browsing habits: "recipe sites", "food blogs"
+- Interests: "scientific cooking"
 
 ### Scenario Development
 
@@ -99,10 +99,10 @@ Claude: "First, I'd check what's coming in fresh from our local farms
 this week - I usually browse the Greenmarket site on my phone..."
 ```
 
-After this conversation, you would manually update:
+When saved, A-Proxy automatically extracts:
 
-- Device usage: Mobile for quick browsing
-- Personal values: Add "local sourcing"
+- Device type: mobile
+- Personal values: "local sourcing"
 
 ## Recording Conversations
 
@@ -118,23 +118,22 @@ This preserves the conversation for:
 - Research on LLM interaction patterns
 - Documentation of persona development process
 
-## Workflow: Chat Then Update
+## Workflow: Chat, Extract, Refine
 
 ### Step 1: Have a Conversation
 
-Chat with Claude to explore the persona. Take notes on relevant details that emerge.
+Chat with Claude to explore the persona. The conversation can reveal demographic, psychographic, behavioral, and contextual details.
 
-### Step 2: Review the Conversation
+### Step 2: Save the Conversation
 
-The conversation is saved as a waypoint. Review it to identify persona attributes.
+Save the chat as a waypoint. A-Proxy automatically extracts persona attributes from the conversation using the configured LLM and merges them into the persona profile.
 
-### Step 3: Update the Persona
+### Step 3: Review and Refine
 
 1. Navigate to **Personas**
-2. Click the persona name
-3. Click **Edit**
-4. Update relevant fields based on conversation insights
-5. Click **Save**
+2. Click the persona name to review the updated attributes
+3. Click **Edit** to correct or refine any extracted data
+4. Click **Save**
 
 ## Building Personas Over Multiple Sessions
 
@@ -142,25 +141,25 @@ The conversation is saved as a waypoint. Review it to identify persona attribute
 ```
 "You're a chef in Brooklyn who values local ingredients."
 ```
-Then update: occupation, location, values
+Auto-extracted: occupation, location, values
 
 **Session 2**: Develop behaviors
 ```
 "Tell me about your typical morning routine before work."
 ```
-Then update: time_of_day, lifestyle
+Auto-extracted: time_of_day, lifestyle
 
 **Session 3**: Refine preferences
 ```
 "What brands of kitchen equipment do you trust?"
 ```
-Then update: brand_interactions, purchase_history
+Auto-extracted: brand_interactions, purchase_history
 
 **Session 4**: Add depth
 ```
 "How has your approach to cooking evolved over the years?"
 ```
-Then update: attitudes, personality
+Auto-extracted: attitudes, personality
 
 ## Best Practices
 
@@ -182,6 +181,39 @@ Add notes to persona fields explaining why attributes were chosen:
 Occupation: Chef
 (Established in chat session 2024-12-09, discussed restaurant work)
 ```
+
+## Automatic Attribute Extraction
+
+When a conversation is saved as a waypoint, A-Proxy uses the configured LLM to automatically extract persona attributes across all four categories:
+
+- **Demographic**: age, gender, location, language, education, income, occupation
+- **Psychographic**: interests, values, attitudes, opinions, lifestyle, personality
+- **Behavioral**: browsing habits, purchase history, brand interactions, device usage, social media activity, content consumption
+- **Contextual**: time of day, day of week, season, device type, browser type, connection type
+
+Extraction is **additive** — list-type fields (interests, browsing habits, etc.) accumulate across conversations, while scalar fields (age, occupation, etc.) are updated to the latest value. Existing data is preserved when the LLM cannot determine a field.
+
+This works with any configured LLM provider (Ollama, vLLM on Picotte, Anthropic, OpenAI).
+
+## Exporting Personas
+
+### JSON Export
+
+From the persona detail page, click **Export > Download JSON** to download the full persona profile. The JSON file includes all four attribute categories and can be used for:
+
+- Backup and migration between A-Proxy instances
+- Input to external tools and scripts
+- Research data collection
+
+### Chrome Browsing Profile (Planned)
+
+A complementary approach to persona-driven archiving involves generating Chrome browsing profiles with actual search history, YouTube watch history, and browsing history that influence ad-targeting algorithms. This is a separate but complementary workflow:
+
+1. **A-Proxy** defines the persona analytically (who the persona *is*)
+2. **Browsing profile scripts** generate behavioral artifacts (what the browser *did* as that persona)
+3. **Archiving tools** (Browsertrix, ArchiveWeb.page) use the Chrome profile to capture personalized content
+
+The Chrome profile export is planned and requires coordination with the browsing profile automation scripts. The **Export > Export as Chrome Profile** button on the persona detail page is a placeholder for this integration.
 
 ## Related Guides
 

@@ -8,6 +8,11 @@ from utils.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
+PERSONA_CATEGORIES = ("demographic", "psychographic", "behavioral", "contextual")
+
+# Reserve tokens for the system prompt and expected JSON output
+_MAX_TRANSCRIPT_CHARS = 12000
+
 
 EXTRACTION_SCHEMA: Dict[str, Any] = {
     "type": "object",
@@ -39,8 +44,34 @@ EXTRACTION_SCHEMA: Dict[str, Any] = {
             },
             "additionalProperties": False,
         },
+        "behavioral": {
+            "type": "object",
+            "properties": {
+                "browsing_habits": {"type": "array", "items": {"type": "string"}},
+                "purchase_history": {"type": "array", "items": {"type": "string"}},
+                "brand_interactions": {"type": "array", "items": {"type": "string"}},
+                "device_usage": {"type": "object", "additionalProperties": {"type": "string"}},
+                "social_media_activity": {"type": "object", "additionalProperties": {"type": "string"}},
+                "content_consumption": {"type": "object", "additionalProperties": {"type": "string"}},
+            },
+            "additionalProperties": False,
+        },
+        "contextual": {
+            "type": "object",
+            "properties": {
+                "time_of_day": {"type": ["string", "null"]},
+                "day_of_week": {"type": ["string", "null"]},
+                "season": {"type": ["string", "null"]},
+                "weather": {"type": ["string", "null"]},
+                "device_type": {"type": ["string", "null"]},
+                "browser_type": {"type": ["string", "null"]},
+                "screen_size": {"type": ["string", "null"]},
+                "connection_type": {"type": ["string", "null"]},
+            },
+            "additionalProperties": False,
+        },
     },
-    "required": ["demographic", "psychographic"],
+    "required": ["demographic", "psychographic", "behavioral", "contextual"],
     "additionalProperties": False,
 }
 
@@ -124,11 +155,20 @@ class PersonaAttributeService:
         transcript = "\n".join(
             [f"{msg.get('role', 'user')}: {msg.get('content', '').strip()}" for msg in conversation]
         )
+        if len(transcript) > _MAX_TRANSCRIPT_CHARS:
+            transcript = transcript[-_MAX_TRANSCRIPT_CHARS:]
         persona_label = persona_name or "the persona"
         return (
             "You are an analyst who extracts persona attributes from a dialogue. "
-            "Identify demographic and psychographic details that are explicitly stated or strongly implied. "
-            "If a field is unknown, leave it null (for strings) or an empty list (for arrays).\n\n"
+            "Extract details across four categories:\n"
+            "1. Demographic: age, gender, location, language, education, income, occupation.\n"
+            "2. Psychographic: interests, values, attitudes, opinions, lifestyle, personality.\n"
+            "3. Behavioral: browsing habits, purchase history, brand interactions, "
+            "device usage, social media activity, content consumption patterns.\n"
+            "4. Contextual: preferred time of day, day of week, season, weather conditions, "
+            "device type, browser type, screen size, connection type.\n\n"
+            "Only include details that are explicitly stated or strongly implied. "
+            "If a field is unknown, leave it null (for strings/objects) or an empty list (for arrays).\n\n"
             f"Conversation with {persona_label}:\n{transcript}"
         )
 
@@ -136,18 +176,14 @@ class PersonaAttributeService:
         if not extraction:
             return {}
 
-        demographic_updates = self._merge_category(
-            persona.get("demographic", {}), extraction.get("demographic", {})
-        )
-        psychographic_updates = self._merge_category(
-            persona.get("psychographic", {}), extraction.get("psychographic", {})
-        )
-
         updates: Dict[str, Any] = {"id": persona.get("id"), "name": persona.get("name")}
-        if demographic_updates:
-            updates["demographic"] = demographic_updates
-        if psychographic_updates:
-            updates["psychographic"] = psychographic_updates
+
+        for category in PERSONA_CATEGORIES:
+            merged = self._merge_category(
+                persona.get(category, {}), extraction.get(category, {})
+            )
+            if merged:
+                updates[category] = merged
 
         return updates
 
@@ -162,6 +198,14 @@ class PersonaAttributeService:
                 merged_values = list(dict.fromkeys((existing.get(key) or []) + value))
                 if merged_values:
                     merged[key] = merged_values
+            elif isinstance(value, dict):
+                existing_dict = existing.get(key) or {}
+                if isinstance(existing_dict, dict):
+                    combined = {**existing_dict, **value}
+                else:
+                    combined = value
+                if combined:
+                    merged[key] = combined
             else:
                 merged[key] = value
 

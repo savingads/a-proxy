@@ -97,7 +97,7 @@ Claude (as persona): "That's right, I work at a small Italian place
 in Park Slope. The morning prep is my favorite part of the day..."
 ```
 
-After such conversations, archivists manually update the persona profile with relevant attributes discovered during the chat. See [Develop Personas via Chat](../how-to/develop-personas.md) for the workflow.
+When conversations are saved as waypoints, A-Proxy automatically extracts persona attributes across all four categories using the configured LLM. Archivists can review and refine the extracted data. See [Develop Personas via Chat](../how-to/develop-personas.md) for the workflow.
 
 ## Attribute Reification
 

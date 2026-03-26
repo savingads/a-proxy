@@ -8,16 +8,55 @@ services:
       - ./data:/app/data
       - ./archives:/app/archives
     environment:
-      - OPENAI_COMPATIBLE_URL=${OPENAI_COMPATIBLE_URL:-}
-      - OPENAI_COMPATIBLE_MODEL=${OPENAI_COMPATIBLE_MODEL:-}
-      - OPENAI_COMPATIBLE_API_KEY=${OPENAI_COMPATIBLE_API_KEY:-}
+      - OPENAI_COMPATIBLE_URL=${OPENAI_COMPATIBLE_URL:-http://ollama:11434/v1}
+      - OPENAI_COMPATIBLE_MODEL=${OPENAI_COMPATIBLE_MODEL:-qwen2.5:7b}
+      - OPENAI_COMPATIBLE_API_KEY=${OPENAI_COMPATIBLE_API_KEY:-none}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-}
       - LLM_PROVIDER=${LLM_PROVIDER:-}
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - DEBUG=${DEBUG:-false}
       - PROXY_URL=${PROXY_URL:-}
       - BROWSER_HEADLESS=${BROWSER_HEADLESS:-True}
-    env_file:
-      - .env
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
     restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: a-proxy-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Pulls the default model after Ollama is healthy, then exits
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: a-proxy-ollama-pull
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=ollama
+    entrypoint: >
+      sh -c "echo 'Waiting for Ollama...' &&
+             until ollama list 2>/dev/null; do sleep 2; done &&
+             echo 'Pulling ${OPENAI_COMPATIBLE_MODEL:-qwen2.5:7b}...' &&
+             ollama pull ${OPENAI_COMPATIBLE_MODEL:-qwen2.5:7b} &&
+             echo 'Model ready.'"
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama_data:

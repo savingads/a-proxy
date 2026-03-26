@@ -65,8 +65,8 @@ def demonstrate_a_proxy():
                 screenshot(page, "02-logged-in")
 
             # 3. Dashboard
-            print("3. Navigating to persona dashboard...")
-            page.goto(f"{CONFIG['base_url']}/persona/dashboard")
+            print("3. Navigating to dashboard...")
+            page.goto(f"{CONFIG['base_url']}/dashboard")
             page.wait_for_timeout(2000)
             screenshot(page, "03-dashboard")
 

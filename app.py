@@ -117,4 +117,4 @@ if __name__ == "__main__":
     atexit.register(_shutdown_browser)
 
     app = create_app()
-    app.run(debug=True, use_reloader=True, port=args.port, host=args.host)
+    app.run(debug=True, use_reloader=False, port=args.port, host=args.host)

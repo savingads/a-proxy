@@ -47,6 +47,11 @@
         padding: 2px 8px;
         margin-right: 5px;
     }
+
+    .list-value .item-pill-extracted {
+        background-color: rgba(25, 135, 84, 0.3);
+        border: 1px solid rgba(25, 135, 84, 0.6);
+    }
     
     .dict-value {
         display: flex;
@@ -116,7 +121,7 @@
 <div class="custom-card mb-4">
     <div class="row">
         <div class="col">
-            <strong>Geolocation:</strong> <span id="geolocation">{{ geolocation }}</span>
+            <strong>Geolocation:</strong> <span id="geolocation" data-server-set="true">{{ geolocation }}</span>
         </div>
         <div class="col">
             <strong>Language:</strong> {{ language }}
@@ -216,7 +221,7 @@
                                         <div class="list-value">
                                             {% if persona.psychographic[field.name] %}
                                                 {% for item in persona.psychographic[field.name] %}
-                                                    <span class="item-pill">{{ item }}</span>
+                                                    <span class="item-pill{% if chat_extracted.get('psychographic', {}).get(field.name) and item in chat_extracted['psychographic'][field.name] %} item-pill-extracted{% endif %}">{{ item }}</span>
                                                 {% endfor %}
                                             {% else %}
                                                 <em class="text-muted">None</em>
@@ -264,7 +269,7 @@
                                         <div class="list-value">
                                             {% if persona.behavioral[field.name] %}
                                                 {% for item in persona.behavioral[field.name] %}
-                                                    <span class="item-pill">{{ item }}</span>
+                                                    <span class="item-pill{% if chat_extracted.get('behavioral', {}).get(field.name) and item in chat_extracted['behavioral'][field.name] %} item-pill-extracted{% endif %}">{{ item }}</span>
                                                 {% endfor %}
                                             {% else %}
                                                 <em class="text-muted">None</em>
@@ -312,7 +317,7 @@
                                         <div class="list-value">
                                             {% if persona.contextual[field.name] %}
                                                 {% for item in persona.contextual[field.name] %}
-                                                    <span class="item-pill">{{ item }}</span>
+                                                    <span class="item-pill{% if chat_extracted.get('contextual', {}).get(field.name) and item in chat_extracted['contextual'][field.name] %} item-pill-extracted{% endif %}">{{ item }}</span>
                                                 {% endfor %}
                                             {% else %}
                                                 <em class="text-muted">None</em>

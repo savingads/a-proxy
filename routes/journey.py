@@ -370,11 +370,17 @@ def direct_browse(persona_id):
     journey_id = request.args.get("journey_id", type=int)
     session_status = BrowserManager.get_instance().get_session_status()
 
+    from routes.browsing import COUNTRY_GOOGLE_DOMAINS
+    country = persona.get("demographic", {}).get("country", "")
+    google_domain = COUNTRY_GOOGLE_DOMAINS.get(country, "google.com")
+    default_start_url = f"https://www.{google_domain}"
+
     return render_template("direct_browse.html",
                            persona=persona,
                            existing_journeys=existing_journeys,
                            journey_id=journey_id,
-                           session_status=session_status)
+                           session_status=session_status,
+                           default_start_url=default_start_url)
 
 @journey_bp.route("/save-waypoint/<int:persona_id>", methods=["POST"])
 def save_page_as_waypoint(persona_id):

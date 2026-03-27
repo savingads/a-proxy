@@ -7,6 +7,16 @@ from utils.persona_client_db import get_db_persona_client
 browsing_bp = Blueprint('browsing', __name__)
 
 
+COUNTRY_GOOGLE_DOMAINS = {
+    "US": "google.com", "GB": "google.co.uk", "CA": "google.ca",
+    "AU": "google.com.au", "DE": "google.de", "FR": "google.fr",
+    "ES": "google.es", "IT": "google.it", "JP": "google.co.jp",
+    "CN": "google.com.hk", "IN": "google.co.in", "BR": "google.com.br",
+    "MX": "google.com.mx", "RU": "google.ru", "KR": "google.co.kr",
+    "ZA": "google.co.za",
+}
+
+
 def _get_persona_browser_settings(persona):
     """Extract browser context settings from a persona dict."""
     demo = persona.get("demographic", {})
@@ -22,11 +32,15 @@ def _get_persona_browser_settings(persona):
 
     proxy = session.get("proxy_url") or PROXY_URL
 
+    google_domain = COUNTRY_GOOGLE_DOMAINS.get(country, "google.com")
+    default_start_url = f"https://www.{google_domain}"
+
     return {
         "locale": locale,
         "geolocation": geolocation,
         "timezone_id": timezone_id,
         "proxy": proxy,
+        "default_start_url": default_start_url,
     }
 
 @browsing_bp.route("/visit-page", methods=["POST"])
@@ -115,7 +129,7 @@ def start_session():
     """Launch a headful browsing session for a persona."""
     data = request.get_json() or request.form
     persona_id = data.get("persona_id")
-    start_url = data.get("start_url", "https://www.google.com")
+    user_start_url = data.get("start_url", "").strip()
 
     if not persona_id:
         return jsonify({"success": False, "error": "persona_id is required"}), 400
@@ -128,6 +142,8 @@ def start_session():
             return jsonify({"success": False, "error": "Persona not found"}), 404
 
         settings = _get_persona_browser_settings(persona)
+        start_url = user_start_url or settings.pop("default_start_url", "https://www.google.com")
+        settings.pop("default_start_url", None)
         manager = BrowserManager.get_instance()
         manager.start_session(
             persona_id=persona_id,

@@ -39,6 +39,6 @@ LLM_MAX_OUTPUT_TOKENS = int(os.environ.get('LLM_MAX_OUTPUT_TOKENS', '4096'))
 
 # Region to language/geolocation/timezone mapping (externalized so regions can be
 # added without a code change). Loaded eagerly; a missing/malformed file fails loud.
-_REGIONS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "regions.json")
+_REGIONS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "regions.json")
 with open(_REGIONS_PATH, encoding="utf-8") as _regions_file:
     REGION_LANGUAGE_MAP = json.load(_regions_file)

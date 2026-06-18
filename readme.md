@@ -84,9 +84,10 @@ Key sections:
 
 ```
 app.py                     # Flask app, blueprint registration
-config.py                  # Configuration (API keys, regions, proxy)
+config.py                  # Configuration (API keys, proxy; loads regions.json)
+regions.json               # Region presets (language/geolocation/timezone)
 picotte_vllm.py            # Picotte HPC vLLM management script
-services.py                # Persona context management, token counting
+services/                  # Persona context management, attribute extraction
 database/                  # SQLite database layer (repository pattern)
 routes/                    # Flask blueprints (browsing, persona, network, agent, etc.)
 utils/

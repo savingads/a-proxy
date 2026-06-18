@@ -29,7 +29,7 @@ Headful browsing launches a visible Chromium window configured with the persona'
 |-------------------|-----------------|
 | Language (`demographic.language`) | Locale — Accept-Language header and UI language |
 | Latitude/Longitude | Geolocation — `navigator.geolocation` API |
-| Country | Timezone — via `REGION_LANGUAGE_MAP` lookup |
+| Country / City | Timezone — city-aware inference (city beats country) via `utils/geo.py` |
 | Screen size (`contextual.screen_size`) | Viewport dimensions |
 | Device type (`contextual.device_type`) | Mobile + touch emulation (mobile/tablet) |
 | Proxy (session or env) | Per-context traffic routing |
@@ -99,7 +99,7 @@ Archives a URL by saving HTML, a full-page screenshot, and metadata to the files
 `capture_as_persona.py` captures a page as a persona from the command line, using the **same engine** as the web app (`BrowserManager`). It maps the persona's full attribute set — locale, geolocation, timezone, viewport, and mobile/touch flags — into the browser context, and can record network traffic (HAR) and a session video for cross-persona analysis.
 
 ```bash
-# Synthesized context for the default persona (Alex Johnson)
+# Synthesized context for the first available persona (or pass --persona-name)
 python3 capture_as_persona.py https://www.cnn.com
 
 # Real Chrome profile: drive the session with the persona's accumulated
@@ -110,7 +110,7 @@ python3 capture_as_persona.py https://www.cnn.com \
 
 | Option | Description |
 |--------|-------------|
-| `--persona-id` / `--persona-name` | Select the persona (default: Alex Johnson) |
+| `--persona-id` / `--persona-name` | Select the persona (default: first available persona) |
 | `--profile-dir` | Load a real Chrome user-data dir (persistent context) instead of a synthesized one |
 | `--channel` | Browser channel, e.g. `chrome` (for real Google Chrome profiles) |
 | `--har` | Record network traffic to `traffic.har` |

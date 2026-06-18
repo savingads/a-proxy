@@ -144,10 +144,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             The ID of the newly created waypoint
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             # Get sequence number
             cursor.execute(
                 "SELECT COUNT(*) as count FROM waypoints WHERE journey_id = ?",
@@ -186,14 +183,7 @@ class JourneyRepository(BaseRepository):
                 (datetime.now(), journey_id)
             )
 
-            conn.commit()
             return waypoint_id
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def get_waypoints(self, journey_id: int) -> List[Dict[str, Any]]:
         """
@@ -205,10 +195,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             List of dictionaries containing waypoint data
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             cursor.execute("""
                 SELECT *
                 FROM waypoints
@@ -230,8 +217,6 @@ class JourneyRepository(BaseRepository):
                         pass
 
             return waypoints
-        finally:
-            conn.close()
 
     def get_waypoint(self, waypoint_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -243,10 +228,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             Dictionary containing waypoint data or None if not found
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             cursor.execute("""
                 SELECT w.*, j.name as journey_name
                 FROM waypoints w
@@ -263,8 +245,6 @@ class JourneyRepository(BaseRepository):
                 result['metadata'] = json.loads(result['metadata'])
 
             return result
-        finally:
-            conn.close()
 
     def update_waypoint(self, waypoint_id: int, **updates) -> bool:
         """
@@ -277,10 +257,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             allowed_fields = ['title', 'notes', 'sequence_number', 'type', 'agent_data']
             update_data = {k: v for k, v in updates.items() if k in allowed_fields and v is not None}
 
@@ -303,14 +280,7 @@ class JourneyRepository(BaseRepository):
                 (datetime.now(), waypoint_id)
             )
 
-            conn.commit()
             return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def delete_waypoint(self, waypoint_id: int) -> bool:
         """
@@ -322,10 +292,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             # Get journey_id before deleting
             cursor.execute(
                 "SELECT journey_id FROM waypoints WHERE id = ?",
@@ -333,7 +300,6 @@ class JourneyRepository(BaseRepository):
             )
             waypoint = cursor.fetchone()
             if not waypoint:
-                conn.close()
                 return False
 
             journey_id = waypoint['journey_id']
@@ -347,11 +313,4 @@ class JourneyRepository(BaseRepository):
                 (datetime.now(), journey_id)
             )
 
-            conn.commit()
             return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()

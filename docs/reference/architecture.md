@@ -145,25 +145,28 @@ Provider-agnostic LLM client supporting local and cloud models:
 a-proxy/
 ├── app.py                    # Application entry
 ├── config.py                 # Configuration
-├── database/                 # Data layer
+├── regions.json              # Region presets (language/geolocation/timezone)
+├── database/                 # Data layer (repository pattern; connection context managers)
 ├── routes/                   # HTTP handlers
 │   ├── agent.py             # LLM chat integration
-│   ├── persona_api_db.py    # Persona CRUD
+│   ├── persona_api.py       # Persona CRUD
 │   ├── journey.py           # Journey management
 │   ├── browsing.py          # Web browsing (Playwright)
 │   ├── archives.py          # Archive management
 │   ├── network.py           # Proxy/network control
 │   └── auth.py              # Authentication
-├── services.py              # Business logic
+├── services/                # Business logic (context mgmt, persona attributes)
 ├── utils/                   # Utilities
 │   ├── browser.py           # Playwright BrowserManager
+│   ├── persona_browser.py   # Persona → browser-context mapping
+│   ├── geo.py               # Timezone/geolocation inference (single source)
 │   ├── network.py           # Proxy config, IP info
 │   ├── agent.py             # Agent service (LLM chat)
 │   ├── llm_client.py        # Multi-provider LLM client
-│   └── persona_client_db.py # DB client adapter
+│   └── persona_client.py    # DB client adapter
 ├── templates/               # HTML templates
 ├── static/                  # Static assets
-├── data/                    # SQLite database
+├── data/                    # SQLite database (runtime volume)
 ├── archives/                # Archived pages
 └── tests/                   # Test suite
 ```

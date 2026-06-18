@@ -132,6 +132,7 @@ def start_session():
         manager.start_session(
             persona_id=persona_id,
             start_url=start_url,
+            persona=persona,
             **settings,
         )
         return jsonify({"success": True, "persona_id": persona_id})

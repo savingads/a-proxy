@@ -106,3 +106,15 @@ archive/
 *.temp
 temp_*/
 *_temp/
+
+# Real browser profiles (sensitive: cookies/history; too large for GitHub) — never commit
+*_Browser_Profile.zip
+*_Browser_Profile/
+
+# Persona capture artifacts (screenshots + HAR/video traffic captures)
+screenshots/
+*.har
+*.webm
+
+# Scratch patches
+phase0playwrightpersonabrowser.patch

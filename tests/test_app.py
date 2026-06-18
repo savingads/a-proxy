@@ -400,7 +400,7 @@ class TestPersonaAttributeService(unittest.TestCase):
         existing = {"interests": ["cooking", "hiking"], "lifestyle": "urban"}
         incoming = {"interests": ["hiking", "travel"], "lifestyle": "suburban"}
 
-        merged = PersonaAttributeService._merge_category(existing, incoming)
+        merged, _ = PersonaAttributeService._merge_category(existing, incoming)
 
         self.assertEqual(merged["interests"], ["cooking", "hiking", "travel"])
         self.assertEqual(merged["lifestyle"], "suburban")
@@ -412,7 +412,7 @@ class TestPersonaAttributeService(unittest.TestCase):
         existing = {"device_usage": {"mobile": "70%", "tablet": "10%"}}
         incoming = {"device_usage": {"mobile": "60%", "desktop": "40%"}}
 
-        merged = PersonaAttributeService._merge_category(existing, incoming)
+        merged, _ = PersonaAttributeService._merge_category(existing, incoming)
 
         self.assertEqual(merged["device_usage"]["mobile"], "60%")
         self.assertEqual(merged["device_usage"]["desktop"], "40%")
@@ -425,7 +425,7 @@ class TestPersonaAttributeService(unittest.TestCase):
         existing = {"age": 30, "occupation": "chef"}
         incoming = {"age": None, "occupation": "chef"}
 
-        merged = PersonaAttributeService._merge_category(existing, incoming)
+        merged, _ = PersonaAttributeService._merge_category(existing, incoming)
 
         self.assertEqual(merged["age"], 30)
         self.assertEqual(merged["occupation"], "chef")
@@ -437,7 +437,7 @@ class TestPersonaAttributeService(unittest.TestCase):
         existing = {"country": "France", "city": "Paris"}
         incoming = {"country": "Germany"}
 
-        merged = PersonaAttributeService._merge_category(existing, incoming)
+        merged, _ = PersonaAttributeService._merge_category(existing, incoming)
 
         self.assertEqual(merged["country"], "Germany")
         self.assertEqual(merged["city"], "Paris")

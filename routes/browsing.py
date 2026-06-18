@@ -22,8 +22,9 @@ def _get_persona_browser_settings(persona):
     """Extract browser context settings from a persona dict."""
     demo = persona.get("demographic", {})
     locale = demo.get("language", "en-US")
+    country = demo.get("country", "")
     geolocation = persona_geolocation(demo)
-    timezone_id = infer_timezone(demo.get("country"), demo.get("city"))
+    timezone_id = infer_timezone(country, demo.get("city"))
     proxy = session.get("proxy_url") or PROXY_URL
 
     google_domain = COUNTRY_GOOGLE_DOMAINS.get(country, "google.com")

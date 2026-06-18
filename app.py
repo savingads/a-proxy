@@ -8,8 +8,7 @@ from routes.auth import user_from_row
 # Import blueprints
 from routes.home import home_bp
 from routes.network import network_bp
-# Choose which persona implementation to use (API or direct DB access)
-from routes.persona_api_db import persona_bp  # Using direct database implementation
+from routes.persona_api import persona_bp
 from routes.browsing import browsing_bp
 from routes.archives import archives_bp
 from routes.journey import journey_bp

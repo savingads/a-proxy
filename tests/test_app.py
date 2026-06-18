@@ -32,7 +32,7 @@ class TestApp(unittest.TestCase):
         database._settings_repo = None
 
         # Reset persona client singleton
-        import utils.persona_client_db as persona_client_module
+        import utils.persona_client as persona_client_module
         persona_client_module._db_persona_client = None
 
         # Initialize the database
@@ -73,7 +73,7 @@ class TestApp(unittest.TestCase):
         database._settings_repo = None
 
         # Reset persona client singleton
-        import utils.persona_client_db as persona_client_module
+        import utils.persona_client as persona_client_module
         persona_client_module._db_persona_client = None
 
         # Close and remove the temporary database

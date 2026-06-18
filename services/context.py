@@ -136,7 +136,7 @@ class ContextManager:
         return combined
 
 
-def fetch_persona_context(persona_id, persona_service_url="http://localhost:5050/api/v1/personas/"):
+def fetch_persona_context(persona_id):
     """
     Fetch persona details from the database.
     Returns a dict of persona attributes or None if not found.

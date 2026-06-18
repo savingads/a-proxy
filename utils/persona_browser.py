@@ -10,7 +10,7 @@ the browser identically.
 Kept import-light on purpose: it has no Playwright dependency, so the mapping
 logic can be unit-tested without a browser installed.
 
-Persona shape (as returned by ``utils.persona_client_db`` / ``PersonaRepository``):
+Persona shape (as returned by ``utils.persona_client`` / ``PersonaRepository``):
 
     {
       "demographic": {"language", "latitude", "longitude", "geolocation",

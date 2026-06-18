@@ -2,7 +2,7 @@ from flask import Blueprint, request, redirect, url_for, flash, session, jsonify
 import logging
 from config import PROXY_URL, REGION_LANGUAGE_MAP
 from utils.browser import BrowserManager
-from utils.persona_client_db import get_db_persona_client
+from utils.persona_client import get_db_persona_client
 
 browsing_bp = Blueprint('browsing', __name__)
 

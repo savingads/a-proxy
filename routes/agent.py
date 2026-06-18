@@ -156,7 +156,7 @@ def standalone_agent_message():
 def direct_chat(persona_id):
     """Start a direct chat session with or as a persona without creating a journey."""
     # Import inside function to avoid circular imports
-    from utils.persona_client_db import get_db_persona_client
+    from utils.persona_client import get_db_persona_client
     import database
     import json
     
@@ -504,7 +504,7 @@ def journey_agent(journey_id):
     persona = None
     if journey['persona_id']:
         # Import inside function to avoid circular imports
-        from utils.persona_client_db import get_db_persona_client
+        from utils.persona_client import get_db_persona_client
         try:
             client = get_db_persona_client()
             persona = client.get_persona(journey['persona_id'])
@@ -542,7 +542,7 @@ def agent_message(journey_id):
         persona = None
         if journey['persona_id']:
             # Import inside function to avoid circular imports
-            from utils.persona_client_db import get_db_persona_client
+            from utils.persona_client import get_db_persona_client
             try:
                 client = get_db_persona_client()
                 persona = client.get_persona(journey['persona_id'])

@@ -218,88 +218,95 @@ class BrowserManager:
             logger.error(f"Error capturing session page: {e}", exc_info=True)
             return None
 
-    def archive_session_page(self, persona_id=None) -> Optional[Dict[str, Any]]:
-        """Archive the current page from the active browsing session."""
-        session = self._active_session
-        if not session:
-            return None
+    @staticmethod
+    def _memento_paths(url):
+        """Compute and create the archives/<url_hash>/<timestamp>/ memento dir.
 
-        page = session.page
-        persona_id = persona_id or session.persona_id
+        Returns (url_dir, memento_dir, timestamp).
+        """
+        url_hash = hashlib.md5(url.encode()).hexdigest()
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        url_dir = os.path.join("archives", url_hash)
+        memento_dir = os.path.join(url_dir, timestamp)
+        os.makedirs(memento_dir, exist_ok=True)
+        return url_dir, memento_dir, timestamp
 
+    def _write_memento(self, page, url, *, locale=None, persona_id=None,
+                       extra_metadata=None, memento_dir=None, timestamp=None,
+                       save_to_db=True):
+        """Persist an already-navigated ``page`` as a memento under archives/.
+
+        Writes content.html, screenshot.png, metadata.json (common keys plus any
+        ``extra_metadata``) and updates the url-level metadata index; unless
+        ``save_to_db`` is False, also records the archived_website/memento rows.
+        Callers that record HAR/video pre-create the dir and pass
+        ``memento_dir``/``timestamp``. Shared by archive_page /
+        archive_session_page / capture_as_persona.
+        """
+        page_title = page.title()
+
+        # Best-effort HTTP info (adds Accept-Language when a locale is known).
+        http_status = content_type = content_length = None
+        headers = {}
         try:
-            url = page.url
-            page_title = page.title()
-            locale = None
-            geolocation_str = None
-            logger.info(f"Archiving session page: {url}")
+            req_headers = {"Accept-Language": locale} if locale else {}
+            response = requests.get(url, headers=req_headers, timeout=10)
+            http_status = response.status_code
+            headers = dict(response.headers)
+            content_type = response.headers.get("Content-Type", "")
+            content_length = len(response.content)
+        except Exception as e:
+            logger.error(f"Error getting HTTP information: {e}")
 
-            # Get HTTP info
-            http_status = None
-            headers = {}
-            content_type = None
-            content_length = None
-            try:
-                response = requests.get(url, timeout=10)
-                http_status = response.status_code
-                headers = dict(response.headers)
-                content_type = response.headers.get("Content-Type", "")
-                content_length = len(response.content)
-            except Exception as e:
-                logger.error(f"Error getting HTTP information: {e}")
+        if memento_dir is None:
+            url_dir, memento_dir, timestamp = self._memento_paths(url)
+        else:
+            url_dir = os.path.dirname(memento_dir)
 
-            # Create archive directory structure
-            url_hash = hashlib.md5(url.encode()).hexdigest()
-            archives_dir = "archives"
-            os.makedirs(archives_dir, exist_ok=True)
+        html_path = os.path.join(memento_dir, "content.html")
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(page.content())
 
-            url_dir = os.path.join(archives_dir, url_hash)
-            os.makedirs(url_dir, exist_ok=True)
+        screenshot_path = os.path.join(memento_dir, "screenshot.png")
+        page.screenshot(path=screenshot_path, full_page=True)
 
-            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            memento_dir = os.path.join(url_dir, timestamp)
-            os.makedirs(memento_dir, exist_ok=True)
+        metadata = {
+            "url": url,
+            "title": page_title,
+            "timestamp": timestamp,
+            "persona_id": persona_id,
+            "http_status": http_status,
+            "content_type": content_type,
+            "content_length": content_length,
+            "headers": headers,
+        }
+        if extra_metadata:
+            metadata.update(extra_metadata)
+        with open(os.path.join(memento_dir, "metadata.json"), "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2)
 
-            # Save HTML
-            html_content = page.content()
-            html_file_path = os.path.join(memento_dir, "content.html")
-            with open(html_file_path, "w", encoding="utf-8") as f:
-                f.write(html_content)
+        # URL-level metadata index.
+        url_metadata_path = os.path.join(url_dir, "metadata.json")
+        if os.path.exists(url_metadata_path):
+            with open(url_metadata_path, "r", encoding="utf-8") as f:
+                url_metadata = json.load(f)
+        else:
+            url_metadata = {"url": url, "first_archived": timestamp, "mementos": []}
+        url_metadata["mementos"].append(timestamp)
+        url_metadata["last_archived"] = timestamp
+        with open(url_metadata_path, "w", encoding="utf-8") as f:
+            json.dump(url_metadata, f, indent=2)
 
-            # Save screenshot
-            screenshot_path = os.path.join(memento_dir, "screenshot.png")
-            page.screenshot(path=screenshot_path, full_page=True)
+        result = {
+            "url": url,
+            "title": page_title,
+            "memento_location": memento_dir,
+            "screenshot_path": screenshot_path,
+            "html_path": html_path,
+            "http_status": http_status,
+        }
 
-            # Save metadata
-            metadata = {
-                "url": url,
-                "title": page_title,
-                "timestamp": timestamp,
-                "language": locale,
-                "geolocation": geolocation_str,
-                "persona_id": persona_id,
-                "http_status": http_status,
-                "content_type": content_type,
-                "content_length": content_length,
-                "headers": headers,
-            }
-            metadata_file_path = os.path.join(memento_dir, "metadata.json")
-            with open(metadata_file_path, "w", encoding="utf-8") as f:
-                json.dump(metadata, f, indent=2)
-
-            # Save/update URL-level metadata
-            url_metadata_path = os.path.join(url_dir, "metadata.json")
-            if os.path.exists(url_metadata_path):
-                with open(url_metadata_path, "r", encoding="utf-8") as f:
-                    url_metadata = json.load(f)
-            else:
-                url_metadata = {"url": url, "first_archived": timestamp, "mementos": []}
-            url_metadata["mementos"].append(timestamp)
-            url_metadata["last_archived"] = timestamp
-            with open(url_metadata_path, "w", encoding="utf-8") as f:
-                json.dump(url_metadata, f, indent=2)
-
-            # Save to database
+        if save_to_db:
             import database
 
             conn = database.get_db_connection()
@@ -313,7 +320,7 @@ class BrowserManager:
             else:
                 archived_website_id = database.save_archived_website(
                     url=url, persona_id=persona_id,
-                    archive_type="filesystem", archive_location=url_dir
+                    archive_type="filesystem", archive_location=url_dir,
                 )
 
             memento_id = database.save_memento(
@@ -325,17 +332,30 @@ class BrowserManager:
                 headers=headers,
                 screenshot_path=screenshot_path,
             )
+            result["archived_website_id"] = archived_website_id
+            result["memento_id"] = memento_id
 
-            logger.info(f"Session page archived: website={archived_website_id}, memento={memento_id}")
-            return {
-                "archived_website_id": archived_website_id,
-                "memento_id": memento_id,
-                "url": url,
-                "title": page_title,
-                "memento_location": memento_dir,
-                "screenshot_path": screenshot_path,
-            }
+        return result
 
+    def archive_session_page(self, persona_id=None) -> Optional[Dict[str, Any]]:
+        """Archive the current page from the active browsing session."""
+        session = self._active_session
+        if not session:
+            return None
+
+        page = session.page
+        persona_id = persona_id or session.persona_id
+
+        try:
+            url = page.url
+            logger.info(f"Archiving session page: {url}")
+            result = self._write_memento(
+                page, url, persona_id=persona_id,
+                extra_metadata={"language": None, "geolocation": None},
+            )
+            logger.info("Session page archived: website=%s, memento=%s",
+                        result.get("archived_website_id"), result.get("memento_id"))
+            return result
         except Exception as e:
             logger.error(f"Error archiving session page: {e}", exc_info=True)
             return None
@@ -398,103 +418,13 @@ class BrowserManager:
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
             page.wait_for_timeout(5000)
 
-            page_title = page.title()
-
-            http_status = None
-            headers = {}
-            content_type = None
-            content_length = None
-            try:
-                req_headers = {}
-                if locale:
-                    req_headers["Accept-Language"] = locale
-                response = requests.get(url, headers=req_headers, timeout=10)
-                http_status = response.status_code
-                headers = dict(response.headers)
-                content_type = response.headers.get("Content-Type", "")
-                content_length = len(response.content)
-            except Exception as e:
-                logger.error(f"Error getting HTTP information: {e}")
-
-            url_hash = hashlib.md5(url.encode()).hexdigest()
-            archives_dir = "archives"
-            os.makedirs(archives_dir, exist_ok=True)
-
-            url_dir = os.path.join(archives_dir, url_hash)
-            os.makedirs(url_dir, exist_ok=True)
-
-            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            memento_dir = os.path.join(url_dir, timestamp)
-            os.makedirs(memento_dir, exist_ok=True)
-
-            html_content = page.content()
-            html_file_path = os.path.join(memento_dir, "content.html")
-            with open(html_file_path, "w", encoding="utf-8") as f:
-                f.write(html_content)
-
-            screenshot_path = os.path.join(memento_dir, "screenshot.png")
-            page.screenshot(path=screenshot_path, full_page=True)
-
-            metadata = {
-                "url": url,
-                "title": page_title,
-                "timestamp": timestamp,
-                "language": locale,
-                "geolocation": geolocation if isinstance(geolocation, str) else None,
-                "persona_id": persona_id,
-                "http_status": http_status,
-                "content_type": content_type,
-                "content_length": content_length,
-                "headers": headers,
-            }
-            metadata_file_path = os.path.join(memento_dir, "metadata.json")
-            with open(metadata_file_path, "w", encoding="utf-8") as f:
-                json.dump(metadata, f, indent=2)
-
-            url_metadata_path = os.path.join(url_dir, "metadata.json")
-            if os.path.exists(url_metadata_path):
-                with open(url_metadata_path, "r", encoding="utf-8") as f:
-                    url_metadata = json.load(f)
-            else:
-                url_metadata = {"url": url, "first_archived": timestamp, "mementos": []}
-            url_metadata["mementos"].append(timestamp)
-            url_metadata["last_archived"] = timestamp
-            with open(url_metadata_path, "w", encoding="utf-8") as f:
-                json.dump(url_metadata, f, indent=2)
-
-            import database
-
-            conn = database.get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute("SELECT id FROM archived_websites WHERE uri_r = ?", (url,))
-            existing = cursor.fetchone()
-            conn.close()
-
-            if existing:
-                archived_website_id = existing["id"]
-            else:
-                archived_website_id = database.save_archived_website(
-                    url=url, persona_id=persona_id,
-                    archive_type="filesystem", archive_location=url_dir
-                )
-
-            memento_id = database.save_memento(
-                archived_website_id=archived_website_id,
-                memento_location=memento_dir,
-                http_status=http_status,
-                content_type=content_type,
-                content_length=content_length,
-                headers=headers,
-                screenshot_path=screenshot_path,
+            return self._write_memento(
+                page, url, locale=locale, persona_id=persona_id,
+                extra_metadata={
+                    "language": locale,
+                    "geolocation": geolocation if isinstance(geolocation, str) else None,
+                },
             )
-
-            return {
-                "archived_website_id": archived_website_id,
-                "memento_id": memento_id,
-                "url": url,
-                "memento_location": memento_dir,
-                "screenshot_path": screenshot_path,
-            }
 
         except Exception as e:
             logger.error(f"Error archiving page: {e}", exc_info=True)
@@ -550,11 +480,7 @@ class BrowserManager:
             persona_id = persona.get("id")
 
         # Pre-compute the memento dir so HAR/video (fixed at context creation) land in it.
-        url_hash = hashlib.md5(url.encode()).hexdigest()
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        url_dir = os.path.join("archives", url_hash)
-        memento_dir = os.path.join(url_dir, timestamp)
-        os.makedirs(memento_dir, exist_ok=True)
+        url_dir, memento_dir, timestamp = self._memento_paths(url)
 
         har_path = os.path.join(memento_dir, "traffic.har") if record_har else None
         video_dir = memento_dir if record_video else None
@@ -584,27 +510,7 @@ class BrowserManager:
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
             page.wait_for_timeout(wait_time * 1000)
 
-            title = page.title()
             final_url = page.url
-
-            # HTTP info (best-effort, mirrors archive_page).
-            http_status = content_type = content_length = None
-            headers = {}
-            try:
-                resp = requests.get(url, timeout=10)
-                http_status = resp.status_code
-                headers = dict(resp.headers)
-                content_type = resp.headers.get("Content-Type", "")
-                content_length = len(resp.content)
-            except Exception as e:
-                logger.error(f"Error getting HTTP information: {e}")
-
-            html_path = os.path.join(memento_dir, "content.html")
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(page.content())
-
-            screenshot_path = os.path.join(memento_dir, "screenshot.png")
-            page.screenshot(path=screenshot_path, full_page=True)
 
             if record_video and page.video:
                 try:
@@ -623,28 +529,27 @@ class BrowserManager:
                                     if k not in ("record_har_path", "record_video_dir")},
             }
 
-            metadata = {
-                "url": url, "final_url": final_url, "title": title,
-                "timestamp": timestamp, "persona_id": persona_id,
-                "http_status": http_status, "content_type": content_type,
-                "content_length": content_length, "headers": headers,
-                "persona_snapshot": persona_snapshot,
-                "artifacts": {
-                    "screenshot": "screenshot.png",
-                    "html": "content.html",
-                    "har": "traffic.har" if har_path else None,
-                    "video": os.path.basename(video_path) if video_path else None,
+            # Reuse the shared persist pipeline (no DB row for ad-hoc captures).
+            result = self._write_memento(
+                page, url, persona_id=persona_id,
+                memento_dir=memento_dir, timestamp=timestamp, save_to_db=False,
+                extra_metadata={
+                    "final_url": final_url,
+                    "persona_snapshot": persona_snapshot,
+                    "artifacts": {
+                        "screenshot": "screenshot.png",
+                        "html": "content.html",
+                        "har": "traffic.har" if har_path else None,
+                        "video": os.path.basename(video_path) if video_path else None,
+                    },
                 },
-            }
-            with open(os.path.join(memento_dir, "metadata.json"), "w", encoding="utf-8") as f:
-                json.dump(metadata, f, indent=2)
-
-            result = {
-                "url": url, "final_url": final_url, "title": title,
-                "memento_location": memento_dir, "screenshot_path": screenshot_path,
-                "html_path": html_path, "har_path": har_path, "video_path": video_path,
-                "http_status": http_status, "persona_snapshot": persona_snapshot,
-            }
+            )
+            result.update({
+                "final_url": final_url,
+                "har_path": har_path,
+                "video_path": video_path,
+                "persona_snapshot": persona_snapshot,
+            })
         finally:
             context.close()  # flushes HAR + finalizes video
             if browser is not None:

@@ -79,7 +79,7 @@ def create_journey():
             flash(f"Error creating journey: {str(e)}", "danger")
     
     # Import inside function to avoid circular imports
-    from utils.persona_client_db import get_db_persona_client
+    from utils.persona_client import get_db_persona_client
     
     try:
         # Get personas from the API
@@ -139,7 +139,7 @@ def edit_journey(journey_id):
             flash(f"Error updating journey: {str(e)}", "danger")
     
     # Import inside function to avoid circular imports
-    from utils.persona_client_db import get_db_persona_client
+    from utils.persona_client import get_db_persona_client
     
     try:
         # Get personas from the API
@@ -345,7 +345,7 @@ def complete_journey(journey_id):
 @journey_bp.route("/direct-browse/<int:persona_id>")
 def direct_browse(persona_id):
     """Launch page for headful browsing as a persona."""
-    from utils.persona_client_db import get_db_persona_client
+    from utils.persona_client import get_db_persona_client
     from utils.browser import BrowserManager
 
     try:
@@ -540,7 +540,7 @@ def create_journey_from_browse(persona_id):
 def interact_as():
     """Choose a persona to interact with (browse or chat)."""
     # Import inside function to avoid circular imports
-    from utils.persona_client_db import get_db_persona_client
+    from utils.persona_client import get_db_persona_client
     
     try:
         # Get personas from the API

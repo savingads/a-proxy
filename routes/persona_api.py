@@ -6,7 +6,7 @@ import logging
 import re
 import traceback
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Response
-from utils.persona_client_db import get_db_persona_client
+from utils.persona_client import get_db_persona_client
 import persona_field_config
 
 # Set up logging

@@ -24,29 +24,10 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional, Tuple
 
+from utils.geo import infer_timezone
+
 logger = logging.getLogger(__name__)
 
-
-# Best-effort timezone inference. Intentionally small; callers can override with
-# an explicit ``timezone_id``. City wins over country when both are known.
-_CITY_TIMEZONES = {
-    "san francisco": "America/Los_Angeles",
-    "los angeles": "America/Los_Angeles",
-    "seattle": "America/Los_Angeles",
-    "new york": "America/New_York",
-    "chicago": "America/Chicago",
-    "london": "Europe/London",
-    "paris": "Europe/Paris",
-    "berlin": "Europe/Berlin",
-    "tokyo": "Asia/Tokyo",
-}
-_COUNTRY_TIMEZONES = {
-    "US": "America/New_York",
-    "GB": "Europe/London",
-    "FR": "Europe/Paris",
-    "DE": "Europe/Berlin",
-    "JP": "Asia/Tokyo",
-}
 
 # Playwright launch channels for real browser builds. None => bundled Chromium.
 # Safari/WebKit isn't a Chromium channel, so it falls back to Chromium emulation.
@@ -93,14 +74,6 @@ def _parse_screen_size(screen_size: Optional[str]) -> Optional[Dict[str, int]]:
         return None
 
 
-def _infer_timezone(demographic: Dict[str, Any]) -> Optional[str]:
-    city = (demographic.get("city") or "").strip().lower()
-    if city in _CITY_TIMEZONES:
-        return _CITY_TIMEZONES[city]
-    country = (demographic.get("country") or "").strip().upper()
-    return _COUNTRY_TIMEZONES.get(country)
-
-
 def channel_for_persona(persona: Dict[str, Any]) -> Optional[str]:
     """
     Map ``contextual.browser_type`` to a Playwright launch channel
@@ -138,7 +111,7 @@ def build_context_options(persona: Dict[str, Any]) -> Dict[str, Any]:
         options["geolocation"] = {"latitude": lat, "longitude": lon}
         options["permissions"] = ["geolocation"]
 
-    timezone_id = _infer_timezone(demographic)
+    timezone_id = infer_timezone(demographic.get("country"), demographic.get("city"))
     if timezone_id:
         options["timezone_id"] = timezone_id
 

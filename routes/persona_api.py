@@ -7,6 +7,7 @@ import re
 import traceback
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Response
 from utils.persona_client import get_db_persona_client
+from utils.geo import persona_geolocation
 import persona_field_config
 
 # Set up logging
@@ -67,8 +68,7 @@ def view_persona(persona_id):
         language = ""
         
         if 'demographic' in persona:
-            if persona['demographic'].get('latitude') and persona['demographic'].get('longitude'):
-                geolocation = f"{persona['demographic']['latitude']},{persona['demographic']['longitude']}"
+            geolocation = persona_geolocation(persona['demographic']) or ""
             language = persona['demographic'].get('language', '')
         
         # Get field configuration
@@ -351,8 +351,7 @@ def use_persona(persona_id):
         
         if 'demographic' in persona:
             demographic = persona['demographic']
-            if demographic.get('latitude') and demographic.get('longitude'):
-                geolocation = f"{demographic['latitude']},{demographic['longitude']}"
+            geolocation = persona_geolocation(demographic)
             language = demographic.get('language')
         
         session['geolocation'] = geolocation

@@ -1,8 +1,9 @@
 from flask import Blueprint, request, redirect, url_for, flash, session, jsonify
 import logging
-from config import PROXY_URL, REGION_LANGUAGE_MAP
+from config import PROXY_URL
 from utils.browser import BrowserManager
 from utils.persona_client import get_db_persona_client
+from utils.geo import infer_timezone, persona_geolocation
 
 browsing_bp = Blueprint('browsing', __name__)
 
@@ -11,15 +12,8 @@ def _get_persona_browser_settings(persona):
     """Extract browser context settings from a persona dict."""
     demo = persona.get("demographic", {})
     locale = demo.get("language", "en-US")
-
-    lat = demo.get("latitude")
-    lng = demo.get("longitude")
-    geolocation = f"{lat},{lng}" if lat and lng else None
-
-    country = demo.get("country", "")
-    region_info = REGION_LANGUAGE_MAP.get(country, {})
-    timezone_id = region_info.get("timezone")
-
+    geolocation = persona_geolocation(demo)
+    timezone_id = infer_timezone(demo.get("country"), demo.get("city"))
     proxy = session.get("proxy_url") or PROXY_URL
 
     return {

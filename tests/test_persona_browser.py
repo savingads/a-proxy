@@ -15,9 +15,9 @@ from utils.persona_browser import (  # noqa: E402
     build_context_options,
     channel_for_persona,
     _extract_latlon,
-    _infer_timezone,
     _parse_screen_size,
 )
+from utils.geo import infer_timezone  # noqa: E402
 
 # Mirrors Alex Johnson from create_sample_personas_simple.py (San Francisco).
 ALEX = {
@@ -75,7 +75,7 @@ def test_geolocation_from_string_fallback():
 
 
 def test_country_timezone_when_city_unknown():
-    assert _infer_timezone({"country": "GB", "city": "Nowheresville"}) == "Europe/London"
+    assert infer_timezone("GB", "Nowheresville") == "Europe/London"
 
 
 def test_parse_screen_size_variants():

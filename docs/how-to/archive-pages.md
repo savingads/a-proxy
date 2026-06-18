@@ -6,6 +6,19 @@ This guide documents the process of capturing and storing web pages within the A
 
 Web archiving in A-Proxy captures page content along with the persona context used during retrieval. This preserves both the content and the conditions under which it was served.
 
+## How Capture Works
+
+A-Proxy captures pages with a real browser (Playwright driving Chromium), not a plain HTTP fetch. This matters: what gets saved is the **rendered DOM after JavaScript runs**, so dynamic content — ads, lazy-loaded images, trackers — is captured as the persona's browser would actually render it.
+
+Each capture has three steps:
+
+1. **Configure a browser context** from the persona's attributes — locale, geolocation, timezone, viewport, mobile/touch flags, and an optional proxy — before the page opens.
+2. **Navigate and settle** — load the URL (`wait_until="domcontentloaded"`), then pause ~5 seconds so JavaScript-rendered content finishes loading.
+3. **Write the artifacts** — the serialized rendered DOM (`content.html`), a full-page screenshot (`screenshot.png`), and `metadata.json`. Persona captures run via `capture_as_persona.py` also record `traffic.har` (every network request) and `video.webm`.
+
+!!! note "HTTP headers come from a separate request"
+    The HTML and screenshot come from the persona's browser, but the HTTP status and response headers stored in `metadata.json` come from a separate `requests.get(url)` that does **not** use the persona's browser context or proxy. Those header values reflect a generic fetch, not what the persona's browser received — keep this in mind if you analyze response headers per persona.
+
 ## Initiating an Archive
 
 ### From the Browsing Interface
@@ -98,7 +111,7 @@ The captured HTML includes:
 
 PNG screenshot capturing:
 
-- Visible viewport at capture time
+- The entire scrollable page (full-page capture, not just the visible viewport)
 - Rendered state including dynamic content
 
 ## Limitations

@@ -1,0 +1,39 @@
+{
+  "3": {
+    "psychographic": {
+      "interests": [
+        "Tech Reviews",
+        "Gaming",
+        "News",
+        "Manga",
+        "History",
+        "Gadgets",
+        "Electronics",
+        "Arcade Games"
+      ]
+    },
+    "behavioral": {
+      "browsing_habits": [
+        "Commute",
+        "Weekends"
+      ],
+      "brand_interactions": [
+        "Sony",
+        "Panasonic",
+        "Nintendo"
+      ],
+      "device_usage": [
+        "device",
+        "os",
+        "browser"
+      ],
+      "content_consumption": [
+        "google_workspace",
+        "slack",
+        "trello_or_asana",
+        "coggle",
+        "zoho_books_or_quickbooks"
+      ]
+    }
+  }
+}

@@ -13,7 +13,7 @@
     </div>
     <div class="waypoint-body">
         {% if waypoint.agent_data %}
-        {% set agent_data = waypoint.agent_data|tojson|safe|fromjson %}
+        {% set agent_data = waypoint.agent_data|fromjson %}
         <div class="mb-3">
             {% if agent_data.has_both_modes %}
             <!-- Tabbed interface for showing both chat modes -->
@@ -73,15 +73,15 @@
             <!-- Default display for single chat mode -->
             <div class="conversation-summary p-2 mb-2 rounded bg-dark">
                 {% set history = agent_data.history if agent_data.history is defined else [] %}
-                {% for message in history[:3] %}
-                <div class="conversation-line {% if message.role == 'user' %}text-info{% endif %}">
+                {% for message in history[:4] %}
+                <div class="conversation-line mb-2 {% if message.role == 'user' %}text-info{% endif %}">
                     <strong>{{ message.role|title }}:</strong>
-                    {{ message.content|truncate(50) }}
+                    {{ message.content|truncate(200) }}
                 </div>
                 {% endfor %}
-                {% if history|length > 3 %}
+                {% if history|length > 4 %}
                 <div class="text-muted text-center small mt-2">
-                    <em>... conversation continues ({{ history|length - 3 }} more messages) ...</em>
+                    <em>... {{ history|length - 4 }} more messages ...</em>
                 </div>
                 {% endif %}
             </div>

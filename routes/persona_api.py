@@ -73,14 +73,19 @@ def view_persona(persona_id):
         
         # Get field configuration
         field_config = persona_field_config.get_field_config()
-        
-        return render_template('persona_view_dynamic.html', 
+
+        # Get chat-extracted attribute metadata for highlighting
+        from services.persona_attribute_service import PersonaAttributeService
+        chat_extracted = PersonaAttributeService.get_extracted_metadata(persona_id)
+
+        return render_template('persona_view_dynamic.html',
                               persona=persona,
                               persona_id=persona_id,
                               persona_name=persona.get('name', 'Unnamed'),
                               geolocation=geolocation,
                               language=language,
-                              field_config=field_config)
+                              field_config=field_config,
+                              chat_extracted=chat_extracted)
     except Exception as e:
         logger.error(f"Error viewing persona {persona_id}: {str(e)}")
         logger.error(traceback.format_exc())

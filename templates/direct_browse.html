@@ -105,7 +105,7 @@
             <!-- Inactive state -->
             <div id="session-inactive" {% if session_status.active and session_status.persona_id == persona.id %}style="display:none"{% endif %}>
                 <div class="input-group mb-3">
-                    <input type="url" id="start-url" class="form-control" placeholder="Starting URL (default: google.com)" value="">
+                    <input type="url" id="start-url" class="form-control" placeholder="Starting URL (default: {{ default_start_url }})" value="">
                     <button id="start-btn" class="btn btn-success" type="button">
                         <i class="bi bi-play-fill me-1"></i>Start Browsing
                     </button>

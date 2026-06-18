@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.ip_info && !data.ip_info.error) {
                     const geoEl = document.getElementById('geolocation');
-                    if (geoEl) geoEl.textContent = data.ip_info.loc || 'Unavailable';
+                    // Don't overwrite geolocation if it was set server-side (e.g. persona pages)
+                    if (geoEl && !geoEl.dataset.serverSet) geoEl.textContent = data.ip_info.loc || 'Unavailable';
 
                     // Update save persona form fields
                     const saveGeo = document.getElementById('save-geolocation');
@@ -26,6 +27,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize geolocation display
     function initializeGeolocation() {
         const proxyConfigured = document.body.getAttribute('data-proxy-configured') === 'True';
+        const geoEl = document.getElementById('geolocation');
+
+        // Skip if geolocation was set server-side (e.g. persona/journey pages)
+        if (geoEl && geoEl.dataset.serverSet) return;
 
         if (!proxyConfigured) {
             if (navigator.geolocation) {

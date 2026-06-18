@@ -13,7 +13,7 @@ captures a screenshot, and optionally a HAR (network traffic, for cross-persona
 ad diffs) and a video. Artifacts land in archives/<url_hash>/<timestamp>/.
 
 Examples:
-    # Synthesized context for the default persona (Alex Johnson)
+    # Synthesized context for the first available persona (or pass --persona-name)
     python3 capture_as_persona.py https://www.cnn.com
 
     # Real Alex Chrome profile (the demo "money shot"), capturing traffic + video.
@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 
 
 def _load_persona(persona_id, persona_name):
-    """Fetch a persona by id, or by name (default 'Alex Johnson')."""
+    """Fetch a persona by id, by name, or -- if neither is given -- the first
+    available persona (so the tool isn't bound to any specific seed persona)."""
     from database.repositories.persona import PersonaRepository
 
     repo = PersonaRepository()
@@ -41,18 +42,29 @@ def _load_persona(persona_id, persona_name):
             raise SystemExit(f"No persona with id {persona_id}")
         return persona
 
-    for candidate in repo.get_all(per_page=500).get("personas", []):
-        if candidate.get("name", "").strip().lower() == persona_name.strip().lower():
-            # get_all rows can be summaries; re-fetch the full persona by id.
-            return repo.get(candidate["id"]) or candidate
-    raise SystemExit(f"No persona named {persona_name!r}")
+    personas = repo.get_all(per_page=500).get("personas", [])
+    if not personas:
+        raise SystemExit("No personas found; create one first "
+                         "(e.g. python3 create_sample_personas_simple.py).")
+
+    if persona_name:
+        for candidate in personas:
+            if candidate.get("name", "").strip().lower() == persona_name.strip().lower():
+                # get_all rows can be summaries; re-fetch the full persona by id.
+                return repo.get(candidate["id"]) or candidate
+        raise SystemExit(f"No persona named {persona_name!r}")
+
+    # Neither id nor name given: fall back to the first available persona.
+    first = personas[0]
+    logger.info("No persona specified; using %r (id=%s).", first.get("name"), first.get("id"))
+    return repo.get(first["id"]) or first
 
 
 def main():
     parser = argparse.ArgumentParser(description="Capture a page as a persona (Playwright).")
     parser.add_argument("url", help="URL to visit")
     parser.add_argument("--persona-id", type=int, help="Persona ID (overrides --persona-name)")
-    parser.add_argument("--persona-name", default="Alex Johnson", help="Persona name (default: Alex Johnson)")
+    parser.add_argument("--persona-name", help="Persona name (default: first available persona)")
     parser.add_argument("--profile-dir", help="Real Chrome user-data dir (persistent/real-profile mode)")
     parser.add_argument("--channel", help="Browser channel, e.g. 'chrome' (for real Google Chrome profiles)")
     parser.add_argument("--har", action="store_true", help="Record network traffic to traffic.har")

@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-from ..connection import get_db_connection
+from ..connection import get_db
 from . import BaseRepository
 
 
@@ -24,10 +24,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             Dictionary containing journey data or None if not found
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             cursor.execute("SELECT j.* FROM journeys j WHERE j.id = ?", (id,))
             journey = cursor.fetchone()
 
@@ -39,8 +36,6 @@ class JourneyRepository(BaseRepository):
             result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
 
             return result
-        finally:
-            conn.close()
 
     def get_all(self, **filters) -> List[Dict[str, Any]]:
         """
@@ -49,10 +44,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             List of dictionaries containing journey data
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             cursor.execute("""
                 SELECT j.*
                 FROM journeys j
@@ -65,8 +57,6 @@ class JourneyRepository(BaseRepository):
                 journey['persona_name'] = None if journey['persona_id'] is None else f"Persona #{journey['persona_id']}"
 
             return journeys
-        finally:
-            conn.close()
 
     def save(self, journey_data: Dict[str, Any]) -> int:
         """
@@ -78,10 +68,7 @@ class JourneyRepository(BaseRepository):
         Returns:
             The ID of the saved journey
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             journey_id = journey_data.get('id')
             now = datetime.now()
 
@@ -118,14 +105,7 @@ class JourneyRepository(BaseRepository):
                 )
                 journey_id = cursor.lastrowid
 
-            conn.commit()
             return journey_id
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def delete(self, id: int) -> bool:
         """
@@ -137,20 +117,10 @@ class JourneyRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             # Delete the journey (CASCADE will delete related waypoints)
             cursor.execute("DELETE FROM journeys WHERE id = ?", (id,))
-            conn.commit()
             return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     # Waypoint operations
 

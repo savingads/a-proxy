@@ -79,6 +79,24 @@ class DatabaseConnection:
         finally:
             conn.close()
 
+    @contextmanager
+    def cursor(self):
+        """
+        Context manager for a read cursor.
+
+        Usage:
+            with db.cursor() as cur:
+                cur.execute("SELECT ...")
+                rows = cur.fetchall()
+
+        Closes the connection on exit; does NOT commit (use transaction() for writes).
+        """
+        conn = self.get_connection()
+        try:
+            yield conn.cursor()
+        finally:
+            conn.close()
+
 
 # Global database instance
 _db_instance = None

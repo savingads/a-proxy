@@ -6,7 +6,7 @@ Handles all database operations related to users and authentication.
 import sqlite3
 from typing import Optional, Dict, Any
 
-from ..connection import get_db_connection
+from ..connection import get_db
 from . import BaseRepository
 
 
@@ -23,13 +23,9 @@ class UserRepository(BaseRepository):
         Returns:
             Dictionary containing user data or None if not found
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM users WHERE id = ?", (id,))
-        user = cursor.fetchone()
-
-        conn.close()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE id = ?", (id,))
+            user = cursor.fetchone()
         return dict(user) if user else None
 
     def get_all(self, **filters) -> list:
@@ -39,13 +35,9 @@ class UserRepository(BaseRepository):
         Returns:
             List of dictionaries containing user data
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
-        users = [dict(row) for row in cursor.fetchall()]
-
-        conn.close()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
+            users = [dict(row) for row in cursor.fetchall()]
         return users
 
     def save(self, user_data: Dict[str, Any]) -> Optional[int]:
@@ -58,20 +50,15 @@ class UserRepository(BaseRepository):
         Returns:
             The ID of the created user or None if email already exists
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
         try:
-            cursor.execute(
-                "INSERT INTO users (email, password_hash) VALUES (?, ?)",
-                (user_data['email'], user_data['password_hash'])
-            )
-            conn.commit()
-            return cursor.lastrowid
+            with get_db().transaction() as cursor:
+                cursor.execute(
+                    "INSERT INTO users (email, password_hash) VALUES (?, ?)",
+                    (user_data['email'], user_data['password_hash'])
+                )
+                return cursor.lastrowid
         except sqlite3.IntegrityError:
             return None
-        finally:
-            conn.close()
 
     def delete(self, id: int) -> bool:
         """
@@ -83,18 +70,9 @@ class UserRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute("DELETE FROM users WHERE id = ?", (id,))
-            conn.commit()
-            return True
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
+        return True
 
     def get_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """
@@ -106,11 +84,7 @@ class UserRepository(BaseRepository):
         Returns:
             Dictionary containing user data or None if not found
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-        user = cursor.fetchone()
-
-        conn.close()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+            user = cursor.fetchone()
         return dict(user) if user else None

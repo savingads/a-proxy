@@ -8,7 +8,7 @@ import hashlib
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-from ..connection import get_db_connection
+from ..connection import get_db
 from . import BaseRepository
 
 
@@ -25,20 +25,15 @@ class ArchiveRepository(BaseRepository):
         Returns:
             Dictionary containing archived website data or None if not found
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT aw.* FROM archived_websites aw WHERE aw.id = ?", (id,))
-        archived_website = cursor.fetchone()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT aw.* FROM archived_websites aw WHERE aw.id = ?", (id,))
+            archived_website = cursor.fetchone()
 
         if not archived_website:
-            conn.close()
             return None
 
         result = dict(archived_website)
         result['persona_name'] = None if result['persona_id'] is None else f"Persona #{result['persona_id']}"
-
-        conn.close()
         return result
 
     def get_all(self, **filters) -> List[Dict[str, Any]]:
@@ -48,21 +43,16 @@ class ArchiveRepository(BaseRepository):
         Returns:
             List of dictionaries containing archived website data
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT aw.*
-            FROM archived_websites aw
-            ORDER BY aw.created_at DESC
-        """)
-
-        archived_websites = [dict(row) for row in cursor.fetchall()]
+        with get_db().cursor() as cursor:
+            cursor.execute("""
+                SELECT aw.*
+                FROM archived_websites aw
+                ORDER BY aw.created_at DESC
+            """)
+            archived_websites = [dict(row) for row in cursor.fetchall()]
 
         for website in archived_websites:
             website['persona_name'] = None if website['persona_id'] is None else f"Persona #{website['persona_id']}"
-
-        conn.close()
         return archived_websites
 
     def save(self, url: str, persona_id: int = None, archive_type: str = 'filesystem',
@@ -83,10 +73,7 @@ class ArchiveRepository(BaseRepository):
             url_hash = hashlib.md5(url.encode()).hexdigest()
             archive_location = f"archives/{url_hash}"
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute(
                 """
                 INSERT INTO archived_websites
@@ -97,14 +84,7 @@ class ArchiveRepository(BaseRepository):
             )
 
             archived_website_id = cursor.lastrowid
-            conn.commit()
             return archived_website_id
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def delete(self, id: int) -> bool:
         """
@@ -116,19 +96,9 @@ class ArchiveRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute("DELETE FROM archived_websites WHERE id = ?", (id,))
-            conn.commit()
             return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     # Memento operations
 
@@ -152,10 +122,7 @@ class ArchiveRepository(BaseRepository):
         Returns:
             The ID of the newly created memento
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute(
                 """
                 INSERT INTO mementos
@@ -178,14 +145,7 @@ class ArchiveRepository(BaseRepository):
             )
 
             memento_id = cursor.lastrowid
-            conn.commit()
             return memento_id
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def get_mementos(self, archived_website_id: int) -> List[Dict[str, Any]]:
         """
@@ -197,23 +157,18 @@ class ArchiveRepository(BaseRepository):
         Returns:
             List of dictionaries containing memento data
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT *
-            FROM mementos
-            WHERE archived_website_id = ?
-            ORDER BY memento_datetime DESC
-        """, (archived_website_id,))
-
-        mementos = [dict(row) for row in cursor.fetchall()]
+        with get_db().cursor() as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM mementos
+                WHERE archived_website_id = ?
+                ORDER BY memento_datetime DESC
+            """, (archived_website_id,))
+            mementos = [dict(row) for row in cursor.fetchall()]
 
         for memento in mementos:
             if memento['headers']:
                 memento['headers'] = json.loads(memento['headers'])
-
-        conn.close()
         return mementos
 
     def get_memento(self, memento_id: int) -> Optional[Dict[str, Any]]:
@@ -226,24 +181,19 @@ class ArchiveRepository(BaseRepository):
         Returns:
             Dictionary containing memento data or None if not found
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        with get_db().cursor() as cursor:
+            cursor.execute("""
+                SELECT m.*, aw.uri_r
+                FROM mementos m
+                JOIN archived_websites aw ON m.archived_website_id = aw.id
+                WHERE m.id = ?
+            """, (memento_id,))
+            memento = cursor.fetchone()
 
-        cursor.execute("""
-            SELECT m.*, aw.uri_r
-            FROM mementos m
-            JOIN archived_websites aw ON m.archived_website_id = aw.id
-            WHERE m.id = ?
-        """, (memento_id,))
-
-        memento = cursor.fetchone()
         if not memento:
-            conn.close()
             return None
 
         result = dict(memento)
         if result['headers']:
             result['headers'] = json.loads(result['headers'])
-
-        conn.close()
         return result

@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from typing import Optional, Dict, Any
 
-from ..connection import get_db_connection
+from ..connection import get_db
 from . import BaseRepository
 
 
@@ -24,10 +24,7 @@ class PersonaRepository(BaseRepository):
         Returns:
             Dictionary containing persona data or None if not found
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             cursor.execute("SELECT * FROM personas WHERE id = ?", (id,))
             persona_row = cursor.fetchone()
 
@@ -38,8 +35,6 @@ class PersonaRepository(BaseRepository):
             persona.update(self._get_persona_data(cursor, id))
 
             return persona
-        finally:
-            conn.close()
 
     def get_all(self, page: int = 1, per_page: int = 100, **filters) -> Dict[str, Any]:
         """
@@ -53,10 +48,7 @@ class PersonaRepository(BaseRepository):
         Returns:
             Dictionary with 'personas' list and pagination info
         """
-        conn = get_db_connection()
-        try:
-            cursor = conn.cursor()
-
+        with get_db().cursor() as cursor:
             offset = (page - 1) * per_page
 
             # Get total count
@@ -83,8 +75,6 @@ class PersonaRepository(BaseRepository):
                 'per_page': per_page,
                 'pages': (total + per_page - 1) // per_page
             }
-        finally:
-            conn.close()
 
     def save(self, persona_data: Dict[str, Any]) -> int:
         """
@@ -96,10 +86,7 @@ class PersonaRepository(BaseRepository):
         Returns:
             The ID of the saved persona
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             persona_id = persona_data.get('id')
             now = datetime.now()
 
@@ -141,14 +128,7 @@ class PersonaRepository(BaseRepository):
             if 'contextual' in persona_data:
                 self._save_contextual_data(cursor, persona_id, persona_data['contextual'])
 
-            conn.commit()
             return persona_id
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def delete(self, id: int) -> bool:
         """
@@ -160,10 +140,7 @@ class PersonaRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             # Delete the persona (CASCADE will delete related data)
             cursor.execute("DELETE FROM personas WHERE id = ?", (id,))
 
@@ -173,14 +150,7 @@ class PersonaRepository(BaseRepository):
             cursor.execute("DELETE FROM behavioral_data WHERE persona_id = ?", (id,))
             cursor.execute("DELETE FROM contextual_data WHERE persona_id = ?", (id,))
 
-            conn.commit()
             return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
 
     def _get_persona_data(self, cursor, persona_id: int) -> Dict[str, Any]:
         """Helper function to get all persona data for a given persona ID."""

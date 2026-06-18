@@ -6,7 +6,7 @@ Handles all database operations related to application settings.
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-from ..connection import get_db_connection
+from ..connection import get_db
 from . import BaseRepository
 
 
@@ -23,13 +23,9 @@ class SettingsRepository(BaseRepository):
         Returns:
             The setting value or None if not found
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
-        result = cursor.fetchone()
-
-        conn.close()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
+            result = cursor.fetchone()
         return result['value'] if result else None
 
     def get_with_default(self, key: str, default: Any = None) -> Any:
@@ -53,13 +49,9 @@ class SettingsRepository(BaseRepository):
         Returns:
             List of dictionaries containing setting data
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM settings ORDER BY key")
-        settings = [dict(row) for row in cursor.fetchall()]
-
-        conn.close()
+        with get_db().cursor() as cursor:
+            cursor.execute("SELECT * FROM settings ORDER BY key")
+            settings = [dict(row) for row in cursor.fetchall()]
         return settings
 
     def save(self, key: str, value: str, description: str = None) -> bool:
@@ -74,10 +66,7 @@ class SettingsRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute("SELECT key FROM settings WHERE key = ?", (key,))
             exists = cursor.fetchone()
 
@@ -91,15 +80,7 @@ class SettingsRepository(BaseRepository):
                     "INSERT INTO settings (key, value, description, updated_at) VALUES (?, ?, ?, ?)",
                     (key, value, description, datetime.now())
                 )
-
-            conn.commit()
-            return True
-
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
+        return True
 
     def delete(self, key: str) -> bool:
         """
@@ -111,15 +92,6 @@ class SettingsRepository(BaseRepository):
         Returns:
             True if successful
         """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        try:
+        with get_db().transaction() as cursor:
             cursor.execute("DELETE FROM settings WHERE key = ?", (key,))
-            conn.commit()
-            return True
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
+        return True

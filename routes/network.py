@@ -7,7 +7,7 @@ cross-platform proxy configuration endpoints.
 from flask import Blueprint, jsonify, request, session
 import logging
 from config import REGION_LANGUAGE_MAP
-from utils.network import is_proxy_configured, get_proxy_url, get_ip_info
+from utils.network import get_proxy_url, get_ip_info
 
 network_bp = Blueprint('network', __name__)
 

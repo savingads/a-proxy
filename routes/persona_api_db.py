@@ -5,7 +5,7 @@ import json
 import logging
 import re
 import traceback
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, session, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Response
 from utils.persona_client_db import get_db_persona_client
 import persona_field_config
 
@@ -251,7 +251,7 @@ def edit_persona(persona_id):
                     persona_data[category] = category_data
             
             # Update persona
-            result = client.update_persona(persona_id, persona_data)
+            client.update_persona(persona_id, persona_data)
             
             flash('Persona updated successfully', 'success')
             return redirect(url_for('persona.view_persona', persona_id=persona_id))
@@ -323,7 +323,7 @@ def delete_persona(persona_id):
     """Delete a persona"""
     try:
         client = get_persona_client()
-        result = client.delete_persona(persona_id)
+        client.delete_persona(persona_id)
         
         flash('Persona deleted successfully', 'success')
         return redirect(url_for('persona.list_personas'))

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, session
-from utils.network import is_proxy_configured, get_proxy_url, get_ip_info
+from utils.network import get_proxy_url, get_ip_info
 from config import REGION_LANGUAGE_MAP
 
 home_bp = Blueprint('home', __name__)

@@ -118,3 +118,6 @@ screenshots/
 
 # Scratch patches
 phase0playwrightpersonabrowser.patch
+
+# Old dev-file backups (superseded variants kept locally)
+backup_dev_files/

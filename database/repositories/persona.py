@@ -5,10 +5,9 @@ Handles all database operations related to personas and their associated data.
 """
 import json
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 
 from ..connection import get_db_connection
-from ..models import Persona, DemographicData, PsychographicData, BehavioralData, ContextualData
 from . import BaseRepository
 
 

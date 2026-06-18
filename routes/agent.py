@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for, current_app
+from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for
 import logging
 import json
 import database
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 def agent_chat():
     """Show the standalone agent chat interface."""
     from config import (
-        LLM_PROVIDER, OPENAI_COMPATIBLE_URL, OPENAI_COMPATIBLE_MODEL,
-        ANTHROPIC_API_KEY, ANTHROPIC_MODEL, OPENAI_API_KEY, OPENAI_MODEL,
+        OPENAI_COMPATIBLE_URL, OPENAI_COMPATIBLE_MODEL, ANTHROPIC_API_KEY,
+        ANTHROPIC_MODEL, OPENAI_API_KEY, OPENAI_MODEL,
     )
     # Build list of available models based on configured providers
     models = []
@@ -33,7 +33,7 @@ def agent_chat():
         default_model = models[0]["value"]
     return render_template("agent_chat.html", models=models, default_model=default_model)
 
-from services import fetch_persona_context, flatten_persona_context, persona_context_to_system_prompt
+from services import fetch_persona_context, flatten_persona_context
 
 @agent_bp.route("/agent/message", methods=["POST"])
 @login_required
@@ -356,7 +356,6 @@ def save_direct_chat(persona_id):
             # Check if any existing waypoint has a matching title but different mode
             # This handles both "Chat with X" and "Chat as X" cases
             other_mode = 'with' if chat_mode == 'as' else 'as'
-            other_mode_query = f"agent://conversation/{other_mode}"
             
             for wp in waypoints:
                 # Check if this is a chat waypoint with the other perspective
@@ -628,25 +627,4 @@ def save_agent_conversation(journey_id):
     
     except Exception as e:
         logger.error(f"Error saving agent conversation: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@agent_bp.route("/agent-blueprint")
-def register_blueprint():
-    """Register the agent blueprint."""
-    try:
-        # Import here to avoid circular imports
-        from utils.agent import get_agent_service
-        
-        # Get agent service
-        agent_service = get_agent_service()
-        
-        # Create the agent blueprint
-        agent_bp = agent_service.create_agent_blueprint()
-        
-        # Register with current app
-        current_app.register_blueprint(agent_bp)
-        
-        return jsonify({"success": True, "message": "Agent blueprint registered successfully"})
-    except Exception as e:
-        logger.error(f"Error registering agent blueprint: {e}")
         return jsonify({"success": False, "error": str(e)}), 500

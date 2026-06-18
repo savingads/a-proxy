@@ -108,7 +108,7 @@ A-Proxy translates persona attributes into browser configuration:
 | Geographic location | Proxy exit IP, Playwright geolocation emulation |
 | Language | Playwright locale (Accept-Language + UI) |
 | Timezone | Playwright timezone emulation |
-| Device type | Viewport dimensions |
+| Device type | Mobile + touch emulation (`is_mobile` / `has_touch`) |
 | Screen size | Viewport dimensions |
 
 This allows web crawling that authentically represents how a persona would experience the web.

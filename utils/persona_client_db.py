@@ -2,8 +2,6 @@
 Database-backed implementation of the Persona Client
 """
 import logging
-import json
-import os
 from datetime import datetime
 import database
 

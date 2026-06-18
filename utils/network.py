@@ -4,7 +4,6 @@ Network utilities for proxy configuration and IP info.
 Replaces the Linux-only VPN utilities (utils/vpn.py) with
 cross-platform proxy-based networking.
 """
-import os
 import logging
 import requests
 

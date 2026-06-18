@@ -4,7 +4,6 @@ User repository module.
 Handles all database operations related to users and authentication.
 """
 import sqlite3
-from datetime import datetime
 from typing import Optional, Dict, Any
 
 from ..connection import get_db_connection
@@ -35,7 +34,7 @@ class UserRepository(BaseRepository):
 
     def get_all(self, **filters) -> list:
         """
-        Get all users.
+        Get all users. (Required by the BaseRepository ABC interface.)
 
         Returns:
             List of dictionaries containing user data

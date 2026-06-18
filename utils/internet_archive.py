@@ -1,4 +1,3 @@
-import os
 import requests
 import logging
 from datetime import datetime
@@ -95,9 +94,6 @@ def submit_to_internet_archive(url):
             
             # The archived URL should be available at:
             archived_url = f"https://web.archive.org/web/{datetime.now().strftime('%Y%m%d%H%M%S')}/{url}"
-            
-            # If there's a memento header, use that instead
-            memento_datetime = response.headers.get('Memento-Datetime')
             
             # The actual URL will be in the Location header if redirected
             if 'Location' in response.headers:

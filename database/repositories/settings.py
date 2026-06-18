@@ -48,7 +48,7 @@ class SettingsRepository(BaseRepository):
 
     def get_all(self, **filters) -> List[Dict[str, Any]]:
         """
-        Get all settings.
+        Get all settings. (Required by the BaseRepository ABC interface.)
 
         Returns:
             List of dictionaries containing setting data

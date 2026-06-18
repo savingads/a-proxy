@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, flash, Response, session, jsonify
+from flask import Blueprint, request, redirect, url_for, flash, session, jsonify
 import logging
 from config import PROXY_URL, REGION_LANGUAGE_MAP
 from utils.browser import BrowserManager

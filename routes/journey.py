@@ -4,8 +4,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from PIL import Image
-from io import BytesIO
 import base64
 
 journey_bp = Blueprint('journey', __name__)
@@ -441,9 +439,9 @@ def save_page_as_waypoint(persona_id):
             "user_agent": request.headers.get('User-Agent'),
             "source": "direct_browse"
         }
-        
+
         # Add the waypoint
-        waypoint_id = database.add_waypoint(
+        database.add_waypoint(
             journey_id=journey_id,
             url=url,
             title=title,

@@ -1,10 +1,7 @@
 import unittest
 import tempfile
 import os
-import json
-import sqlite3
 import sys
-from datetime import datetime
 
 # Add parent directory to path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

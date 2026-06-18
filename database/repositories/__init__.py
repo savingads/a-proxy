@@ -4,7 +4,7 @@ Database repositories package.
 This package provides the data access layer with repository pattern implementation.
 """
 from abc import ABC, abstractmethod
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any
 
 
 class BaseRepository(ABC):
@@ -13,22 +13,18 @@ class BaseRepository(ABC):
     @abstractmethod
     def get(self, id: int) -> Optional[Any]:
         """Get entity by ID."""
-        pass
 
     @abstractmethod
     def get_all(self, **filters) -> List[Any]:
         """Get all entities with optional filtering."""
-        pass
 
     @abstractmethod
     def save(self, entity: Any) -> int:
         """Save entity and return ID."""
-        pass
 
     @abstractmethod
     def delete(self, id: int) -> bool:
         """Delete entity by ID."""
-        pass
 
 
 # Import repository implementations

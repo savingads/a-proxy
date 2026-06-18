@@ -3,14 +3,13 @@ import os
 import sys
 import tempfile
 import json
-from flask import session
 
 # Add parent directory to path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import app
 import database
-from database.connection import get_db, DatabaseConnection
+from database.connection import DatabaseConnection
 
 class TestApp(unittest.TestCase):
     """Test cases for the Flask application"""

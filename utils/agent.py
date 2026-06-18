@@ -126,22 +126,6 @@ class AgentService:
             logger.error(f"Error saving agent conversation: {e}")
             raise
 
-    def get_conversation(self, waypoint_id):
-        from database import get_waypoint
-
-        try:
-            waypoint = get_waypoint(waypoint_id)
-
-            if not waypoint or waypoint.get('type') != 'agent':
-                return None
-
-            agent_data = json.loads(waypoint.get('agent_data', '{}'))
-            return agent_data
-        except Exception as e:
-            logger.error(f"Error retrieving agent conversation: {e}")
-            return None
-
-
 def get_agent_service():
     if not hasattr(current_app, 'agent_service'):
         config = {

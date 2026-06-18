@@ -24,6 +24,8 @@ from pathlib import Path
 DEFAULT_SSH_HOST = os.environ.get("PICOTTE_SSH_HOST", "picotte")
 DEFAULT_TIMEOUT = 600
 VLLM_PORT = 8000
+MODEL = "Qwen/Qwen2.5-7B-Instruct"
+READY_MARKER = "Application startup complete"
 SLURM_SCRIPT = "~/vllm-serve.slurm"
 ENV_FILE = Path(__file__).parent / ".env"
 
@@ -51,8 +53,8 @@ PICOTTE_BLOCK = """\
 # Picotte vLLM (active — managed by picotte_vllm.py)
 LLM_PROVIDER=openai_compatible
 OPENAI_COMPATIBLE_URL=http://localhost:{port}/v1
-OPENAI_COMPATIBLE_MODEL=Qwen/Qwen2.5-7B-Instruct
-OPENAI_COMPATIBLE_API_KEY=none""".format(port=VLLM_PORT)
+OPENAI_COMPATIBLE_MODEL={model}
+OPENAI_COMPATIBLE_API_KEY=none""".format(port=VLLM_PORT, model=MODEL)
 
 
 def ssh(host, command, timeout=30):
@@ -72,27 +74,28 @@ def ssh_check(host):
     try:
         out, rc = ssh(host, "echo ok")
         return rc == 0 and "ok" in out
-    except (subprocess.TimeoutExpired, FileNotFoundError):
+    except FileNotFoundError:  # ssh binary not on PATH (ssh() already handles timeouts)
         return False
 
 
 def get_running_job(host):
-    """Find a running vllm-server SLURM job. Returns (job_id, node) or (None, None)."""
+    """Find the vllm-server SLURM job. Returns (job_id, node) or (None, None).
+
+    node is None while the job is still pending (squeue reports it as "(None)").
+    """
     out, rc = ssh(host, "squeue -u $USER -n vllm-server -h -o '%i %N %T'")
     if rc != 0 or not out.strip():
         return None, None
-    for line in out.strip().splitlines():
-        parts = line.split()
-        if len(parts) >= 3 and parts[2] == "RUNNING":
-            return parts[0], parts[1]
-        if len(parts) >= 2:
-            return parts[0], parts[1] if parts[1] != "(None)" else None
-    return None, None
+    parts = out.strip().splitlines()[0].split()
+    if len(parts) < 2:
+        return None, None
+    job_id, node = parts[0], parts[1]
+    return job_id, (node if node != "(None)" else None)
 
 
-def get_job_log_file(host, job_id):
-    """Get the stdout log path for a job."""
-    return f"~/vllm-server-{job_id}.out"
+def job_files(job_id):
+    """Return (stdout_log, stderr_log) paths for a SLURM job."""
+    return f"~/vllm-server-{job_id}.out", f"~/vllm-server-{job_id}.err"
 
 
 def submit_job(host):
@@ -128,46 +131,45 @@ def wait_for_job_running(host, job_id, timeout=120):
 
 
 def wait_for_vllm_ready(host, job_id, timeout=DEFAULT_TIMEOUT):
-    """Wait for vLLM to finish loading and report 'Application startup complete'."""
-    log_file = get_job_log_file(host, job_id)
+    """Wait for vLLM to finish loading and report the readiness marker."""
+    log_file, err_file = job_files(job_id)
     start = time.time()
     last_status = ""
-    err_file = f"~/vllm-server-{job_id}.err"
     while time.time() - start < timeout:
-        out, _ = ssh(host, f"tail -3 {log_file} 2>/dev/null")
-        err_out, _ = ssh(host, f"tail -5 {err_file} 2>/dev/null")
+        # One SSH round-trip per poll: tail both logs and confirm the job is alive.
+        raw, _ = ssh(host, f"tail -3 {log_file} 2>/dev/null; echo '==ERR=='; "
+                           f"tail -5 {err_file} 2>/dev/null; echo '==JOB=='; "
+                           f"squeue -j {job_id} -h -o '%T'")
+        logs, _, job_state = raw.partition("==JOB==")
 
-        # The startup message may appear in either stdout or stderr
-        if "Application startup complete" in out or "Application startup complete" in err_out:
+        # The startup marker may appear in either stdout or stderr.
+        if READY_MARKER in logs:
             return True
 
-        # Show loading progress from both stdout and stderr
-        combined = out + "\n" + err_out
+        # Gone from the queue -> the job died or finished.
+        if not job_state.strip():
+            print(f"\nJob {job_id} is no longer running. Check logs:")
+            print(f"  ssh {host} 'tail -20 {log_file}'")
+            sys.exit(1)
+
         status = ""
-        if "Loading safetensors" in combined:
-            match = re.search(r"(\d+)%", combined)
+        if "Loading safetensors" in logs:
+            match = re.search(r"(\d+)%", logs)
             if match:
                 status = f"Loading model weights: {match.group(1)}%"
-        elif "Starting to load model" in combined:
+        elif "Starting to load model" in logs:
             status = "Loading model..."
-        elif "Using TRITON_ATTN" in combined or "Using FLASH_ATTN" in combined:
+        elif "Using TRITON_ATTN" in logs or "Using FLASH_ATTN" in logs:
             status = "Compiling CUDA kernels..."
-        elif "Starting vLLM API server" in combined:
+        elif "Starting vLLM API server" in logs:
             status = "Starting API server..."
-        elif "Initializing" in combined:
+        elif "Initializing" in logs:
             status = "Initializing engine..."
 
         if status and status != last_status:
             elapsed = int(time.time() - start)
             print(f"\r[{elapsed}s] {status}            ", end="", flush=True)
             last_status = status
-
-        # Check job hasn't died
-        job_out, _ = ssh(host, f"squeue -j {job_id} -h -o '%T'")
-        if not job_out.strip():
-            print(f"\nJob {job_id} is no longer running. Check logs:")
-            print(f"  ssh {host} 'tail -20 {log_file}'")
-            sys.exit(1)
 
         time.sleep(10)
 
@@ -195,6 +197,8 @@ def close_tunnel(port=VLLM_PORT):
     """Kill any SSH tunnel processes forwarding the given port."""
     # Find and kill ssh processes with the tunnel port
     if sys.platform == "win32":
+        # NOTE: uses wmic, which is removed on Windows 11 24H2+. If long-term
+        # Windows support is needed, replace this block with psutil.
         # On Windows, find ssh processes with our port in the command line
         result = subprocess.run(
             ["tasklist", "/FI", "IMAGENAME eq ssh.exe", "/FO", "CSV", "/NH"],
@@ -228,6 +232,10 @@ def update_env_file(target):
     """Swap the LLM config block in .env between Ollama and Picotte.
 
     target: "picotte" or "ollama"
+
+    NOTE (fragile): relies on an exact match of OLLAMA_BLOCK / PICOTTE_BLOCK in
+    .env. If those lines are hand-edited the swap silently no-ops (just warns).
+    A marker-delimited region (# >>> a-proxy llm >>> ... # <<<) would be sturdier.
     """
     if not ENV_FILE.exists():
         print(f"Warning: {ENV_FILE} not found, skipping .env update")
@@ -293,7 +301,7 @@ def cmd_start(args):
     print()
     print("=" * 50)
     print("  vLLM is running and a-proxy is configured.")
-    print(f"  Model: Qwen/Qwen2.5-7B-Instruct")
+    print(f"  Model: {MODEL}")
     print(f"  Endpoint: http://localhost:{VLLM_PORT}/v1")
     print(f"  SLURM job: {job_id} on {node}")
     print()
@@ -342,9 +350,8 @@ def cmd_status(args):
     print(f"  Elapsed: {elapsed} / {limit}")
 
     if state == "RUNNING" and node:
-        log_file = get_job_log_file(host, job_id)
-        err_file = log_file.replace(".out", ".err")
-        out, _ = ssh(host, f"grep -c 'Application startup complete' {log_file} {err_file} 2>/dev/null")
+        log_file, err_file = job_files(job_id)
+        out, _ = ssh(host, f"grep -c '{READY_MARKER}' {log_file} {err_file} 2>/dev/null")
         if "1" in out:
             print(f"  vLLM: ready (serving on {node}:{VLLM_PORT})")
             print(f"  Tunnel command: ssh -L {VLLM_PORT}:{node}:{VLLM_PORT} {host} -N")
@@ -390,7 +397,7 @@ def cmd_logs(args):
             return
         log_file = out
     else:
-        log_file = get_job_log_file(host, job_id)
+        log_file, _ = job_files(job_id)
 
     print(f"--- {log_file} ---")
     out, _ = ssh(host, f"tail -30 {log_file}")
@@ -423,20 +430,13 @@ def main():
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
-    subparsers.add_parser("start", help="Submit job, wait for ready, open tunnel")
-    subparsers.add_parser("status", help="Check vLLM job status")
-    subparsers.add_parser("stop", help="Cancel job and close tunnel")
-    subparsers.add_parser("logs", help="Show vLLM server logs")
+    subparsers.add_parser("start", help="Submit job, wait for ready, open tunnel").set_defaults(func=cmd_start)
+    subparsers.add_parser("status", help="Check vLLM job status").set_defaults(func=cmd_status)
+    subparsers.add_parser("stop", help="Cancel job and close tunnel").set_defaults(func=cmd_stop)
+    subparsers.add_parser("logs", help="Show vLLM server logs").set_defaults(func=cmd_logs)
 
     args = parser.parse_args()
-
-    commands = {
-        "start": cmd_start,
-        "status": cmd_status,
-        "stop": cmd_stop,
-        "logs": cmd_logs,
-    }
-    commands[args.command](args)
+    args.func(args)
 
 
 if __name__ == "__main__":

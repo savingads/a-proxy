@@ -43,8 +43,15 @@ archives/
 │   └── [timestamp]/
 │       ├── content.html
 │       ├── screenshot.png
-│       └── metadata.json
+│       ├── metadata.json
+│       ├── traffic.har      # persona captures run with --har
+│       └── video.webm       # persona captures run with --video
 ```
+
+Persona captures made with `capture_as_persona.py` add `traffic.har` (network
+traffic) and/or `video.webm` to the same memento directory, plus a
+`persona_snapshot` block inside `metadata.json`. Standard archives contain only
+the HTML, screenshot, and metadata.
 
 ## Viewing Archives
 

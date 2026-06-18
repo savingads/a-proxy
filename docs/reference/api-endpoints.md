@@ -161,7 +161,7 @@ POST /journey/create
 ### Add Waypoint
 
 ```
-POST /journey/<journey_id>/waypoint
+POST /journey/<journey_id>/add-waypoint
 ```
 
 **Form Fields:**
@@ -186,10 +186,10 @@ Returns HTML page listing archived pages.
 ### View Archive
 
 ```
-GET /archive/<archive_id>
+GET /archives/<archived_website_id>
 ```
 
-Returns HTML page with archive details and content.
+Returns HTML page with archive details and content. Individual mementos are viewed at `GET /archives/<archived_website_id>/mementos/<memento_id>`.
 
 ## Agent Endpoints
 

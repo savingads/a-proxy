@@ -30,6 +30,8 @@ Headful browsing launches a visible Chromium window configured with the persona'
 | Language (`demographic.language`) | Locale — Accept-Language header and UI language |
 | Latitude/Longitude | Geolocation — `navigator.geolocation` API |
 | Country | Timezone — via `REGION_LANGUAGE_MAP` lookup |
+| Screen size (`contextual.screen_size`) | Viewport dimensions |
+| Device type (`contextual.device_type`) | Mobile + touch emulation (mobile/tablet) |
 | Proxy (session or env) | Per-context traffic routing |
 
 These are applied natively by Playwright — no JavaScript injection needed.
@@ -51,7 +53,7 @@ The control page polls the session status every 3 seconds, so your navigation hi
 ### Session Behavior
 
 - **One session at a time** — starting a new session closes any existing one
-- **Isolated contexts** — each session starts fresh with no cookies or history from previous sessions
+- **Isolated contexts** — each session starts fresh with no cookies or history from previous sessions (to drive a session from a *real* Chrome profile instead, use the `capture_as_persona.py` CLI with `--profile-dir` — see [Capture as Persona (CLI)](#capture-as-persona-cli))
 - **Persistent until stopped** — the browser stays open until you click Stop or the server shuts down
 
 ## Headless Browsing (Automated)
@@ -91,6 +93,33 @@ Archives a URL by saving HTML, a full-page screenshot, and metadata to the files
 | language | string | Locale |
 | geolocation | string | "lat,lng" format |
 | persona_id | int | Persona used for the archive |
+
+### Capture as Persona (CLI)
+
+`capture_as_persona.py` captures a page as a persona from the command line, using the **same engine** as the web app (`BrowserManager`). It maps the persona's full attribute set — locale, geolocation, timezone, viewport, and mobile/touch flags — into the browser context, and can record network traffic (HAR) and a session video for cross-persona analysis.
+
+```bash
+# Synthesized context for the default persona (Alex Johnson)
+python3 capture_as_persona.py https://www.cnn.com
+
+# Real Chrome profile: drive the session with the persona's accumulated
+# cookies/history/ad-personalization, capturing traffic + video
+python3 capture_as_persona.py https://www.cnn.com \
+    --profile-dir ./Alex_Johnson_Browser_Profile --channel chrome --har --video
+```
+
+| Option | Description |
+|--------|-------------|
+| `--persona-id` / `--persona-name` | Select the persona (default: Alex Johnson) |
+| `--profile-dir` | Load a real Chrome user-data dir (persistent context) instead of a synthesized one |
+| `--channel` | Browser channel, e.g. `chrome` (for real Google Chrome profiles) |
+| `--har` | Record network traffic to `traffic.har` |
+| `--video` | Record a session video |
+| `--headed` | Run with a visible browser window |
+
+Artifacts are written to `archives/<url_hash>/<timestamp>/` (screenshot, HTML, and metadata, plus `traffic.har` / `video.webm` when requested). See [Archive Web Pages](archive-pages.md) for the storage layout.
+
+**Synthesized vs. real profile:** synthesized mode builds a fresh context from the persona's attributes with no prior state; real-profile mode loads an actual Chrome profile so the persona's accumulated browsing state drives the session. `--channel chrome` requires Google Chrome to be installed; otherwise the bundled Chromium is used (which may log profile schema-mismatch warnings).
 
 ### Demo Scripts
 

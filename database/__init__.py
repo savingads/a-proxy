@@ -16,7 +16,7 @@ Usage:
 """
 from datetime import datetime
 
-from .connection import get_db_connection, get_db, DatabaseConnection
+from .connection import get_db_connection
 
 # Import repositories
 from .repositories.persona import PersonaRepository
@@ -417,10 +417,6 @@ def get_setting(key, default=None):
 
 def set_setting(key, value, description=None):
     return _get_settings_repo().save(key, value, description)
-
-
-def get_all_settings():
-    return _get_settings_repo().get_all()
 
 
 # --- User functions ---

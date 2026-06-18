@@ -5,7 +5,6 @@ from .persona_attribute_service import PersonaAttributeService  # noqa: E402,F40
 # Re-export functions from the legacy services module (services.py was renamed)
 # These are imported by routes/agent.py
 import importlib
-import sys
 import os
 
 # Load the legacy services.py as a separate module
@@ -24,7 +23,6 @@ if os.path.exists(_legacy_path):
     PersonaContextProvider = _legacy.PersonaContextProvider
     JourneyContextProvider = _legacy.JourneyContextProvider
     ContextProvider = _legacy.ContextProvider
-    format_persona_system_prompt = _legacy.format_persona_system_prompt
 
 __all__ = [
     "PersonaAttributeService",
@@ -35,5 +33,4 @@ __all__ = [
     "PersonaContextProvider",
     "JourneyContextProvider",
     "ContextProvider",
-    "format_persona_system_prompt",
 ]

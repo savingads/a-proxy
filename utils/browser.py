@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from playwright.sync_api import sync_playwright
 
-from config import BROWSER_HEADLESS, PROXY_URL
+from config import BROWSER_HEADLESS
 from utils.persona_browser import (
     build_context_options as persona_context_options,
     channel_for_persona,

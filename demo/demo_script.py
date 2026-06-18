@@ -8,7 +8,6 @@ Demonstrates key features:
 4. Adding waypoints to a journey
 """
 import os
-import sys
 from playwright.sync_api import sync_playwright
 
 # Configuration

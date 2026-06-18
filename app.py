@@ -3,8 +3,7 @@ import logging
 import argparse
 from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
 from flask_login import LoginManager
-from database import get_user_by_email
-from routes.auth import User, user_from_row
+from routes.auth import user_from_row
 
 # Import blueprints
 from routes.home import home_bp

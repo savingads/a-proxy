@@ -21,6 +21,15 @@ Examples:
     # descends into the inner user-data dir automatically).
     python3 capture_as_persona.py https://www.cnn.com \
         --profile-dir ./Alex_Johnson_Browser_Profile --channel chrome --har --video
+
+Note on real-profile mode:
+    ``Alex_Johnson_Browser_Profile.zip`` (~510 MB) is NOT included in the repo --
+    it is gitignored, so a fresh clone does not have it. To use ``--profile-dir``
+    you must obtain that zip out-of-band and unzip it next to this script (giving
+    ``./Alex_Johnson_Browser_Profile/``), or point ``--profile-dir`` at any other
+    real Chrome user-data dir. A real profile holds live cookies/login state, so
+    treat it as sensitive -- do not commit or share it. Without ``--profile-dir``
+    the tool runs in synthesized mode and needs no external profile.
 """
 import argparse
 import logging
@@ -65,7 +74,8 @@ def main():
     parser.add_argument("url", help="URL to visit")
     parser.add_argument("--persona-id", type=int, help="Persona ID (overrides --persona-name)")
     parser.add_argument("--persona-name", help="Persona name (default: first available persona)")
-    parser.add_argument("--profile-dir", help="Real Chrome user-data dir (persistent/real-profile mode)")
+    parser.add_argument("--profile-dir", help="Real Chrome user-data dir for real-profile mode "
+                                              "(e.g. an unzipped *_Browser_Profile; not shipped with the repo)")
     parser.add_argument("--channel", help="Browser channel, e.g. 'chrome' (for real Google Chrome profiles)")
     parser.add_argument("--har", action="store_true", help="Record network traffic to traffic.har")
     parser.add_argument("--video", action="store_true", help="Record a session video")

@@ -121,6 +121,9 @@ Artifacts are written to `archives/<url_hash>/<timestamp>/` (screenshot, HTML, a
 
 **Synthesized vs. real profile:** synthesized mode builds a fresh context from the persona's attributes with no prior state; real-profile mode loads an actual Chrome profile so the persona's accumulated browsing state drives the session. `--channel chrome` requires Google Chrome to be installed; otherwise the bundled Chromium is used (which may log profile schema-mismatch warnings).
 
+!!! note "The `Alex_Johnson_Browser_Profile` is not shipped with the repository"
+    The `Alex_Johnson_Browser_Profile.zip` (~510 MB) shown in the example is gitignored, so it is **not** included in a clone. To use `--profile-dir`, obtain that zip out-of-band and unzip it (producing `./Alex_Johnson_Browser_Profile/`), or point `--profile-dir` at any real Chrome user-data dir of your own. Because such a profile holds live cookies and login state, treat it as sensitive — do not commit or share it. Without `--profile-dir`, the tool runs in synthesized mode and needs no external profile.
+
 ### Demo Scripts
 
 The `demo/` directory contains Playwright scripts that automate the app's UI for demonstrations:

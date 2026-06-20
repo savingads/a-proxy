@@ -4,9 +4,23 @@ This guide documents the configuration options available in A-Proxy.
 
 ## Accessing Settings
 
-Navigate to **Settings** in the main navigation menu.
+The only in-app settings page is **Archive Settings**, reached via **Archive Settings** in the sidebar. It manages Internet Archive integration only.
 
-## Configuration Categories
+!!! note
+    A-Proxy does not have a general Settings UI. LLM provider, proxy, browser, and debug options are configured exclusively through environment variables / your `.env` file (see below), not through an in-app page.
+
+## Archive Settings (in-app)
+
+The Archive Settings page exposes the following options:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Internet Archive Enabled | Toggle submitting captured pages to the Internet Archive | enabled |
+| Internet Archive Rate Limit | Maximum submissions per day (clamped to 1-100) | 10 |
+
+## Configuration (environment variables)
+
+The categories below are configured via environment variables, not an in-app page.
 
 ### LLM Provider
 
@@ -33,40 +47,27 @@ See [Proxy & Geo-IP](proxy-setup.md) for detailed configuration.
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| Default Viewport | Screen size for captures | 1920x1080 |
-| JavaScript Enabled | Execute JS during browsing | true |
-| Image Loading | Load images during browsing | true |
-| Timeout | Page load timeout (seconds) | 30 |
-| Headless Mode | Run browser without UI | true |
+| Headless Mode | Run browser without UI (env var `BROWSER_HEADLESS`) | true |
 
-### Archive Settings
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Archive Location | Directory for saved archives | ./archives |
-| Screenshot Format | PNG or JPEG | PNG |
-| Capture Full Page | Screenshot entire page or viewport | viewport |
-| Save HTML | Include raw HTML in archive | true |
-
-### Session Settings
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Session Timeout | Inactivity timeout (minutes) | 30 |
-| Auto-save Journeys | Save journey progress automatically | true |
+Other browser behavior is fixed in code rather than configurable: the page-load
+timeout is hardcoded to 30 seconds (`utils/browser.py`), and the viewport is
+derived from persona attributes rather than a global setting.
 
 ## Environment Variables
 
-All settings can be configured via environment variables:
+Most configuration (everything except the in-app Archive Settings) is set via environment variables:
 
 | Variable | Setting | Example |
 |----------|---------|---------|
 | `OPENAI_COMPATIBLE_URL` | Local LLM endpoint | `http://localhost:11434/v1` |
 | `OPENAI_COMPATIBLE_MODEL` | Local model name | `qwen2.5:7b` |
+| `OPENAI_COMPATIBLE_API_KEY` | Local endpoint API key (vLLM default `none`) | `none` |
 | `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-...` |
 | `OPENAI_API_KEY` | OpenAI API key | `sk-...` |
 | `LLM_PROVIDER` | Force provider | `openai_compatible` |
+| `LLM_MAX_OUTPUT_TOKENS` | Max output tokens per LLM call | `4096` |
 | `SECRET_KEY` | Flask session key | random-string |
+| `SESSION_COOKIE_SECURE` | Send session cookie over HTTPS only | True/False |
 | `DEBUG` | Debug mode | true/false |
 | `PROXY_URL` | Default proxy | `socks5://host:port` |
 | `BROWSER_HEADLESS` | Headless browser | true/false |
@@ -141,11 +142,7 @@ Application logs are output to stdout/stderr by default.
 
 ### Log Level
 
-Set via environment:
-
-```bash
-export LOG_LEVEL=DEBUG  # DEBUG, INFO, WARNING, ERROR
-```
+The log level is currently hardcoded to `DEBUG` via `logging.basicConfig(level=logging.DEBUG)` in `app.py` and is not configurable via an environment variable.
 
 ## Performance Settings
 
@@ -177,9 +174,8 @@ services:
 
 View system status:
 
-1. Navigate to **Settings**
-2. Check **System Status** section
-3. Review connection status for all services
+1. Navigate to the **Dashboard**
+2. Review the integration status (LLM, Internet Archive) and browser information shown there
 
 ## Related Guides
 

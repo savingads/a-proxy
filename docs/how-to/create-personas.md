@@ -130,7 +130,7 @@ For location-based personalization:
 
 ## LLM-Assisted Creation
 
-Personas can also be developed through chat. See [Develop Personas via Chat](develop-personas.md) for details.
+Personas can also be developed through chat. Start a chat from the **Interact As** item in the sidebar (or the **Start Chat** button on the home page), then select the persona and chat mode there. See [Develop Personas via Chat](develop-personas.md) for details.
 
 ## Related Guides
 

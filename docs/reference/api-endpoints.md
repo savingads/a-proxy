@@ -8,7 +8,50 @@ A-Proxy exposes both web interface routes and API endpoints. Most routes serve H
 
 ## Authentication
 
-Most endpoints require authentication via session cookie. Login through `/login` to establish a session.
+Authentication via session cookie is only enforced on the agent endpoints (`/agent`, `/agent/message`, `/direct-chat/<persona_id>` and its `/save` action, and the `/journey/<journey_id>/agent...` routes) and on `/logout`. The persona, journey, archive, browsing, and network endpoints are not protected by `@login_required` and are publicly accessible. Login through `/login` to establish a session for the protected agent endpoints.
+
+## Home / Utility Endpoints
+
+### Home
+
+```
+GET /
+GET /home
+```
+
+Renders the home page (proxy/IP status and detected language).
+
+### Dashboard
+
+```
+GET /dashboard
+```
+
+Renders the dashboard page.
+
+### Geolocation Test
+
+```
+GET /geolocation-test
+```
+
+Renders the geolocation test page. Accepts optional `language` and `geolocation` query parameters.
+
+### Get Headers (API)
+
+```
+GET /get-headers
+```
+
+Returns selected request headers as JSON.
+
+**Response:**
+
+```json
+{
+    "accept-language": "en-US"
+}
+```
 
 ## Persona Endpoints
 
@@ -79,7 +122,7 @@ GET returns the edit form. POST updates the persona.
 POST /delete-persona/<persona_id>
 ```
 
-Deletes the specified persona.
+Deletes the specified persona. `<persona_id>` must be an integer (Flask `<int:...>` converter); non-integer values return 404.
 
 ### Export Persona (JSON)
 
@@ -173,6 +216,97 @@ POST /journey/<journey_id>/add-waypoint
 | type | string | browse or agent |
 | notes | string | Optional notes |
 
+### Edit Journey
+
+```
+GET /journey/<journey_id>/edit
+POST /journey/<journey_id>/edit
+```
+
+GET returns the journey edit form. POST updates the journey (`name`, `description`, `persona_id`, `journey_type`, `status`).
+
+### Delete Journey
+
+```
+POST /journey/<journey_id>/delete
+```
+
+Deletes the journey and all of its waypoints, then redirects to the journey list.
+
+### Browse Journey
+
+```
+GET /journey/<journey_id>/browse
+```
+
+Starts a browsing session for the journey's linked persona (redirects to `/direct-browse/<persona_id>`). If the journey has no linked persona, redirects back with a warning.
+
+### Visualize Journey
+
+```
+GET /journey/<journey_id>/visualize
+```
+
+Renders the journey's waypoints as a timeline.
+
+### Complete Journey
+
+```
+POST /journey/<journey_id>/complete
+```
+
+Marks the journey as completed.
+
+### Edit Waypoint
+
+```
+POST /journey/waypoint/<waypoint_id>/edit
+```
+
+Updates a waypoint's `title` and `notes`. Returns JSON for AJAX requests; otherwise redirects with a flash message.
+
+### Delete Waypoint
+
+```
+POST /journey/waypoint/<waypoint_id>/delete
+```
+
+Deletes a waypoint. Returns JSON for AJAX requests; otherwise redirects with a flash message.
+
+### Save Page as Waypoint
+
+```
+POST /save-waypoint/<persona_id>
+```
+
+Saves a page from a direct browsing session as a waypoint, optionally creating a new journey or attaching to an existing one.
+
+### Create Journey from Browse
+
+```
+POST /create-journey-from-browse/<persona_id>
+```
+
+Creates a journey from a direct browsing session, adding a waypoint for each visited URL.
+
+**Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | Journey name |
+| description | string | Optional description |
+| journey_type | string | Journey type (default: research) |
+| visited_urls | string | JSON array of visited URLs |
+| current_url | string | Current page URL |
+
+### Browse As (Legacy)
+
+```
+GET /browse-as
+```
+
+Legacy route that redirects to `/interact-as`.
+
 ## Archive Endpoints
 
 ### List Archives
@@ -191,7 +325,69 @@ GET /archives/<archived_website_id>
 
 Returns HTML page with archive details and content. Individual mementos are viewed at `GET /archives/<archived_website_id>/mementos/<memento_id>`.
 
+### Delete Archive
+
+```
+POST /delete-archive/<archived_website_id>
+```
+
+Deletes an archived website and all of its associated mementos, then redirects to the archive list.
+
+### Submit Memento to Internet Archive
+
+```
+POST /submit-to-internet-archive/<memento_id>
+```
+
+Submits the given memento's URL to the Internet Archive. Honors the rate limit configured in archive settings. Returns JSON when called with `X-Requested-With: XMLHttpRequest`; otherwise redirects with a flash message.
+
+### Archive Settings
+
+```
+GET /settings
+POST /settings
+```
+
+GET renders the archive settings page. POST updates the Internet Archive integration settings.
+
+**POST Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| internet_archive_enabled | string | `on` to enable Internet Archive submissions |
+| internet_archive_rate_limit | int | Daily submission limit (clamped to 1–100; defaults to 10) |
+
+### Internet Archive Status (API)
+
+```
+GET /api/internet-archive-status
+```
+
+Returns Internet Archive integration status as JSON.
+
+**Response:**
+
+```json
+{
+    "enabled": true,
+    "submissions_today": 0,
+    "rate_limit": 10,
+    "can_submit": true,
+    "remaining": 10
+}
+```
+
 ## Agent Endpoints
+
+All agent endpoints require authentication (`@login_required`).
+
+### Agent Chat (Standalone UI)
+
+```
+GET /agent
+```
+
+Returns the standalone agent chat interface, listing the LLM models available based on the configured providers.
 
 ### Send Message
 
@@ -230,7 +426,68 @@ Send a message to the configured LLM in persona context.
 GET /direct-chat/<persona_id>
 ```
 
-Returns HTML chat interface for persona conversations.
+Returns HTML chat interface for persona conversations. Requires authentication.
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | string | with | Chat perspective: `with` (chat with the persona) or `as` (chat as the persona) |
+| target_persona_id | int | — | Optional second persona for the conversation |
+| journey_id | int | — | Link the chat to an existing journey |
+| waypoint_id | int | — | Preload chat history from a saved waypoint |
+
+### Save Direct Chat
+
+```
+POST /direct-chat/<persona_id>/save
+```
+
+Saves a direct chat as a waypoint, optionally creating a new journey or attaching to an existing one. Returns JSON for AJAX requests; otherwise redirects with a flash message.
+
+### Journey Agent (UI)
+
+```
+GET /journey/<journey_id>/agent
+```
+
+Returns the agent interface for a specific journey.
+
+### Journey Agent Message
+
+```
+POST /journey/<journey_id>/agent/message
+```
+
+Sends a message to the agent in the context of the given journey (its waypoints and associated persona).
+
+**Request Body (JSON):**
+
+```json
+{
+    "message": "User message text",
+    "conversation_id": "optional-id"
+}
+```
+
+### Save Journey Agent Conversation
+
+```
+POST /journey/<journey_id>/agent/save
+```
+
+Saves an agent conversation as a waypoint on the given journey.
+
+**Request Body (JSON):**
+
+```json
+{
+    "title": "Agent Conversation",
+    "notes": "optional notes",
+    "conversation_id": "optional-id",
+    "conversation_history": []
+}
+```
 
 ## Browsing Endpoints
 
@@ -240,14 +497,7 @@ Returns HTML chat interface for persona conversations.
 GET /interact-as
 ```
 
-Returns HTML interface for browsing/chatting as a persona.
-
-**Query Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| persona_id | int | Pre-select persona |
-| mode | string | browse or chat |
+Returns HTML interface for browsing/chatting as a persona. This endpoint takes no query parameters.
 
 ### Direct Browse (Launch Page)
 
@@ -255,7 +505,22 @@ Returns HTML interface for browsing/chatting as a persona.
 GET /direct-browse/<persona_id>
 ```
 
-Returns the headful browsing launch/control page for a persona. Accepts optional `journey_id` query parameter to link waypoints to a specific journey.
+Returns the headful browsing launch/control page for a persona. Accepts optional `journey_id` query parameter to link waypoints to a specific journey. (This route is defined in the journey blueprint.)
+
+### Test Geolocation
+
+```
+POST /test-geolocation
+```
+
+Stores the submitted `language` and `geolocation` in the session and redirects to the geolocation test page.
+
+**Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| language | string | Locale (e.g., "en-US") |
+| geolocation | string | "lat,lng" format |
 
 ### Headful Session Endpoints (API)
 
@@ -381,7 +646,6 @@ Returns current proxy and IP information.
 ```json
 {
     "proxy_configured": true,
-    "proxy_url": "socks5://host:port",
     "ip_info": {
         "ip": "203.0.113.1",
         "city": "New York",
@@ -416,10 +680,10 @@ Removes the session proxy override.
 ### Get Region Geolocation
 
 ```
-GET /get-region-geolocation/<code>
+GET /get-region-geolocation/<region_code>
 ```
 
-Returns geolocation data for a region code.
+Returns geolocation data for a region code. The code is upper-cased before lookup; unknown or invalid codes return 404 with `{"error": "Region not found"}`.
 
 **Response:**
 
@@ -445,8 +709,24 @@ POST /login
 
 | Field | Type | Description |
 |-------|------|-------------|
-| email | string | User email |
+| username | string | User email (the form field is named `username` but holds the email value) |
 | password | string | User password |
+
+### Register
+
+```
+GET /register
+POST /register
+```
+
+GET returns the registration form. POST creates a user account.
+
+**POST Form Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| email | string | New user email |
+| password | string | New user password |
 
 ### Logout
 
@@ -454,7 +734,7 @@ POST /login
 GET /logout
 ```
 
-Ends the current session.
+Ends the current session. Requires authentication.
 
 ## Error Responses
 

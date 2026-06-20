@@ -78,14 +78,27 @@ database/
 
 ### Browser Automation
 
-Playwright controls Chromium for web browsing with per-context isolation:
+Playwright controls Chromium in two modes: headless ephemeral contexts for visit/archive, and persistent headful sessions for interactive persona browsing:
 
 | Component | Purpose |
 |-----------|---------|
 | Playwright | Browser automation framework (sync API) |
 | BrowserManager | Singleton manager in `utils/browser.py` |
-| BrowserContext | Per-request isolated context (locale, geolocation, timezone, proxy) |
-| Chromium | Headless browser execution |
+| BrowserContext | Per-request isolated context for visit/archive (locale, geolocation, timezone, proxy) |
+| BrowsingSession | Persistent, persona-scoped headful session (dataclass tracking page + navigation history) |
+| Chromium | Runs headless for `visit_page`/`archive_page`; headful (`headless=False`) for interactive persona sessions |
+
+#### Headful Browsing Sessions
+
+In addition to the ephemeral per-request contexts, `BrowserManager.start_session()` launches a separate headful Chromium and holds a single active `BrowsingSession` tied to a persona. Unlike the per-request contexts, this session is persistent and persona-scoped; it survives across requests until stopped. `routes/browsing.py` exposes these endpoints:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /start-session` | Launch a headful session for a persona (optional start URL) |
+| `GET /session-status` | Report the active session (persona, current URL/title, history) |
+| `POST /capture-page` | Screenshot the active session page |
+| `POST /archive-page-from-session` | Archive the current session page as a memento |
+| `POST /stop-session` | Close the active session |
 
 ### Network / Proxy
 
@@ -122,9 +135,11 @@ Provider-agnostic LLM client supporting local and cloud models:
    - Verify exit IP
 4. Navigate to URL via Playwright
 5. Capture page content and screenshot
-6. Create waypoint record
-7. Return rendered page to user
+6. Return rendered page to user
 ```
+
+The plain `visit-page` / `archive_page` endpoints do not record waypoints;
+waypoints are created only when browsing within a journey/agent context.
 
 ### Chat Flow
 
@@ -135,7 +150,7 @@ Provider-agnostic LLM client supporting local and cloud models:
    - Conversation history
 3. Send to LLM via LLMClient (auto-detects provider)
 4. Receive response
-5. Create waypoint record (type: agent)
+5. Create waypoint record (type: `agent` when chatting *with* the persona, `persona` when chatting *as* the persona)
 6. Return response to user
 ```
 

@@ -60,11 +60,12 @@ The **Interact As** page allows you to:
 
 ### Settings
 
-The **Settings** page provides configuration options for:
+The **Settings** page (Archive Settings) configures Internet Archive integration:
 
-- Proxy and network settings
-- API key management
-- Application preferences
+- Enable or disable submitting archived pages to archive.org
+- Set a daily submission rate limit
+
+Proxy and network settings are not configured here — they are set per-session via the browsing/network controls rather than on this page.
 
 ## Interface Navigation
 
@@ -108,7 +109,7 @@ For detailed instructions, see [Create Personas](../how-to/create-personas.md).
 2. Select a persona from the dropdown
 3. Choose an interaction mode:
    - **Browse**: Navigate websites as the persona
-   - **Chat**: Converse with Claude AI as the persona
+   - **Chat**: Converse with the configured LLM as the persona
 4. Your interactions will be recorded as waypoints in a journey
 
 For detailed instructions, see [Manage Journeys](../how-to/manage-journeys.md).

@@ -29,9 +29,8 @@ Click on a journey name to view:
 
 Journeys are automatically created when you:
 
-1. Start browsing as a persona
-2. Begin a chat session with a persona
-3. Archive a page from persona context
+1. Begin a chat session with a persona
+2. Save a waypoint while browsing and choose the **Create new journey** option
 
 ### Manual Creation
 
@@ -73,33 +72,30 @@ Journeys are automatically created when you:
 
 ### Adding Waypoints Manually
 
-1. Open the journey detail page
-2. Click **Add Waypoint**
-3. Fill in the waypoint details:
+The journey detail page does not currently surface an **Add Waypoint** control in the UI. Waypoints added through the underlying add-waypoint endpoint accept only the following fields:
 
 | Field | Description |
 |-------|-------------|
 | URL | Web address or reference |
 | Title | Page title or waypoint label |
-| Type | browse or agent |
 | Notes | Additional context |
 
-4. Click **Save**
+Waypoints created this way always have the type `browse` (the type cannot be set during manual creation).
 
 ### Adding Waypoints Through Browsing
 
-Waypoints are automatically added when browsing as the journey's persona:
+While browsing as the journey's persona, each visited page is added to the session's navigation history, but pages are not persisted as waypoints automatically. To save a page as a waypoint:
 
 1. Navigate to **Interact As**
 2. Select the persona associated with your journey
 3. Browse websites
-4. Each page visit creates a new waypoint
+4. Click **Save Waypoint** on a page to persist it as a waypoint in the journey
 
 ### Editing Waypoints
 
 1. Open the journey detail page
-2. Click on a waypoint
-3. Modify the fields
+2. Open a waypoint's edit dialog
+3. Modify the **Title** and **Notes** (the URL and type cannot be edited)
 4. Click **Save**
 
 ### Deleting Waypoints
@@ -136,27 +132,7 @@ View journeys for a specific persona:
 
 ### By Type
 
-Filter journeys by type:
-
-1. Navigate to **Journeys**
-2. Use the type filter dropdown
-3. Select the desired journey type
-
-## Exporting Journey Data
-
-Journey data can be exported for analysis:
-
-1. Open the journey detail page
-2. Click **Export**
-3. Choose format (JSON recommended)
-4. Download the file
-
-Export includes:
-
-- Journey metadata
-- All waypoints with timestamps
-- Agent conversation data (if applicable)
-- Screenshot references
+Type-based filtering is not currently available. The **Journeys** page lists all journeys and shows each journey's type as a tag, but there is no type filter control.
 
 ## Best Practices
 

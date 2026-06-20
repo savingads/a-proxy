@@ -42,9 +42,10 @@ python -m unittest tests.test_database.TestDatabase.test_save_and_get_persona
 - `test_config.py`: Shared test configuration, fixtures, and utility functions
 - `test_database.py`: Tests for database operations
 - `test_app.py`: Tests for Flask application routes
-- `test_utils_vpn.py`: Tests for VPN utility functions
+- `test_persona_browser.py`: Tests for mapping persona attributes to Playwright context options
 - `test_templates.py`: Tests for template inheritance and rendering
-- `test_migration.py`: Tests for database migration functionality
+- `test_utils_network.py`: Tests for network/proxy utility functions
+- `test_write_memento.py`: Tests for the browser archive/memento persistence pipeline
 
 ## Writing New Tests
 
@@ -62,4 +63,4 @@ Tests use a temporary SQLite database file that is created and cleaned up for ea
 
 ## Mocking External Services
 
-Tests that interact with external services (like VPN operations and IP geo-location) use mocking to avoid actual network requests.
+Tests that interact with external services (like proxy connections and IP geo-location) use mocking to avoid actual network requests.

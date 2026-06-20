@@ -12,7 +12,7 @@ Headful browsing launches a visible Chromium window configured with the persona'
 
 1. Navigate to **Interact As**
 2. Click **Browse** on a persona card
-3. Optionally enter a starting URL (defaults to google.com)
+3. Optionally enter a starting URL (defaults to the persona country's Google domain — e.g. `google.co.uk` for GB, `google.de` for DE — falling back to `google.com` when the country is unknown or unmapped)
 4. Click **Start Browsing**
 5. A Chromium window opens with the persona's settings applied
 
@@ -21,7 +21,7 @@ Headful browsing launches a visible Chromium window configured with the persona'
 1. Navigate to **Journeys**
 2. Open a journey that has a linked persona
 3. Click **Browse** — this opens the same launch page with the journey pre-selected
-4. Waypoints are automatically saved to that journey
+4. As you browse, visited pages are tracked in the session's in-memory navigation history. To persist a page as a waypoint, click **Save Waypoint** (which can target an existing journey or create a new one) — waypoints are not saved automatically
 
 ### What the Browser Emulates
 

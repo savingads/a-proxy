@@ -60,11 +60,11 @@ A-Proxy is designed to integrate with OntServe (ontology management) and ProEthi
 
 - Repository pattern for database access
 - Domain models as dataclasses
+- Service layer abstraction
 - Test suite passing
 
 ### Phase 2: Service Layer (Planned)
 
-- Service layer abstraction
 - Basic ontology export capability
 - RDF serialization
 

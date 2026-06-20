@@ -183,7 +183,7 @@ No encryption at rest is implemented. This is intended for local/research use.
 
 ### Can data be exported?
 
-Journey and persona data can be exported as JSON through the interface.
+Persona data can be exported as JSON through the interface.
 
 ## Development
 

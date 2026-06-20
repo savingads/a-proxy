@@ -11,18 +11,18 @@ The chat interface provides a space to explore persona characteristics through d
 
 ## Starting a Persona Chat
 
-### Method 1: Direct Chat
+### Method 1: Interact As
 
-1. Navigate to **Personas**
-2. Click on an existing persona
-3. Click **Chat** or **Direct Chat**
+1. Open **Interact As** from the sidebar (or click **Start Chat** on the home page)
+2. Find the persona card and click its **Chat** button
+3. Use the **Chat with / Chat as** toggle to pick the mode
 4. Begin conversing as or about the persona
 
-### Method 2: Interact As
+### Method 2: From a Journey
 
-1. Navigate to **Interact As**
-2. Select a persona from the dropdown
-3. Choose **Chat** mode
+1. Open a journey from **Journeys**
+2. Use the chat link on the journey to continue a conversation with that persona
+3. Use the **Chat with / Chat as** toggle to pick the mode
 4. Start the conversation
 
 ## Chat Modes
@@ -106,11 +106,13 @@ When saved, A-Proxy automatically extracts:
 
 ## Recording Conversations
 
-Chat sessions are automatically saved as waypoints in journeys:
+When you choose to save a chat, it is stored as a waypoint in a journey. You supply a title and either pick an existing journey or create a new one. Saving also triggers automatic attribute extraction.
 
-1. Each message exchange is recorded
-2. Conversation context is preserved
-3. Chat history can be reviewed later
+Once saved:
+
+1. The full conversation history is preserved on the waypoint
+2. Chat history can be reviewed later
+3. Persona attributes extracted from the chat are merged into the profile
 
 This preserves the conversation for:
 
@@ -193,7 +195,7 @@ When a conversation is saved as a waypoint, A-Proxy uses the configured LLM to a
 
 Extraction is **additive** — list-type fields (interests, browsing habits, etc.) accumulate across conversations, while scalar fields (age, occupation, etc.) are updated to the latest value. Existing data is preserved when the LLM cannot determine a field.
 
-This works with any configured LLM provider (Ollama, vLLM on Picotte, Anthropic, OpenAI).
+This works with the configured LLM provider, selected via `LLM_PROVIDER`. The supported providers are Anthropic, OpenAI, and an OpenAI-compatible endpoint (set with `OPENAI_COMPATIBLE_URL`), which covers backends such as vLLM, Ollama, and LiteLLM.
 
 ## Exporting Personas
 

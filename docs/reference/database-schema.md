@@ -168,7 +168,7 @@ Individual interaction records within journeys.
 | sequence_number | INTEGER | | Order in journey |
 | metadata | TEXT | | JSON additional data |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation |
-| type | TEXT | DEFAULT 'browse' | browse or agent |
+| type | TEXT | DEFAULT 'browse' | browse, agent, or persona |
 | agent_data | TEXT | | JSON conversation data |
 
 **Foreign Keys:** `journey_id` references `journeys(id)` ON DELETE CASCADE

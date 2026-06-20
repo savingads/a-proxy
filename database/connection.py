@@ -2,7 +2,7 @@
 Database connection management module.
 
 This module provides the core database connection functionality
-with support for connection pooling and configuration.
+with context-manager-based connection handling and configuration.
 """
 import sqlite3
 import os

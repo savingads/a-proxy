@@ -2,6 +2,14 @@
 
 A Flask-based web application for persona-driven web browsing, archiving, and LLM-powered conversations. Create personas with demographic, psychographic, behavioral, and contextual attributes, then browse the web as those personas with language, geolocation, timezone, and proxy emulation.
 
+> ## ⚠️ Local research tool — do not expose to a network
+>
+> **A-Proxy is intended to run on your own machine for research and experimentation.** By default it binds to `127.0.0.1` (localhost only), which is the supported and recommended way to run it.
+>
+> It is **not hardened for network, multi-user, or internet-facing deployment.** In particular it ships with a known default login (`admin@example.com` / `password`) and a publicly-known development `SECRET_KEY`, runs the Flask debug server, leaves most routes unauthenticated, and its browsing endpoints will fetch arbitrary user-supplied URLs from the server. Running it on `0.0.0.0` or publishing the Docker port to an untrusted network would expose all of the above.
+>
+> **Do not deploy this to a shared or public host as-is.** If you need a network-accessible deployment, treat it as a project that requires a security pass first (authentication on all routes, a real secret key, debug disabled, SSRF/URL validation, and a non-root container).
+
 ## Features
 
 - **Persona Management** -- Create and manage personas with rich attribute profiles (demographic, psychographic, behavioral, contextual)

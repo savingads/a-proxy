@@ -9,8 +9,10 @@ SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'Tru
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-# Additional Flask configuration
-DEBUG = os.environ.get('FLASK_DEBUG', 'False') == 'True'
+# Additional Flask configuration.
+# Read FLASK_DEBUG first (Flask's conventional name), then DEBUG (the name used by
+# the .env templates and docker-compose); case-insensitive so True/true/false all work.
+DEBUG = os.environ.get('FLASK_DEBUG', os.environ.get('DEBUG', 'False')).strip().lower() == 'true'
 
 # Proxy configuration (replaces VPN)
 PROXY_URL = os.environ.get('PROXY_URL')  # e.g. socks5://user:pass@host:port

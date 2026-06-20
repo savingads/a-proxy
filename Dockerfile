@@ -3,6 +3,8 @@ FROM python:3.12-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Install Playwright browsers to a shared path so the non-root app user can run them
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Create and set working directory
 WORKDIR /app
@@ -20,14 +22,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create directories for persistent data
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/archives
 
 # Copy requirements and install Python dependencies first (for better caching)
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 
-# Install Playwright Chromium browser and its system dependencies
-RUN playwright install --with-deps chromium
+# Install Playwright Chromium browser and its system dependencies (into PLAYWRIGHT_BROWSERS_PATH)
+RUN playwright install --with-deps chromium \
+    && chmod -R a+rX /ms-playwright
 
 # Copy application code
 COPY . .
@@ -68,6 +71,14 @@ python /app/init_default_user.py\n\
 echo "Starting A-Proxy on port 5002..."\n\
 exec python /app/app.py --host 0.0.0.0 --port 5002\n\
 ' > /app/start.sh && chmod +x /app/start.sh
+
+# Run as a non-root user (defense in depth). UID 1000 matches the typical host user so
+# the bind-mounted ./data and ./archives volumes stay writable; override with
+# --build-arg APP_UID=<your host uid> if your user differs.
+ARG APP_UID=1000
+RUN useradd -m -u ${APP_UID} appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
 # Expose the application port
 EXPOSE 5002

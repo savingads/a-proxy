@@ -3,7 +3,9 @@ services:
     build: .
     container_name: a-proxy
     ports:
-      - "5002:5002"
+      # Loopback-only: A-Proxy is a local research tool (see SECURITY.md / README).
+      # Remove the 127.0.0.1 prefix only if you deliberately need LAN/remote access.
+      - "127.0.0.1:5002:5002"
     volumes:
       - ./data:/app/data
       - ./archives:/app/archives
@@ -30,7 +32,8 @@ services:
     image: ollama/ollama:latest
     container_name: a-proxy-ollama
     ports:
-      - "11434:11434"
+      # Loopback-only to match the a-proxy service; the model API need not be on the LAN.
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     healthcheck:

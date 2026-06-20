@@ -1,7 +1,7 @@
 from flask import Flask
 import logging
 import argparse
-from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE
+from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE, DEBUG
 from flask_login import LoginManager
 from routes.auth import user_from_row
 
@@ -115,4 +115,10 @@ if __name__ == "__main__":
     atexit.register(_shutdown_browser)
 
     app = create_app()
-    app.run(debug=True, use_reloader=False, port=args.port, host=args.host)
+
+    # Drive debug from config (FLASK_DEBUG/DEBUG), and never expose the interactive
+    # debugger on a public interface -- it allows remote code execution.
+    debug = DEBUG and args.host not in ("0.0.0.0", "::")
+    if DEBUG and not debug:
+        logging.warning("Debug mode requested but host is %s; running without the debugger.", args.host)
+    app.run(debug=debug, use_reloader=False, port=args.port, host=args.host)

@@ -2,15 +2,13 @@ Flask>=3.0.0
 Flask-WTF>=1.2.0
 Flask-Login>=0.6.3
 Werkzeug>=3.0.0
-SQLAlchemy>=2.0.48
 cryptography>=46.0.0
 pycryptodome>=3.23.0
-playwright
+playwright>=1.40.0
 python-dotenv>=1.2.0
 pyOpenSSL>=26.0.0
 requests>=2.32.5
 python-dateutil>=2.9.0
-flask-cors>=6.0.0
 # Persona client is now integrated into the main application
 # No separate installation needed
 

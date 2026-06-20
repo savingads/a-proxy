@@ -1,0 +1,2205 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="User manual for A-Proxy - Persona-driven web archiving and LLM interaction tracking">
+      
+      
+        <meta name="author" content="Christopher B. Rauch">
+      
+      
+        <link rel="canonical" href="https://savingads.github.io/a-proxy/how-to/llm-setup/">
+      
+      
+        <link rel="prev" href="../archive-pages/">
+      
+      
+        <link rel="next" href="../picotte-vllm/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>LLM Setup - A-Proxy Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Segoe+UI:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Segoe UI";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#llm-setup-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="A-Proxy Documentation" class="md-header__button md-logo" aria-label="A-Proxy Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 17v2H2v-2s0-4 7-4 7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.4 3.4 0 0 0-1.93.59 5 5 0 0 1 0 5.82A3.4 3.4 0 0 0 15 11a3.5 3.5 0 0 0 0-7"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            A-Proxy Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              LLM Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/savingads/a-proxy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    a-proxy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/archival-goals/" class="md-tabs__link">
+          
+  
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../create-personas/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/architecture/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Back to A-Proxy
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="A-Proxy Documentation" class="md-nav__button md-logo" aria-label="A-Proxy Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 17v2H2v-2s0-4 7-4 7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.4 3.4 0 0 0-1.93.59 5 5 0 0 1 0 5.82A3.4 3.4 0 0 0 15 11a3.5 3.5 0 0 0 0-7"/></svg>
+
+    </a>
+    A-Proxy Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/savingads/a-proxy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    a-proxy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/first-login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/archival-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archival Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/persona-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persona Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/journeys-waypoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Journeys and Waypoints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../create-personas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Personas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../develop-personas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Develop Personas via Chat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manage-journeys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Journeys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../browse-as-persona/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Browse as Persona
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive-pages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archive Web Pages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#option-1-local-model-with-ollama-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Local Model with Ollama (Recommended)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 1: Local Model with Ollama (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Ollama
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pull a Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure A-Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Ollama
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-cloud-llm-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Cloud LLM Providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Cloud LLM Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anthropic-claude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anthropic (Claude)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-gpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAI (GPT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-3-hpc-cluster-with-vllm-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: HPC Cluster with vLLM (Advanced)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 3: HPC Cluster with vLLM (Advanced)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cluster-setup-one-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster Setup (One-Time)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slurm-job-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SLURM Job Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#managing-the-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing the Job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-model-for-your-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a Model for Your GPU
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-drexel-picotte-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for Drexel Picotte Users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-llm-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All LLM Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-a-proxy-connects-to-the-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How A-Proxy Connects to the LLM
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../picotte-vllm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Picotte HPC (Drexel)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxy-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxy & Geo-IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Endpoints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/database-schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Back to A-Proxy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#option-1-local-model-with-ollama-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Local Model with Ollama (Recommended)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 1: Local Model with Ollama (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Ollama
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pull a Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure A-Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Ollama
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-cloud-llm-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Cloud LLM Providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Cloud LLM Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anthropic-claude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anthropic (Claude)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-gpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAI (GPT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-3-hpc-cluster-with-vllm-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: HPC Cluster with vLLM (Advanced)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 3: HPC Cluster with vLLM (Advanced)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cluster-setup-one-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster Setup (One-Time)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slurm-job-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SLURM Job Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#managing-the-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing the Job
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-model-for-your-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a Model for Your GPU
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-drexel-picotte-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for Drexel Picotte Users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-llm-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All LLM Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-a-proxy-connects-to-the-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How A-Proxy Connects to the LLM
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="llm-setup-guide">LLM Setup Guide<a class="headerlink" href="#llm-setup-guide" title="Permanent link">&para;</a></h1>
+<p>A-Proxy requires an LLM backend for persona conversations, attribute extraction, and structured generation. This guide covers setting up a <strong>local model</strong> (recommended) as well as using <strong>HPC clusters</strong> for larger models.</p>
+<h2 id="option-1-local-model-with-ollama-recommended">Option 1: Local Model with Ollama (Recommended)<a class="headerlink" href="#option-1-local-model-with-ollama-recommended" title="Permanent link">&para;</a></h2>
+<p><a href="https://ollama.com">Ollama</a> is the easiest way to run a local LLM. No API keys, no cloud costs, no account required.</p>
+<h3 id="install-ollama">Install Ollama<a class="headerlink" href="#install-ollama" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">macOS</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Download and install from <a href="https://ollama.com">ollama.com</a>, or use winget:
+<div class="highlight"><pre><span></span><code><span class="n">winget</span> <span class="n">install</span> <span class="n">Ollama</span><span class="p">.</span><span class="n">Ollama</span>
+</code></pre></div></p>
+<p>Ollama runs as a background service (system tray icon).</p>
+<p><strong>Optional — store models on a different drive:</strong></p>
+<p>If your C: drive is low on space, set the model storage location before pulling any models:
+<div class="highlight"><pre><span></span><code><span class="no">[System.Environment]</span><span class="p">::</span><span class="n">SetEnvironmentVariable</span><span class="p">(</span><span class="s1">&#39;OLLAMA_MODELS&#39;</span><span class="p">,</span> <span class="s1">&#39;D:\Ollama\models&#39;</span><span class="p">,</span> <span class="s1">&#39;User&#39;</span><span class="p">)</span>
+</code></pre></div>
+Restart Ollama after setting this.</p>
+</div>
+<div class="tabbed-block">
+<p>Download and install from <a href="https://ollama.com">ollama.com</a>, or use Homebrew:
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>ollama
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://ollama.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="pull-a-model">Pull a Model<a class="headerlink" href="#pull-a-model" title="Permanent link">&para;</a></h3>
+<p>We recommend <strong>Qwen 2.5 7B</strong> — it's capable, fast, and runs well on most machines with 8GB+ RAM:</p>
+<div class="highlight"><pre><span></span><code>ollama<span class="w"> </span>pull<span class="w"> </span>qwen2.5:7b
+</code></pre></div>
+<p>This downloads approximately 4.7 GB.</p>
+<p><strong>Other model options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Size</th>
+<th>RAM Needed</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qwen2.5:7b</code></td>
+<td>4.7 GB</td>
+<td>8 GB+</td>
+<td>General use (recommended)</td>
+</tr>
+<tr>
+<td><code>qwen2.5:3b</code></td>
+<td>2.0 GB</td>
+<td>4 GB+</td>
+<td>Low-resource machines</td>
+</tr>
+<tr>
+<td><code>qwen2.5:14b</code></td>
+<td>9.0 GB</td>
+<td>16 GB+</td>
+<td>Higher quality responses</td>
+</tr>
+<tr>
+<td><code>llama3.1:8b</code></td>
+<td>4.7 GB</td>
+<td>8 GB+</td>
+<td>Alternative to Qwen</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configure-a-proxy">Configure A-Proxy<a class="headerlink" href="#configure-a-proxy" title="Permanent link">&para;</a></h3>
+<p>Edit your <code>.env</code> file (copy from <code>.env.example</code> if you don't have one):</p>
+<div class="highlight"><pre><span></span><code><span class="nv">LLM_PROVIDER</span><span class="o">=</span>openai_compatible
+<span class="nv">OPENAI_COMPATIBLE_URL</span><span class="o">=</span>http://localhost:11434/v1
+<span class="nv">OPENAI_COMPATIBLE_MODEL</span><span class="o">=</span>qwen2.5:7b
+<span class="nv">OPENAI_COMPATIBLE_API_KEY</span><span class="o">=</span>none
+</code></pre></div>
+<h3 id="verify-it-works">Verify It Works<a class="headerlink" href="#verify-it-works" title="Permanent link">&para;</a></h3>
+<p>Start a-proxy and try the agent chat:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>app.py<span class="w"> </span>--port<span class="w"> </span><span class="m">5002</span>
+</code></pre></div>
+<p>Open http://localhost:5002, log in, select a persona, and start a conversation in the Agent tab.</p>
+<h3 id="troubleshooting-ollama">Troubleshooting Ollama<a class="headerlink" href="#troubleshooting-ollama" title="Permanent link">&para;</a></h3>
+<p><strong>"timed out waiting for server to start"</strong></p>
+<p>Something else may be holding Ollama's port (11434). Check and kill stale processes:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Windows</label><label for="__tabbed_2_2">Linux/macOS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><div class="highlight"><pre><span></span><code><span class="n">netstat</span> <span class="n">-ano</span> <span class="p">|</span> <span class="n">findstr</span> <span class="n">11434</span>
+<span class="n">taskkill</span> <span class="p">/</span><span class="n">F</span> <span class="p">/</span><span class="n">IM</span> <span class="s2">&quot;ollama.exe&quot;</span>
+<span class="n">taskkill</span> <span class="p">/</span><span class="n">F</span> <span class="p">/</span><span class="n">IM</span> <span class="s2">&quot;ollama app.exe&quot;</span>
+</code></pre></div>
+Then restart Ollama from the Start menu.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>lsof<span class="w"> </span>-i<span class="w"> </span>:11434
+killall<span class="w"> </span>ollama
+ollama<span class="w"> </span>serve
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><strong>VPN interference</strong></p>
+<p>Some VPNs (e.g., Cisco AnyConnect) can interfere with localhost networking. If Ollama won't start while connected to a VPN, disconnect the VPN, restart Ollama, then reconnect.</p>
+<hr />
+<h2 id="option-2-cloud-llm-providers">Option 2: Cloud LLM Providers<a class="headerlink" href="#option-2-cloud-llm-providers" title="Permanent link">&para;</a></h2>
+<p>If you prefer not to run a local model, you can use a commercial API instead.</p>
+<h3 id="anthropic-claude">Anthropic (Claude)<a class="headerlink" href="#anthropic-claude" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-api03-YOUR_KEY_HERE
+<span class="c1"># ANTHROPIC_MODEL=claude-sonnet-4-20250514  # optional, this is the default</span>
+</code></pre></div>
+<h3 id="openai-gpt">OpenAI (GPT)<a class="headerlink" href="#openai-gpt" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>sk-YOUR_KEY_HERE
+<span class="c1"># OPENAI_MODEL=gpt-4o-mini  # optional, this is the default</span>
+</code></pre></div>
+<p>If multiple providers are configured, auto-detection priority is: <strong>local &gt; Anthropic &gt; OpenAI</strong>. Set <code>LLM_PROVIDER</code> to force a specific one.</p>
+<hr />
+<h2 id="option-3-hpc-cluster-with-vllm-advanced">Option 3: HPC Cluster with vLLM (Advanced)<a class="headerlink" href="#option-3-hpc-cluster-with-vllm-advanced" title="Permanent link">&para;</a></h2>
+<p>If you have access to an HPC cluster with GPUs, you can serve larger models (14B, 72B+) using <a href="https://docs.vllm.ai/">vLLM</a> and connect a-proxy to it. This section uses Drexel's Picotte cluster as an example, but the approach works on any SLURM-based cluster with NVIDIA GPUs.</p>
+<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
+<p>The setup has three parts:</p>
+<ol>
+<li><strong>On the cluster:</strong> Install vLLM, download a model, and run it as a SLURM job</li>
+<li><strong>SSH tunnel:</strong> Forward the cluster's vLLM port to your local machine</li>
+<li><strong>On your machine:</strong> Point a-proxy at <code>localhost</code> via the tunnel</li>
+</ol>
+<h3 id="cluster-setup-one-time">Cluster Setup (One-Time)<a class="headerlink" href="#cluster-setup-one-time" title="Permanent link">&para;</a></h3>
+<p>SSH into your cluster and set up a conda environment with vLLM:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Load your cluster&#39;s Python and CUDA modules (names vary by cluster)</span>
+module<span class="w"> </span>load<span class="w"> </span>python/anaconda3
+module<span class="w"> </span>load<span class="w"> </span>cuda12.3/toolkit/12.3.2<span class="w">   </span><span class="c1"># or whatever CUDA version is available</span>
+
+<span class="c1"># Create conda environment</span>
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>vllm<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>-y
+conda<span class="w"> </span>activate<span class="w"> </span>vllm
+
+<span class="c1"># Install PyTorch with CUDA support</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu124
+
+<span class="c1"># Install vLLM</span>
+pip<span class="w"> </span>install<span class="w"> </span>vllm<span class="w"> </span>--no-build-isolation
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">vLLM install troubleshooting</p>
+<p>If <code>pip install vllm</code> fails with version mismatch errors (e.g., <code>expected '0.18.0', but metadata has '0.18.0+cu123'</code>), this is because vLLM's build system detects CUDA and appends a local version suffix. The fix is to install PyTorch first with the correct CUDA wheels, then install vLLM with <code>--no-build-isolation</code>.</p>
+</div>
+<p>Download the model to a shared/large filesystem:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Set model cache to a directory with enough space (~18 GB for 7B model)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">HF_HOME</span><span class="o">=</span>/path/to/your/data/huggingface
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$HF_HOME</span>
+
+<span class="c1"># Download the model</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from huggingface_hub import snapshot_download; snapshot_download(&#39;Qwen/Qwen2.5-7B-Instruct&#39;)&quot;</span>
+</code></pre></div>
+<h3 id="slurm-job-script">SLURM Job Script<a class="headerlink" href="#slurm-job-script" title="Permanent link">&para;</a></h3>
+<p>Create a file like <code>~/vllm-serve.slurm</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --job-name=vllm-server</span>
+<span class="c1">#SBATCH --partition=gpu</span>
+<span class="c1">#SBATCH --gres=gpu:1</span>
+<span class="c1">#SBATCH --cpus-per-task=8</span>
+<span class="c1">#SBATCH --mem=48G</span>
+<span class="c1">#SBATCH --time=04:00:00</span>
+<span class="c1">#SBATCH --output=%x-%j.out</span>
+<span class="c1">#SBATCH --error=%x-%j.err</span>
+
+<span class="c1"># Load modules (adjust for your cluster)</span>
+module<span class="w"> </span>load<span class="w"> </span>python/anaconda3
+module<span class="w"> </span>load<span class="w"> </span>cuda12.3/toolkit/12.3.2
+
+<span class="c1"># Activate environment</span>
+<span class="nb">source</span><span class="w"> </span>activate<span class="w"> </span>vllm
+
+<span class="c1"># Set model cache location</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">HF_HOME</span><span class="o">=</span>/path/to/your/data/huggingface
+
+<span class="c1"># Print connection info</span>
+<span class="nv">PORT</span><span class="o">=</span><span class="m">8000</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;============================================&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;vLLM server starting on </span><span class="k">$(</span>hostname<span class="k">)</span><span class="s2">:</span><span class="si">${</span><span class="nv">PORT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Connect via SSH tunnel:&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  ssh -L </span><span class="si">${</span><span class="nv">PORT</span><span class="si">}</span><span class="s2">:</span><span class="k">$(</span>hostname<span class="k">)</span><span class="s2">:</span><span class="si">${</span><span class="nv">PORT</span><span class="si">}</span><span class="s2"> your-cluster&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;============================================&quot;</span>
+
+<span class="c1"># Start vLLM server</span>
+python<span class="w"> </span>-m<span class="w"> </span>vllm.entrypoints.openai.api_server<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--model<span class="w"> </span>Qwen/Qwen2.5-7B-Instruct<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--port<span class="w"> </span><span class="si">${</span><span class="nv">PORT</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tensor-parallel-size<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--max-model-len<span class="w"> </span><span class="m">8192</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dtype<span class="w"> </span>float16
+</code></pre></div>
+<p>Adjust <code>--gres</code>, <code>--partition</code>, and module names to match your cluster. For larger models, increase <code>--tensor-parallel-size</code> and request more GPUs.</p>
+<h3 id="running-the-server">Running the Server<a class="headerlink" href="#running-the-server" title="Permanent link">&para;</a></h3>
+<p><strong>Step 1:</strong> Submit the job:
+<div class="highlight"><pre><span></span><code>sbatch<span class="w"> </span>~/vllm-serve.slurm
+</code></pre></div></p>
+<p><strong>Step 2:</strong> Check the output for the GPU node hostname:
+<div class="highlight"><pre><span></span><code><span class="c1"># Wait for the job to start</span>
+squeue<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
+
+<span class="c1"># Read the hostname from the output</span>
+cat<span class="w"> </span>~/vllm-server-*.out<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-5
+<span class="c1"># Example output: &quot;vLLM server starting on gpu003:8000&quot;</span>
+</code></pre></div></p>
+<p><strong>Step 3:</strong> Open an SSH tunnel from your local machine (replace <code>gpu003</code> with the actual node):
+<div class="highlight"><pre><span></span><code>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:gpu003:8000<span class="w"> </span>your-cluster
+</code></pre></div></p>
+<p><strong>Step 4:</strong> Configure a-proxy <code>.env</code>:
+<div class="highlight"><pre><span></span><code><span class="nv">LLM_PROVIDER</span><span class="o">=</span>openai_compatible
+<span class="nv">OPENAI_COMPATIBLE_URL</span><span class="o">=</span>http://localhost:8000/v1
+<span class="nv">OPENAI_COMPATIBLE_MODEL</span><span class="o">=</span>Qwen/Qwen2.5-7B-Instruct
+<span class="nv">OPENAI_COMPATIBLE_API_KEY</span><span class="o">=</span>none
+</code></pre></div></p>
+<h3 id="managing-the-job">Managing the Job<a class="headerlink" href="#managing-the-job" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check running jobs</span>
+squeue<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
+
+<span class="c1"># Cancel a job</span>
+scancel<span class="w"> </span>&lt;JOB_ID&gt;
+
+<span class="c1"># View server logs</span>
+tail<span class="w"> </span>-f<span class="w"> </span>~/vllm-server-*.out
+</code></pre></div>
+<h3 id="choosing-a-model-for-your-gpu">Choosing a Model for Your GPU<a class="headerlink" href="#choosing-a-model-for-your-gpu" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>GPU</th>
+<th>VRAM</th>
+<th>Recommended Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V100 (16 GB)</td>
+<td>16 GB</td>
+<td>Qwen2.5-7B-Instruct</td>
+</tr>
+<tr>
+<td>V100 (32 GB)</td>
+<td>32 GB</td>
+<td>Qwen2.5-14B-Instruct</td>
+</tr>
+<tr>
+<td>A100 (40 GB)</td>
+<td>40 GB</td>
+<td>Qwen2.5-32B-Instruct</td>
+</tr>
+<tr>
+<td>A100 (80 GB)</td>
+<td>80 GB</td>
+<td>Qwen2.5-72B-Instruct</td>
+</tr>
+<tr>
+<td>2x A100 (80 GB)</td>
+<td>160 GB</td>
+<td>Qwen2.5-72B-Instruct (tensor-parallel-size=2)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="notes-for-drexel-picotte-users">Notes for Drexel Picotte Users<a class="headerlink" href="#notes-for-drexel-picotte-users" title="Permanent link">&para;</a></h3>
+<p>For a complete Picotte-specific guide with an automation script, see <a href="../picotte-vllm/">Running A-Proxy with vLLM on Drexel Picotte</a>.</p>
+<ul>
+<li><strong>VPN required:</strong> You must be connected to Drexel VPN (Cisco AnyConnect) to reach Picotte</li>
+<li><strong>SSH host:</strong> <code>picotte001.urcf.drexel.edu</code>, username is your Drexel ID (e.g., <code>abc123</code>)</li>
+<li><strong>GPU partition:</strong> 12 nodes with 4x NVIDIA V100 each, request via <code>--partition=gpu --gres=gpu:v100:1</code></li>
+<li><strong>CUDA:</strong> Available as <code>cuda12.3/toolkit/12.3.2</code></li>
+<li><strong>Storage:</strong> Use your group data directory for model storage (home directories have limited space)</li>
+<li><strong>Official docs:</strong> <a href="https://docs.urcf.drexel.edu/clusters/picotte/">Picotte Cluster Documentation</a></li>
+</ul>
+<hr />
+<h2 id="all-llm-environment-variables">All LLM Environment Variables<a class="headerlink" href="#all-llm-environment-variables" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LLM_PROVIDER</code></td>
+<td>Force provider selection (<code>openai_compatible</code>, <code>anthropic</code>, <code>openai</code>)</td>
+<td>auto-detect</td>
+</tr>
+<tr>
+<td><code>OPENAI_COMPATIBLE_URL</code></td>
+<td>Local/self-hosted LLM endpoint URL</td>
+<td>--</td>
+</tr>
+<tr>
+<td><code>OPENAI_COMPATIBLE_MODEL</code></td>
+<td>Model name on local endpoint</td>
+<td><code>Qwen/Qwen2.5-72B-Instruct</code></td>
+</tr>
+<tr>
+<td><code>OPENAI_COMPATIBLE_API_KEY</code></td>
+<td>API key for local endpoint</td>
+<td><code>none</code></td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>Anthropic (Claude) API key</td>
+<td>--</td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_MODEL</code></td>
+<td>Claude model name</td>
+<td><code>claude-sonnet-4-20250514</code></td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>OpenAI API key</td>
+<td>--</td>
+</tr>
+<tr>
+<td><code>OPENAI_MODEL</code></td>
+<td>GPT model name</td>
+<td><code>gpt-4o-mini</code></td>
+</tr>
+<tr>
+<td><code>LLM_MAX_OUTPUT_TOKENS</code></td>
+<td>Max response tokens</td>
+<td><code>4096</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-a-proxy-connects-to-the-llm">How A-Proxy Connects to the LLM<a class="headerlink" href="#how-a-proxy-connects-to-the-llm" title="Permanent link">&para;</a></h2>
+<p>A-Proxy uses a provider-agnostic LLM client (<code>utils/llm_client.py</code>). When you set <code>OPENAI_COMPATIBLE_URL</code>, it creates an OpenAI SDK client pointed at your endpoint — whether that's Ollama on localhost, vLLM on an HPC cluster, or any other OpenAI-compatible API.</p>
+<p>The model name in your <code>.env</code> must match what the server reports:</p>
+<ul>
+<li><strong>Ollama:</strong> <code>qwen2.5:7b</code> (Ollama's naming convention)</li>
+<li><strong>vLLM:</strong> <code>Qwen/Qwen2.5-7B-Instruct</code> (HuggingFace model ID)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/savingads/a-proxy" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

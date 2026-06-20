@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.12 matches the Docker image; 3.11 guards against accidental 3.12-only usage.
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      # The suite uses temp SQLite DBs and mocks network/browser/LLM, so the
+      # Playwright browser binaries are NOT required. If browser-launching tests
+      # are added later, add: python -m playwright install --with-deps chromium
+      - name: Run tests
+        run: python -m pytest tests/ -v

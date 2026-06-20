@@ -93,7 +93,7 @@ def archive_page():
         flash(f"Archived {url} with language {language} and geolocation {geolocation or 'not specified'}.", "success")
     else:
         flash(f"Failed to archive {url}.", "danger")
-    return redirect(url_for('persona.dashboard'))
+    return redirect(url_for('home.dashboard'))
 
 @browsing_bp.route("/test-geolocation", methods=["POST"])
 def test_geolocation():
